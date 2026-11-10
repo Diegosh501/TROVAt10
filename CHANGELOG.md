@@ -1,5 +1,16 @@
 # 2.0.2 · 10 novembre 2026
 
+## In preparazione - V1.0 cloud e amministrazione
+
+- Confine cloud: niente lettura/scrittura dei dati demo nel browser e nessuna scelta sessione/dispositivo nel flusso online.
+- Isolamento al cambio account, pulizia dei dati amministrativi e rifiuto di risposte tardive.
+- Cache limitata alla shell pubblica senza token degli inviti o richieste autorizzate.
+- Backend Admin con allowlist privata, sessione valida, TOTP recente, quote e audit atomico; migrazione installata ed Edge v1 pubblicata.
+- Dieci suite locali, 24 scenari del gestore Edge e 21 gruppi SQL con rollback superati.
+- Cronologia effettiva delle nove migrazioni preservata. Google, tutti Free, scadenza sette giorni e prove reali restano aperti: vedere V1-STATUS.md.
+- La preview frontend pubblica resta 2.0.2; nessun rilascio V1.0 dichiarato.
+
+
 - Logo runtime PNG da 480×160 e 74.898 byte; originale approvato 2172×724 conservato.
 - Dimensioni intrinseche delle immagini, spazio iniziale della lista riservato per evitare il salto del footer.
 - Contrasto della navigazione corretto, marchio azionabile da tastiera e target touch secondari almeno 44px.

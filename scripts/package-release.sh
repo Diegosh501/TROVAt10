@@ -7,7 +7,7 @@ FINAL_DIR="$PROJECT_ROOT/TROVAT1O-Local-Final-Preview"
 DEPLOY_DIR="$PROJECT_ROOT/TROVAT1O-Cloudflare-Deploy"
 
 WEB_FILES=(index.html index-v2.html config.js sw.js site.webmanifest robots.txt _headers privacy.html cookie.html termini.html politiche.html)
-DOC_FILES=(README.md DEPLOY-READINESS.md SECURITY.md BRAND-GUIDE.md UX-ITERATION-V2.md ADMIN-SETUP.md CHANGELOG.md AUDIT-PREDEPLOY.md RELEASES.md)
+DOC_FILES=(README.md DEPLOY-READINESS.md SECURITY.md BRAND-GUIDE.md UX-ITERATION-V2.md ADMIN-SETUP.md V1-STATUS.md CHANGELOG.md AUDIT-PREDEPLOY.md RELEASES.md)
 DEPLOY_FILES=(README.md package.json package-lock.json wrangler.jsonc)
 
 mkdir -p "$STATIC_DIR/assets/brand" "$DEPLOY_DIR/public/assets/brand" "$FINAL_DIR/assets" "$FINAL_DIR/TROVAT1O-Cloudflare-Deploy/public"
@@ -24,6 +24,8 @@ done
 
 cp "$PROJECT_ROOT/README.md" "$STATIC_DIR/README.md"
 cp "$PROJECT_ROOT/README.md" "$FINAL_DIR/README.md"
+mkdir -p "$FINAL_DIR/TROVAT1O-Static-Preview-Pages"
+cp "$STATIC_DIR/PREVIEW-ONLY.txt" "$FINAL_DIR/TROVAT1O-Static-Preview-Pages/PREVIEW-ONLY.txt"
 cp "$PROJECT_ROOT/TROVAt10-logo.png" "$STATIC_DIR/TROVAt10-logo.png"
 cp "$PROJECT_ROOT/TROVAt10-logo.png" "$FINAL_DIR/TROVAt10-logo.png"
 cp "$PROJECT_ROOT/TROVAT1O-Cloudflare-Deploy/README.md" "$FINAL_DIR/TROVAT1O-Cloudflare-Deploy-README.md"

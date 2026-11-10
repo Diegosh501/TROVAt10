@@ -277,7 +277,8 @@ returns boolean language sql stable security definer set search_path = '' as $$
 $$;
 create or replace function public.is_support()
 returns boolean language sql stable set search_path = '' as $$
-  select coalesce((select auth.jwt()->'app_metadata'->>'role')='support',false)
+  -- Fail closed until admin-security.sql installs private allowlist checks.
+  select false
 $$;
 create or replace function public.is_email_confirmed()
 returns boolean language sql stable security definer set search_path = '' as $$

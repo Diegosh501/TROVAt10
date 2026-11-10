@@ -108,3 +108,20 @@ I rilievi grafici citati nella sezione2.0.1 sono stati corretti nella2.0.2: hamb
 La causa del403GitHub è stata identificata: l’installazione è selezionata per TROVAt10, mentre il precedente tentativo scriveva nel diverso trovato. Il titolare ha scelto esplicitamente Diegosh501/TROVAt10 come repository sorgente. La scrittura dei blob è riuscita su quel repository, con hash verificati; nessuna modifica è stata fatta al repository precedente. Il workflow è pronto; gli esiti delle esecuzioni ospitate vanno verificati nella pagina Actions.
 
 Restano da attivare per 1.0 ONLINE: SMTP/Turnstile/OTP dove necessario,4 Edge Functions configurate, prove con sessioni Auth reali, dispatcher push e processo promemoria, backup/ripristino e aggiornamento delle informative per i servizi attivati. Nessun servizio a pagamento è stato attivato in questa iterazione.
+
+
+## Preparazione V1.0 - sicurezza Admin e confine dei dati cloud
+
+L'obiettivo aggiornato include Google OAuth, tutti Free, account non soggetto a scadenza e storico delle sessioni Free per sette giorni dalla conclusione/annullamento. Queste funzioni non sono ancora operative. Le impostazioni pubbliche Auth verificano Google=false, email=true, phone=false; il vecchio trigger richiede metadati email e deve essere adattato prima dell'attivazione OAuth. La matrice dei venti criteri è V1-STATUS.md.
+
+Applicata migrazione 20261110164243_trovat1o_platform_admin_security: allowlist privata, controlli account/sessione/MFA recente, 60 operazioni Admin/minuto e audit atomico dei ticket. Prima dell'applicazione tutti i 21 gruppi di regressione sono passati con DDL e fixture annullati; dopo l'applicazione la stessa suite è passata sul codice installato. Conteggi finali Auth utenti/eventi/admin/quota/audit: zero. Nessuna email o SMS inviati. La suite prova l'autorizzazione database con claim di test, non la firma JWT o un vero login; i trasporti sono separatamente simulati nei 24 scenari del gestore Edge.
+
+Controllo locale Deno 2.9.6 sul sorgente admin-console: superato. Dieci suite Node passate, inclusi nuovi casi reali delle funzioni client: nessun storage demo letto/scritto in cloud, nessuna scelta locale online, dati privati e modali puliti al cambio account, feed/profili tardivi scartati. Service worker v11 in preparazione: solo shell pubblica, nessuna cache API/richieste autorizzate/parametri invito e rispetto di no-store/private.
+
+admin-console Edge v1 pubblicata con verify_jwt=true; origine HTTPS esatta predefinita. Non usa service-role per leggere/modificare dati Admin. Le prove HTTP del perimetro anonimo sono in output/audit/2026-11-10/admin-edge-http.json. Nessun account Admin assegnato o login Google/MFA reale provato. Supporto/OTP restano non pubblicati.
+
+Gli advisor dopo la migrazione mostrano due RPC anonime e 24 autenticate SECURITY DEFINER intenzionali, più tre INFO per tabelle private con RLS senza policy: diniego predefinito e assenza di privilegi client voluti. Il nuovo test SQL conferma l'impossibilità di scrivere l'elenco privato o eseguire il provisioning come utente normale. La CSP inline e il flusso di gestione ruoli/report più esteso restano da completare.
+
+Cronologia effettiva esportata: nove file, i primi otto 88.812 byte verificati e l'ultimo 12.242 byte MD5 a0c8bac492bc42747e3452ae5f85d751, identico al record del database. Conservata in supabase/recorded-migrations/. È una storia SQL con dipendenze Supabase, non un backup né un replay validato.
+
+Questo blocco frontend è ancora in preparazione: la preview pubblica resta 2.0.2 con i propri risultati di prestazione/CI. Non attribuire alla nuova interfaccia un collaudo browser o un deploy che non è stato eseguito.

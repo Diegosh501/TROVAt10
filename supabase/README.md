@@ -2,7 +2,7 @@
 
 ## Stato attuale
 
-Il progetto `TROVAT1O` è attivo in EU Central. `schema.sql` è stato applicato al database cloud con le relative migration. Tabelle e policy RLS esistono, ma non sono presenti profili o eventi; `onlineReady` rimane `false`. Il progetto non ha Edge Functions pubblicate, SMTP o Turnstile configurati. Nessuna sessione reale è stata usata per testare Auth o RLS.
+Il progetto `TROVAT1O` è attivo in EU Central. `schema.sql` è stato applicato al database cloud con le relative migration. Tabelle e policy RLS esistono, ma non sono presenti profili o eventi; `onlineReady` rimane `false`. La funzione `admin-console` v1 è pubblicata; SMTP, Turnstile e Google non sono configurati. Le altre Edge Functions non sono pubblicate. Nessuna sessione reale è stata usata per testare Auth o RLS.
 
 Le modifiche a eventi, accesso, capienza, inviti e pin sono previste attraverso RPC con controlli server. Il browser non ha permessi di lettura o aggiornamento diretti sulla tabella `events`; legge l’RPC `event_feed`, che oscura luogo e coordinate di un evento privato fino all’ammissione. I link privati usano un token casuale di cui il database conserva soltanto SHA-256.
 
@@ -55,3 +55,11 @@ Il database è stato modificato tramite le migration registrate dal connettore S
 Cronologia remota verificata: 20261110013616 trovat1o_v2_membership_privacy e 20261110015103 trovat1o_v2_notification_preferences. Le modifiche sono presenti nei blueprint schema.sql e notifications.sql. Le policy ora nascondono ai peer le richieste non ammesse e impediscono la riammissione automatica di utenti rimossi/rifiutati. Tabelle notifiche, preferenze, sottoscrizioni e coda privata sono state applicate, con opt-out ricontrollato al claim. Non esiste ancora un dispatcher di consegna.
 
 Il test SQL autorizzato in tests/sql/membership-decisions.sql è passato con trigger attivi e rollback; i conteggi successivi users/events/members/app_notifications/notification_delivery_queue risultano zero. Per rieseguirlo occorre un ambiente di prova o l’autorizzazione esplicita del proprietario per il progetto remoto; il controllo nel file rifiuta database popolati.
+
+## Blocco sicurezza Admin e requisito V1.0
+
+La migrazione effettiva 20261110164243_trovat1o_platform_admin_security è applicata. Il blueprint è admin-security.sql: allowlist privata, verifica della sessione attiva, account confermato/non bloccato, TOTP aal2 recente, quote e audit atomico dei ticket. La funzione Edge usa il token del chiamante, non una service-role per le operazioni Admin. Prove: tests/sql/admin-access.sql (21 gruppi con rollback), tests/admin-edge-runtime.cjs (24 scenari del gestore con trasporti simulati), controllo dei tipi Deno superato.
+
+Le nove migrazioni registrate sono esportate in recorded-migrations/. La prima dipende dalla base Supabase e dalla funzione preesistente public.rls_auto_enable(); nessun replay completo o ripristino dati è stato eseguito. Non usare questi file come bootstrap PostgreSQL generico.
+
+Prima della V1.0 devono essere aggiunti il completamento profilo Google, la regola tutti Free e la scadenza automatica dopo sette giorni dalla conclusione/annullamento. L’account non scade e non va eliminato dal job dei match. I precedenti vincoli telefono/pubblicazione e storico dieci match non rappresentano ancora queste nuove regole: vedere V1-STATUS.md.

@@ -29,6 +29,7 @@ node tests/security-smoke.cjs
 node tests/cloud-integration-smoke.cjs
 node tests/runtime-regressions.cjs
 node tests/service-worker-runtime.cjs
+node tests/admin-edge-runtime.cjs
 ```
 
 I test controllano UI e responsive, collegamenti e handler, regole privacy nel codice, configurazione sicura e collegamenti previsti con le funzioni cloud. Non sostituiscono prove con account distinti su un backend online.
@@ -36,8 +37,8 @@ I test controllano UI e responsive, collegamenti e handler, regole privacy nel c
 ## Stato cloud verificato il 10 novembre 2026
 
 - Il progetto Supabase `TROVAT1O` è attivo. Schema V2, policy RLS e funzioni transazionali sono state applicate; le tabelle applicative sono vuote.
-- Il client resta in modalità preview: `onlineReady: false`. La registrazione online non è attiva e non ci sono Edge Functions pubblicate.
-- Supabase Auth richiede SMTP personalizzato per consegnare conferme e recupero password. Turnstile non è configurato. La verifica SMS richiede Twilio Verify e può avere un costo.
+- Il client resta in modalità preview: `onlineReady: false`. La registrazione online non è attiva. La funzione `admin-console` v1 è pubblicata con verifica JWT e RPC riservate; non esistono ancora account amministrativi reali.
+- Google risulta disattivato e va collegato insieme al completamento del profilo OAuth. Il percorso V1.0 prevede Google e nessun SMS obbligatorio. Il precedente flusso email/password richiederebbe SMTP personalizzato e Turnstile, non ancora configurati; Twilio resta opzionale e non attivo.
 - Le notifiche locali funzionano nella demo; push in background e pagamenti Premium non sono attivi.
 
 L’accesso al database degli eventi è chiuso al client: la ricerca usa il feed filtrato, che nasconde il campo privato agli utenti non ammessi. Le modifiche passano da funzioni server con controlli sul proprietario. I controlli Supabase hanno trovato avvisi generici su funzioni di accesso intenzionali e indici appena creati su un database senza righe; il controllo salute non ha segnalato problemi. Prima di attivare utenti reali servono comunque test con sessioni/account separati.
@@ -65,8 +66,8 @@ Questo pubblica solo la preview statica: non attiva account condivisi o il backe
 - `index.html`: interfaccia mobile-first e flussi locali/cloud.
 - `assets/brand/`: logo e icone PNG approvati.
 - `config.js`: impostazioni sicure della preview, senza credenziali e con cloud spento.
-- `supabase/schema.sql`: schema e policy attualmente applicati al progetto.
-- `supabase/functions/`: sorgenti locali delle funzioni, non ancora pubblicate.
+- `supabase/schema.sql`, `supabase/notifications.sql`, `supabase/admin-security.sql`: blueprint dello schema e dei controlli applicati. La cronologia effettiva è conservata in `supabase/recorded-migrations/`; non è un backup né un replay verificato.
+- `supabase/functions/`: sorgenti delle funzioni. Soltanto `admin-console` v1 è stata pubblicata; supporto e OTP restano da configurare e distribuire.
 - `privacy.html`, `cookie.html`, `termini.html`, `politiche.html`: informative della preview. Prima della registrazione pubblica vanno aggiornate con provider, retention e contatti effettivi. Non sono una certificazione legale.
 - `SECURITY.md` e `DEPLOY-READINESS.md`: impostazioni, limiti e passaggi che restano per la beta online.
 
@@ -84,3 +85,11 @@ Il workflow in .github/workflows/ci.yml controlla test, installazione da lockfil
 ## Verifica prestazioni e PWA
 
 Sul rilascio HTTPS 2.0.2, Lighthouse mobile 13.5.0 ha misurato LCP 2,142 s, CLS 0, prestazioni 96/100 e accessibilità 100/100. In una sessione interattiva distinta con CPU 4× rallentata, INP 120 ms. Sono misure di laboratorio/sessione, non statistiche degli utenti reali. Ricaricamento offline da service worker, ricerca e apertura dei dettagli sono stati provati in Chrome; rete e CPU sono state ripristinate al termine.
+
+## Preparazione V1.0 successiva alla preview
+
+[V1-STATUS.md](V1-STATUS.md) distingue i venti criteri finali completati, parziali e mancanti. Nel codice cloud non compare più la scelta di salvataggio locale; profili, eventi e notifiche della demo non vengono letti o scritti nel browser. Il cambio account scarta le risposte tardive e pulisce dati privati e console. La preview pubblica 2.0.2 non incorpora ancora questo nuovo blocco dell’interfaccia.
+
+Le protezioni Admin applicate richiedono allowlist privata, sessione valida, account non bloccato e TOTP verificato negli ultimi 15 minuti. Sono passati 21 gruppi di prove SQL con rollback prima e dopo la migrazione, 24 scenari del gestore Edge e dieci suite locali. Nessuna prova sostituisce un vero login Google/MFA con account distinti.
+
+Decisioni V1.0 da completare: tutti Free, account sempre attivo e storico dei match conclusi/annullati per sette giorni dal termine effettivo. La procedura automatica di scadenza non è ancora implementata. Premium resta futuro e nessun pagamento è attivo.

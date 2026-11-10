@@ -3,8 +3,8 @@
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict'),crypto=require('node:crypto');
 const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
 const script=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]).join('\n');
-function boot(){
- const elements=new Map(),storage=new Map(),session=new Map(),timers=[],listeners={};let document;
+function boot(options={}){
+ const elements=new Map(),storage=new Map(Object.entries(options.storage||{})),session=new Map(),timers=[],listeners={};let document;
  class Element{
   constructor(id){this.id=id;this.value='';this.hidden=false;this.disabled=false;this.isConnected=true;this.textContent='';this.style={};this.attrs={};this.focusables=[];this.generated=[];this._html='';this.classList={values:new Set(),add(v){this.values.add(v)},remove(v){this.values.delete(v)},contains(v){return this.values.has(v)},toggle(v,force){const on=force===undefined?!this.values.has(v):!!force;if(on)this.values.add(v);else this.values.delete(v);return on}}}
   set innerHTML(value){for(const id of this.generated){const old=elements.get(id);if(old?.owner===this){old.isConnected=false;elements.delete(id)}}this.generated=[];this._html=String(value);for(const match of this._html.matchAll(/<[a-z][^>]*\bid="([^"]+)"[^>]*>/g)){const e=new Element(match[1]);e.owner=this;const val=match[0].match(/\bvalue="([^"]*)"/);if(val)e.value=val[1];elements.set(e.id,e);this.generated.push(e.id)}}
@@ -13,9 +13,9 @@ function boot(){
  const markup=html.slice(html.indexOf('<body'),html.indexOf('<script>',html.indexOf('<body')));
  for(const match of markup.matchAll(/\bid="([^"]+)"/g))elements.set(match[1],new Element(match[1]));
  document={getElementById:id=>elements.get(id)||null,querySelectorAll:()=>[],createElement:()=>new Element(''),addEventListener:(name,fn)=>{listeners[name]=fn},body:new Element('body'),activeElement:null};
- const context={document,console,Date,JSON,Math,Map,Set,Blob,TextEncoder,DataView,Uint8Array,URL,URLSearchParams,crypto:crypto.webcrypto,encodeURIComponent,navigator:{},localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,String(v)),removeItem:k=>storage.delete(k)},sessionStorage:{getItem:k=>session.get(k)||null,setItem:(k,v)=>session.set(k,String(v)),removeItem:k=>session.delete(k)},location:{href:'https://test.example/index.html',origin:'https://test.example',pathname:'/index.html',protocol:'https:',search:'',hash:''},matchMedia:()=>({matches:false}),TROVAT1O_CONFIG:{onlineReady:false},setTimeout(fn,ms){const t={fn,ms};timers.push(t);return t},clearTimeout(t){if(t)t.cancelled=true},confirm:()=>true,open(){}};
+ const context={document,console,Date,JSON,Math,Map,Set,Blob,TextEncoder,DataView,Uint8Array,URL,URLSearchParams,crypto:crypto.webcrypto,encodeURIComponent,navigator:{},localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,String(v)),removeItem:k=>storage.delete(k)},sessionStorage:{getItem:k=>session.get(k)||null,setItem:(k,v)=>session.set(k,String(v)),removeItem:k=>session.delete(k)},location:{href:'https://test.example/index.html',origin:'https://test.example',pathname:'/index.html',protocol:'https:',search:'',hash:''},matchMedia:()=>({matches:false}),TROVAT1O_CONFIG:{onlineReady:false,...options.config},setTimeout(fn,ms){const t={fn,ms};timers.push(t);return t},clearTimeout(t){if(t)t.cancelled=true},confirm:()=>true,open(){}};
  context.window=context;vm.createContext(context);vm.runInContext(script,context,{timeout:3000});
- return {context,elements,document,timers,listeners,Element,async flushTimers(){const batch=timers.splice(0).filter(t=>!t.cancelled&&t.ms===0);for(const t of batch)await t.fn()}};
+ return {context,elements,document,timers,listeners,Element,storage,session,async flushTimers(){const batch=timers.splice(0).filter(t=>!t.cancelled&&t.ms===0);for(const t of batch)await t.fn()}};
 }
 (async()=>{
  const ui=boot(),c=ui.context,get=id=>ui.elements.get(id);
@@ -58,5 +58,23 @@ function boot(){
  providerError=null;vm.runInContext("captchaToken='second-reset-token'",a);await a.sendPasswordReset();assert.equal(auth.elements.get('dialogTitle').textContent,'Controlla la tua email','successful provider response opens neutral email result');
  vm.runInContext("pendingConfirmationEmail='tester@example.invalid'",a);a.openResendConfirmation();assert.ok(auth.elements.get('captchaBox'),'resend creates a fresh anti-bot widget container');await a.resendConfirmation();assert.equal(resendCalls.length,0,'resend requires a fresh captcha');
  providerError=new Error('provider rejection');vm.runInContext("captchaToken='fresh-resend-token'",a);await a.resendConfirmation();assert.equal(resendCalls[0].options.captchaToken,'fresh-resend-token','resend passes anti-bot token');assert.equal(auth.elements.get('dialogTitle').textContent,'Invia di nuovo la conferma','resend provider error keeps retry visible');assert.match(auth.elements.get('toast').textContent,/Richiesta non inviata/);
+ const legacy={ 'trovatio-events-v2':JSON.stringify([{id:'private-legacy',creatorId:'old-owner',title:'Private legacy match'}]),'trovatio-reports-v2':'[{"detail":"private legacy report"}]','trovatio-notifications-v1':'[{"body":"private legacy notification"}]','trovatio-storage-consent-v1':'{"mode":"persistent"}' };
+ const online=boot({config:{onlineReady:true},storage:legacy}),o=online.context;
+ assert.equal(vm.runInContext('events.length+reports.length+notifications.length',o),0,'cloud startup ignores all legacy demo account data');
+ assert.equal(o.write('trovatio-events-v2',[{id:'must-not-store'}]),false,'cloud app data cannot be written to browser storage');
+ assert.equal(online.storage.get('trovatio-events-v2'),legacy['trovatio-events-v2'],'cloud attempts cannot overwrite saved demo data');
+ o.showStorageConsentBanner();assert.equal(online.elements.get('storageConsentBanner').hidden,true,'cloud never displays the session/device prompt');
+ o.setStorageConsent('persistent');assert.equal(online.storage.get('trovatio-events-v2'),legacy['trovatio-events-v2'],'legacy storage handlers have no effect online');
+ await o.openPreferences();assert.doesNotMatch(online.elements.get('dialogContent').innerHTML,/storageChoice|Salvataggio locale/,'online preferences contain no local storage selector');
+ vm.runInContext("authSession={user:{id:'account-A'}};profile={id:'account-A',username:'AccountA',role:'host'};events=[{id:'private-a',creatorId:'account-A',title:'Private A',status:'scheduled',date:day(1)}];adminRows=[{details:'Private ticket A'}];adminLive=true;notifications=[{body:'Private A'}]",o);
+ online.elements.get('adminTickets').innerHTML='Private ticket A';online.elements.get('adminMetrics').innerHTML='Private counts A';online.elements.get('dialogContent').innerHTML='Private modal A';
+ o.clearCloudAccountState();assert.equal(vm.runInContext('events.length+adminRows.length+notifications.length',o),0,'account boundary clears private data');assert.equal(vm.runInContext('profile',o),null);assert.equal(online.elements.get('adminTickets').innerHTML,'');assert.equal(online.elements.get('dialogContent').innerHTML,'','logout/account change clears sensitive hidden modal content');
+ const pendingFeeds=[];o.pendingFeeds=pendingFeeds;vm.runInContext("supabaseClient={rpc:()=>new Promise(resolve=>pendingFeeds.push(resolve))};authSession={user:{id:'account-A'}}",o);
+ const staleFeed=o.refreshCloudEvents();o.clearCloudAccountState();vm.runInContext("authSession={user:{id:'account-B'}}",o);const freshFeed=o.refreshCloudEvents();
+ assert.equal(pendingFeeds.length,2,'a new account does not share the previous feed request');
+ const feedRow=id=>({id,creator_id:'account-B',creator_username:'AccountB',title:'Cloud event',format:5,kind:'Amichevole',starts_at:new Date(Date.now()+86400000).toISOString(),venue:'Campo',city:'Roma',max_players:10,visibility:'public',admission:'approval',status:'scheduled'});
+ pendingFeeds[0]({data:[feedRow('stale-account-A')],error:null});assert.equal(await staleFeed,false);assert.equal(vm.runInContext('events.length',o),0,'late private data from previous account is discarded');
+ pendingFeeds[1]({data:[feedRow('fresh-account-B')],error:null});assert.equal(await freshFeed,true);assert.equal(vm.runInContext('events[0].id',o),'fresh-account-B','new account keeps its own current feed');
+ let resolveProfile;o.profileWait=new Promise(resolve=>{resolveProfile=resolve});vm.runInContext("supabaseClient={from:()=>({select:()=>({eq:()=>({maybeSingle:()=>profileWait})})})};authSession={user:{id:'account-B'}}",o);const staleProfile=o.loadProfile();o.clearCloudAccountState();vm.runInContext("authSession={user:{id:'account-C'}}",o);resolveProfile({data:{id:'account-B',username:'AccountB',role:'host'}});assert.equal(await staleProfile,false);assert.equal(vm.runInContext('profile',o),null,'late profile lookup cannot sign another account back in');
  console.log('PASS: real app functions cover modal focus and Escape, pin close without missing form, single auth CTA, recovery session race, captcha/error handling and Italian phone prefix.');
 })().catch(error=>{console.error(error);process.exitCode=1});

@@ -7,7 +7,8 @@ let passed=0;
 function check(label,condition){if(!condition)throw new Error('FAIL: '+label);passed++;console.log('PASS '+passed+': '+label)}
 
 check('online mode starts without demo events or local event writes',/cloudPreview\?\[\]:read\(STORE\.events,null\)/.test(app)&&/function persistEvents\(\)\{if\(cloudMode\(\)\)\{renderEvents\(\);renderHistory\(\);return\}/.test(app));
-check('public and authorized private events load through the safe feed RPC',/async function refreshCloudEvents\(\)[\s\S]{0,160}supabaseClient\.rpc\('event_feed'\)/.test(app)&&/create or replace function public\.event_feed\(\)/.test(schema));
+const feedFunction=app.slice(app.indexOf('async function refreshCloudEvents()'),app.indexOf('\nfunction clearAdminView'));
+check('public and authorized private events load through the safe feed RPC',/supabaseClient\.rpc\('event_feed'\)/.test(feedFunction)&&/create or replace function public\.event_feed\(\)/.test(schema));
 check('event creation and private invite hashing use the atomic policy RPC',/create_event_with_policy/.test(app)&&/p_invite_token_hash/.test(app)&&/insert into public\.event_invites\(event_id,token_hash,expires_at\)/.test(schema));
 check('public and private invite links resolve without exposing private location',/get_event_invitation/.test(app)&&/supabaseClient\.rpc\('get_event_invitation'/.test(app)&&/Luogo comunicato dopo l’ammissione/.test(schema));
 check('join, approve, decline, remove and leave use the transactional server functions',/request_event_join/.test(app)&&/manage_event_member/.test(app)&&/leave_event/.test(app)&&/function public\.(request_event_join|manage_event_member|leave_event)/.test(schema));
