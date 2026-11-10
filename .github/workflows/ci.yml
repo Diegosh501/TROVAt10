@@ -1,0 +1,65 @@
+name: Source and release checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    env:
+      CI: 'true'
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Prepare safe preview configuration
+        run: |
+          cp config.example.js config.js
+          test -s TROVAT1O-Static-Preview-Pages/PREVIEW-ONLY.txt
+
+      - name: Run source tests
+        run: |
+          for test_file in tests/*.cjs; do
+            node "$test_file"
+          done
+
+      - name: Install locked release tools
+        working-directory: TROVAT1O-Cloudflare-Deploy
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Package release from source
+        run: bash scripts/package-release.sh
+
+      - name: Check Cloudflare bundle without publishing
+        working-directory: TROVAT1O-Cloudflare-Deploy
+        run: ./node_modules/.bin/wrangler deploy --dry-run --outdir "$RUNNER_TEMP/trovato-worker-dry-run"
+
+      - name: Verify release archives
+        run: |
+          unzip -tq TROVAT1O-Static-Preview-Pages.zip
+          unzip -tq TROVAT1O-Local-Final-Preview.zip
+          tar -tzf TROVAT1O-Cloudflare-Deploy/trovato-static-assets.tar.gz > "$RUNNER_TEMP/trovato-archive-files.txt"
+          unzip -p TROVAT1O-Static-Preview-Pages.zip TROVAT1O-Static-Preview-Pages/PREVIEW-ONLY.txt | cmp TROVAT1O-Static-Preview-Pages/PREVIEW-ONLY.txt -
+          unzip -p TROVAT1O-Static-Preview-Pages.zip TROVAT1O-Static-Preview-Pages/index.html | cmp index.html -
+          unzip -p TROVAT1O-Local-Final-Preview.zip TROVAT1O-Local-Final-Preview/index.html | cmp index.html -
+          unzip -p TROVAT1O-Local-Final-Preview.zip TROVAT1O-Local-Final-Preview/TROVAT1O-Cloudflare-Deploy/public/index.html | cmp index.html -
+          tar -xOzf TROVAT1O-Cloudflare-Deploy/trovato-static-assets.tar.gz public/index.html | cmp index.html -
+          tar -xOzf TROVAT1O-Cloudflare-Deploy/trovato-static-assets.tar.gz public/config.js | cmp config.js -
+          tar -xOzf TROVAT1O-Cloudflare-Deploy/trovato-static-assets.tar.gz public/sw.js | cmp sw.js -

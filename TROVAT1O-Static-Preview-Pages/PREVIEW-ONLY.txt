@@ -1,0 +1,9 @@
+TROVAT1O · ANTEPRIMA STATICA MOBILE FIRST
+
+Claim: Non perderti più una partita. La prima versione copre calcio amatoriale a 5, 8 e 11; il brand può estendersi ad altri eventi.
+
+Questa cartella è una preview offline/demo (`onlineReady: false`). Profili, eventi, richieste e notifiche restano nel browser secondo la scelta tra sessione e salvataggio locale. Le push in background e la sincronizzazione tra dispositivi non sono attive. Non inserire dati personali reali.
+
+Il progetto Supabase ha lo schema V2 applicato, ma non ha utenti o eventi, SMTP o Edge Functions configurate. Le pagine informative descrivono la preview e vanno aggiornate prima di raccogliere dati online.
+
+`noindex` scoraggia l’indicizzazione, ma non limita l’accesso a chi conosce il link. Usa il codice della root di progetto per aggiornare questa copia.

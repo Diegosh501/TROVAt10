@@ -1,0 +1,22 @@
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const root=path.join(__dirname,'..'),html=fs.readFileSync(path.join(root,'index.html'),'utf8');let count=0;function check(name,fn){fn();count++;console.log(`PASS ${count}: ${name}`)}
+check('viewport mobile presente',()=>assert.match(html,/name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/));
+check('breakpoint tablet/mobile presente',()=>assert.match(html,/@media\(max-width:760px\)/));
+check('breakpoint telefoni stretti presente',()=>assert.match(html,/@media\(max-width:380px\)/));
+check('layout a schermo basso gestito',()=>assert.match(html,/@media\(max-height:520px\) and \(max-width:760px\)/));
+check('pulsanti rispettano il target touch da 44px',()=>assert.match(html,/button,\.btn\{min-height:44px/));
+check('campi mobile leggibili e senza zoom iOS',()=>assert.match(html,/\.field input,\.field select,\.field textarea\{font-size:16px;min-height:44px/));
+check('barra inferiore con controlli touch',()=>assert.match(html,/\.bottom-nav button\{min-height:48px;font-size:12px/));
+check('azioni flottanti sopra la barra inferiore',()=>assert.match(html,/\.quick-actions\{bottom:calc\(72px \+ env\(safe-area-inset-bottom\)\)/));
+check('azione flottante cliccabile anche con viewport basso',()=>assert.doesNotMatch(html,/@media\(max-height:520px\) and \(max-width:760px\)[^}]*\.quick-actions\{display:none\}/)&&assert.doesNotMatch(html,/\.quick-actions\{[^}]*pointer-events:none/));
+check('pulsante Organizza disponibile anche in I miei match',()=>assert.match(html,/<button class="btn primary history-create" id="historyCreateBtn" type="button">＋ Organizza/)&&assert.match(html,/#historyTab \.history-intro\{align-items:flex-start\}/));
+check('CTA mobile Organizza non duplicata nella hero',()=>assert.match(html,/@media\(max-width:760px\)[\s\S]*?#eventsTab>\.intro>#createBtn\{display:none\}/)&&assert.match(html,/class="btn primary quick-create" id="quickCreateBtn"/));
+check('azione flottante Organizza e area touch',()=>assert.match(html,/class="btn primary quick-create" id="quickCreateBtn" type="button" aria-label="Organizza una partita"/)&&assert.match(html,/\.quick-actions button\{pointer-events:auto;touch-action:manipulation\}/));
+check('safe area rispettata in alto e in basso',()=>assert.match(html,/env\(safe-area-inset-bottom\)/)&&assert.match(html,/env\(safe-area-inset-top\)/));
+check('popup scrollabile con CTA leggibili',()=>assert.match(html,/\.dialog\{width:min\(100%,560px\);max-height:calc\(100dvh/)&&assert.match(html,/\.dialog-foot\{display:grid;grid-template-columns:1fr/));
+check('moduli lunghi si adattano sotto 380px',()=>assert.match(html,/\.form-grid\{grid-template-columns:1fr\}/));
+check('etichette e testi d’azione non restano micro',()=>assert.match(html,/\.field label\{font-size:12px/)&&assert.match(html,/\.event-card \.card-actions button\{font-size:13px/));
+check('titolo, luogo e data non vengono nascosti mobile',()=>assert.doesNotMatch(html,/\.event-meta span:nth-child\(2\)\{display:none\}/)&&assert.match(html,/event-place/));
+check('link e contenuti non causano overflow orizzontale',()=>assert.match(html,/html,body\{max-width:100%;overflow-x:hidden\}/)&&assert.match(html,/overflow-wrap:anywhere/));
+check('animazioni rispettano movimento ridotto',()=>assert.match(html,/@media\(prefers-reduced-motion:reduce\)/));
+console.log(`PASS: ${count} controlli responsive e leggibilità.`);

@@ -1,0 +1,8 @@
+{
+  "name": "trovato-static-preview",
+  "private": true,
+  "version": "2.0.2",
+  "devDependencies": {
+    "wrangler": "4.158.0"
+  }
+}

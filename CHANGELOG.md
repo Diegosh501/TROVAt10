@@ -1,0 +1,30 @@
+# 2.0.2 · 10 novembre 2026
+
+- Logo runtime PNG da 480×160 e 74.898 byte; originale approvato 2172×724 conservato.
+- Dimensioni intrinseche delle immagini, spazio iniziale della lista riservato per evitare il salto del footer.
+- Contrasto della navigazione corretto, marchio azionabile da tastiera e target touch secondari almeno 44px.
+- Workflow CI verificato localmente: controlli Node, installazione da lock, pacchetti, Wrangler dry-run e confronti degli archivi. Nessun deploy automatico o segreto CI.
+- I pacchetti includono workflow e regole per escludere credenziali e file generati.
+
+# 2.0.1 · 10 novembre 2026
+
+- Correzioni raggruppate dopo il primo deploy 2.0.0: focus nelle finestre, Escape, mappa, CTA Auth unica e recupero password/CAPTCHA.
+- Prefisso telefono Italia +39 selezionabile e normalizzazione numeri incollati.
+- Rientro dopo uscita/rifiuto sottoposto ad approvazione, nessuna partecipazione duplicata dell’organizzatore.
+- Richieste non ammesse nascoste agli altri partecipanti da policy server.
+- Date future/capienza validate, coordinate assenti escluse, invito visibile nel riepilogo e PNG privato generabile senza invito.
+- Dipendenze Supabase fissate a 2.119.0, integrità per SDK browser e Leaflet, lock Wrangler completo.
+- Protezioni HTTPS/frame/CSP e pacchetti confrontati con i sorgenti prima dello ZIP.
+- Audit, evidenze e rollback registrati.
+
+# Changelog TROVAT1O
+
+## 2.0 · 10 novembre 2026
+
+- Allineati logo PNG, palette, icone, favicon, manifest e cache PWA.
+- Rifiniti ricerca, lista, mappa demo, schede evento, onboarding, ruoli, I miei match e CTA mobile.
+- Aggiunti nel client i flussi cloud per feed, inviti privati, richieste/approvazioni, roster, pin, contatto Host, segnalazioni e stato evento.
+- Applicato su Supabase lo schema V2 con RLS, feed che oscura il luogo privato, limiti OTP e funzioni server per le operazioni evento. Tabella applicativa vuota; cloud client ancora spento.
+- Aggiornate istruzioni, stato di readiness, sicurezza e pacchetto per la preview.
+
+La release online `workers.dev` resta una demo statica finché non viene aggiornata col pacchetto e non si configurano SMTP, Turnstile e funzioni server. Non presentarla come servizio multiutente attivo.

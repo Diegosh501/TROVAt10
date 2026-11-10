@@ -1,0 +1,24 @@
+{
+  "name": "TROVAT1O · Non perderti una partita",
+  "short_name": "TROVAT1O",
+  "description": "Trova e organizza partite ed eventi a cui non vuoi mancare.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f8f2",
+  "theme_color": "#00633a",
+  "icons": [
+    {
+      "src": "./assets/brand/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/brand/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
