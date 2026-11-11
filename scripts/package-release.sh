@@ -7,7 +7,7 @@ FINAL_DIR="$PROJECT_ROOT/TROVAT1O-Local-Final-Preview"
 DEPLOY_DIR="$PROJECT_ROOT/TROVAT1O-Cloudflare-Deploy"
 
 WEB_FILES=(index.html index-v2.html config.js sw.js site.webmanifest robots.txt _headers privacy.html cookie.html termini.html politiche.html)
-DOC_FILES=(README.md DEPLOY-READINESS.md SECURITY.md BRAND-GUIDE.md UX-ITERATION-V2.md ADMIN-SETUP.md V1-STATUS.md CHANGELOG.md AUDIT-PREDEPLOY.md RELEASES.md)
+DOC_FILES=(README.md DEPLOY-READINESS.md SECURITY.md BRAND-GUIDE.md UX-ITERATION-V2.md ADMIN-SETUP.md BILLING-SETUP.md RETENTION-SETUP.md PUSH-SETUP.md WRITE-QUOTAS.md UX-CHECKPOINT.md V1-STATUS.md CHANGELOG.md AUDIT-PREDEPLOY.md RELEASES.md)
 DEPLOY_FILES=(README.md package.json package-lock.json wrangler.jsonc)
 
 mkdir -p "$STATIC_DIR/assets/brand" "$DEPLOY_DIR/public/assets/brand" "$FINAL_DIR/assets" "$FINAL_DIR/TROVAT1O-Cloudflare-Deploy/public"
@@ -66,8 +66,8 @@ cmp "$PROJECT_ROOT/supabase/notifications.sql" "$FINAL_DIR/supabase/notification
 STATIC_ZIP_TMP="$PROJECT_ROOT/TROVAT1O-Static-Preview-Pages.tmp.zip"
 FINAL_ZIP_TMP="$PROJECT_ROOT/TROVAT1O-Local-Final-Preview.tmp.zip"
 rm -f "$STATIC_ZIP_TMP" "$FINAL_ZIP_TMP"
-(cd "$PROJECT_ROOT" && zip -qr "$STATIC_ZIP_TMP" TROVAT1O-Static-Preview-Pages -x '*/.DS_Store' '*/node_modules/*' '*/.wrangler/*' '*/.git/*' '*/.env' '*/.env.*' '*/.npmrc' '*.log')
-(cd "$PROJECT_ROOT" && zip -qr "$FINAL_ZIP_TMP" TROVAT1O-Local-Final-Preview -x '*/.DS_Store' '*/node_modules/*' '*/.wrangler/*' '*/.git/*' '*/.env' '*/.env.*' '*/.npmrc' '*.log')
+(cd "$PROJECT_ROOT" && zip -qr "$STATIC_ZIP_TMP" TROVAT1O-Static-Preview-Pages -x '*/.DS_Store' '*/node_modules/*' '*/.wrangler/*' '*/.git/*' '*/.env' '*/.env.*' '*/.dev.vars' '*/.dev.vars.*' '*/.npmrc' '*.log')
+(cd "$PROJECT_ROOT" && zip -qr "$FINAL_ZIP_TMP" TROVAT1O-Local-Final-Preview -x '*/.DS_Store' '*/node_modules/*' '*/.wrangler/*' '*/.git/*' '*/.env' '*/.env.*' '*/.dev.vars' '*/.dev.vars.*' '*/.npmrc' '*.log')
 mv -f "$STATIC_ZIP_TMP" "$PROJECT_ROOT/TROVAT1O-Static-Preview-Pages.zip"
 mv -f "$FINAL_ZIP_TMP" "$PROJECT_ROOT/TROVAT1O-Local-Final-Preview.zip"
 (cd "$DEPLOY_DIR" && tar -czf trovato-static-assets.tar.gz public)

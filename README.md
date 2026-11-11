@@ -30,6 +30,10 @@ node tests/cloud-integration-smoke.cjs
 node tests/runtime-regressions.cjs
 node tests/service-worker-runtime.cjs
 node tests/admin-edge-runtime.cjs
+node tests/oauth-runtime.cjs
+node tests/billing-runtime.cjs
+node tests/billing-client-runtime.cjs
+npx --yes deno@2.9.6 test --frozen --lock=supabase/deno.lock tests/billing-signature.test.ts
 ```
 
 I test controllano UI e responsive, collegamenti e handler, regole privacy nel codice, configurazione sicura e collegamenti previsti con le funzioni cloud. Non sostituiscono prove con account distinti su un backend online.
@@ -38,7 +42,7 @@ I test controllano UI e responsive, collegamenti e handler, regole privacy nel c
 
 - Il progetto Supabase `TROVAT1O` è attivo. Schema V2, policy RLS e funzioni transazionali sono state applicate; le tabelle applicative sono vuote.
 - Il client resta in modalità preview: `onlineReady: false`. La registrazione online non è attiva. La funzione `admin-console` v1 è pubblicata con verifica JWT e RPC riservate; non esistono ancora account amministrativi reali.
-- Google risulta disattivato e va collegato insieme al completamento del profilo OAuth. Il percorso V1.0 prevede Google e nessun SMS obbligatorio. Il precedente flusso email/password richiederebbe SMTP personalizzato e Turnstile, non ancora configurati; Twilio resta opzionale e non attivo.
+- Google non è ancora attivo in Supabase: progetto e client Google creati, collegamento della chiave e login reale da completare. Il completamento del profilo OAuth e i gate Google sono implementati e applicati. Il percorso V1.0 prevede Google e nessun SMS obbligatorio. Il precedente flusso email/password richiederebbe SMTP personalizzato e Turnstile, non ancora configurati; Twilio resta opzionale e non attivo.
 - Le notifiche locali funzionano nella demo; push in background e pagamenti Premium non sono attivi.
 
 L’accesso al database degli eventi è chiuso al client: la ricerca usa il feed filtrato, che nasconde il campo privato agli utenti non ammessi. Le modifiche passano da funzioni server con controlli sul proprietario. I controlli Supabase hanno trovato avvisi generici su funzioni di accesso intenzionali e indici appena creati su un database senza righe; il controllo salute non ha segnalato problemi. Prima di attivare utenti reali servono comunque test con sessioni/account separati.
@@ -92,4 +96,13 @@ Sul rilascio HTTPS 2.0.2, Lighthouse mobile 13.5.0 ha misurato LCP 2,142 s, CLS 
 
 Le protezioni Admin applicate richiedono allowlist privata, sessione valida, account non bloccato e TOTP verificato negli ultimi 15 minuti. Sono passati 21 gruppi di prove SQL con rollback prima e dopo la migrazione, 24 scenari del gestore Edge e dieci suite locali. Nessuna prova sostituisce un vero login Google/MFA con account distinti.
 
-Decisioni V1.0 da completare: tutti Free, account sempre attivo e storico dei match conclusi/annullati per sette giorni dal termine effettivo. La procedura automatica di scadenza non è ancora implementata. Premium resta futuro e nessun pagamento è attivo.
+Decisioni V1.0 da completare: tutti Free, account sempre attivo e storico dei match conclusi/annullati per sette giorni dal termine effettivo. La procedura automatica di scadenza non è ancora implementata. Il titolare ha aggiunto il Premium Stripe facoltativo a 4,99 EUR/anno. Il codice è presente e testato nei limiti descritti in BILLING-SETUP.md; nessun pagamento è attivo.
+
+## Punto di ripresa
+
+Il titolare ha richiesto una pausa. Prima di proseguire leggere V1-STATUS.md, BILLING-SETUP.md e il checkpoint privato in output/handoff/RIPRESA-TROVAT1O.md, se disponibile. Dodici migrazioni reali sono esportate. Non ripetere creazione progetto Google o sandbox Stripe e non dichiarare attivo il cloud dalla sola presenza del codice.
+
+
+## Checkpoint 11 novembre
+
+Il candidato locale aggiunge retention, contatto Host verificato, operazioni Admin, export, limiti anti-abuso e push con lease; la migrazione aggregata è applicata al progetto Supabase corretto. Endpoint aggiornati, credenziali Google, test reali e rilascio frontend rimangono da completare. L’URL pubblico continua a servire la preview2.0.2. Vedere V1-STATUS.md per la nuova durata account Free richiesta (sette giorni dalla prima partita creata), non ancora attiva. Non usare le vecchie frasi sull’account sempre attivo come politica definitiva.

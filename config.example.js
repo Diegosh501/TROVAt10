@@ -2,6 +2,10 @@
 // backend. Never put a Supabase service-role key or payment secret here.
 window.TROVAT1O_CONFIG = {
   onlineReady: false,
+  emailAuthEnabled: false,
+  billingReady: false,
+  exportReady: false,
+  billingMode: 'test',
   publicBaseUrl: '',
   supabaseUrl: '',
   supabaseAnonKey: '',

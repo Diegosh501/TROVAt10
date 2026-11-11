@@ -37,12 +37,26 @@ jobs:
       - name: Run source tests
         run: |
           for test_file in tests/*.cjs; do
+            if [[ "$test_file" == "tests/local-postgres.cjs" ]]; then continue; fi
             node "$test_file"
           done
+
+      - name: Verify SQL permissions and rollback on local PostgreSQL
+        run: |
+          mkdir -p tmp/local-postgres
+          cp tests/fixtures/local-postgres/package.json tmp/local-postgres/package.json
+          cp tests/fixtures/local-postgres/package-lock.json tmp/local-postgres/package-lock.json
+          npm ci --prefix tmp/local-postgres --ignore-scripts --no-audit --no-fund
+          node tests/local-postgres.cjs --require-engine
 
       - name: Install locked release tools
         working-directory: TROVAT1O-Cloudflare-Deploy
         run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Check payment functions and actual Stripe signature verification
+        run: |
+          npx --yes deno@2.9.6 check --frozen --lock=supabase/deno.lock supabase/functions/billing/index.ts supabase/functions/stripe-webhook/index.ts supabase/functions/admin-console/index.ts supabase/functions/host-contact/index.ts supabase/functions/push-dispatch/index.ts
+          npx --yes deno@2.9.6 test --frozen --lock=supabase/deno.lock tests/billing-signature.test.ts
 
       - name: Package release from source
         run: bash scripts/package-release.sh

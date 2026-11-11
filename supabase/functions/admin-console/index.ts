@@ -77,7 +77,27 @@ Deno.serve(async req => {
     catch (error) { return json({ error: error instanceof Error && error.message === 'request_too_large' ? 'request_too_large' : 'invalid_request' }, 400); }
     let rpc: string;
     let args: Record<string, unknown> = {};
-    if (body.action === 'dashboard') rpc = 'admin_dashboard';
+    const isId = (id: unknown) => typeof id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    if (typeof body.action !== 'string') return json({error:'invalid_request'},400);
+    if (['users','events','reports'].includes(body.action)) {
+      const statuses = body.action === 'events' ? ['', 'scheduled','in_progress','completed','cancelled'] : ['', 'received','in_review','actioned','no_action','appealed'];
+      if ((body.query !== undefined && (typeof body.query !== 'string' || body.query.length > 100)) ||
+        (body.offset !== undefined && (typeof body.offset !== 'number' || !Number.isInteger(body.offset) || body.offset<0 || body.offset>100000)) ||
+        (body.action === 'users' && body.role !== undefined && (typeof body.role !== 'string' || !['','host','sportivo'].includes(body.role))) ||
+        (body.action !== 'users' && body.status !== undefined && (typeof body.status !== 'string' || !statuses.includes(body.status)))) return json({error:'invalid_request'},400);
+      rpc = body.action === 'users' ? 'admin_users' : body.action === 'events' ? 'admin_events' : 'admin_reports';
+      args = {p_query:body.query??'',p_offset:body.offset??0,...(body.action==='users'?{p_role:body.role??''}:{p_status:body.status??''})};
+    } else if (body.action === 'user-role') {
+      if(!isId(body.id) || typeof body.role!=='string' || !['host','sportivo'].includes(body.role)) return json({error:'invalid_request'},400);
+      rpc='admin_set_user_role';args={p_id:body.id,p_role:body.role};
+    } else if (body.action === 'review-report') {
+      if(!isId(body.id) || typeof body.status!=='string' || !['received','in_review','actioned','no_action','appealed'].includes(body.status) ||
+        typeof body.note!=='string' || body.note.length>2000) return json({error:'invalid_request'},400);
+      rpc='admin_review_report';args={p_id:body.id,p_status:body.status,p_note:body.note};
+    } else if (body.action === 'cancel-event') {
+      if(!isId(body.id)) return json({error:'invalid_request'},400);
+      rpc='admin_cancel_event';args={p_id:body.id};
+    } else if (body.action === 'dashboard') rpc = 'admin_dashboard';
     else if (body.action === 'audit') rpc = 'admin_audit_log';
     else if (body.action === 'tickets') {
       if ((body.query !== undefined && (typeof body.query !== 'string' || body.query.length > 100)) ||
@@ -105,7 +125,7 @@ Deno.serve(async req => {
       return json({ error: 'unavailable' }, 503);
     }
     if (rpc === 'admin_dashboard') return json({ ...data, usage: await readUsage() });
-    return json(rpc === 'admin_update_support_ticket' ? { ok: data === true } : data);
+    return json(['admin_update_support_ticket','admin_set_user_role','admin_review_report','admin_cancel_event'].includes(rpc) ? { ok: data === true } : data);
   } catch {
     return json({ error: 'unavailable' }, 503);
   }

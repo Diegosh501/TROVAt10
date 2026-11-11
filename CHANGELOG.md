@@ -39,3 +39,10 @@
 - Aggiornate istruzioni, stato di readiness, sicurezza e pacchetto per la preview.
 
 La release online `workers.dev` resta una demo statica finché non viene aggiornata col pacchetto e non si configurano SMTP, Turnstile e funzioni server. Non presentarla come servizio multiutente attivo.
+
+## Candidato non pubblicato — checkpoint Google e Premium, 2026-11-10
+
+- Google PKCE e completamento profilo, invito preservato, gate pubblico senza SMS quando Google è verificato.
+- Billing annuale 4,99 EUR con Checkout/portale, firme SDK, deduplicazione, separazione test/live e gestione rinnovi/rimborsi/contestazioni. Pagamenti disabilitati e funzioni Edge ancora da distribuire.
+- Dodici migrazioni effettive preservate; nuove prove OAuth e Billing, lockfile Deno e istruzioni di ripresa.
+- Nessun deploy frontend e nessun pagamento reale. Provider Google e collaudi reali ancora aperti.

@@ -20,7 +20,7 @@ Al controllo successivo alle migration:
 - L’advisor Health non ha segnalato problemi.
 - Gli avvisi di sicurezza residui sono sui RPC `SECURITY DEFINER` necessari per il feed pubblico, gli inviti e le operazioni autenticate. Ogni funzione imposta un search path sicuro e verifica ruolo/utente; restano da provare con sessioni online distinte.
 - Gli avvisi performance riguardano indici inutilizzati in un database senza righe; non risultano chiavi esterne prive di indice.
-- Non ci sono ancora Edge Functions pubblicate e il frontend resta con `onlineReady: false`.
+- La funzione `admin-console` v1 è pubblicata; il frontend resta con `onlineReady: false`. Billing, supporto e OTP non sono distribuiti.
 
 Il fatto che lo schema sia applicato **non significa che l’app multiutente sia online**. Mancano configurazione dei provider, distribuzione delle funzioni e prove reali con account separati.
 
@@ -74,3 +74,9 @@ Il rapporto completo è [AUDIT-PREDEPLOY.md](AUDIT-PREDEPLOY.md). Sono stati cor
 ## Ultimo rilascio2.0.2
 
 Worker 79bbea69-3511-400e-8603-5de3c9acacdb pubblicato;16 asset pubblici confrontati. LCP 2,142 s e CLS 0 nella prova Lighthouse mobile; INP 120 ms nella sessione con CPU 4×. Offline reale Chrome verificato. Questi risultati riguardano la preview: i blocchi degli account online elencati sopra restano aperti. Repository sorgente ufficiale scelto: https://github.com/Diegosh501/TROVAt10 .
+
+## Checkpoint successivo Google / Billing
+
+Il percorso primario è Google, non il precedente signup email obbligatorio. Il codice OAuth e il completamento profilo sono pronti e applicati; progetto Google e client web creati, trasferimento della chiave, redirect Supabase e login reale ancora da completare. Email/password richiederebbe separatamente SMTP/Turnstile. I gate del gioco riconoscono Google verificato, senza SMS obbligatorio.
+
+Billing è disattivato: vedere `BILLING-SETUP.md` per i test effettivi e le dipendenze aperte. Dodici migrazioni registrate, non un backup. Lo stato che prevale sui vecchi elenchi è `V1-STATUS.md`. Non pubblicare il candidato come piattaforma multiutente prima di collaudo Google, retention, notifiche e account distinti.

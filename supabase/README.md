@@ -60,6 +60,12 @@ Il test SQL autorizzato in tests/sql/membership-decisions.sql è passato con tri
 
 La migrazione effettiva 20261110164243_trovat1o_platform_admin_security è applicata. Il blueprint è admin-security.sql: allowlist privata, verifica della sessione attiva, account confermato/non bloccato, TOTP aal2 recente, quote e audit atomico dei ticket. La funzione Edge usa il token del chiamante, non una service-role per le operazioni Admin. Prove: tests/sql/admin-access.sql (21 gruppi con rollback), tests/admin-edge-runtime.cjs (24 scenari del gestore con trasporti simulati), controllo dei tipi Deno superato.
 
-Le nove migrazioni registrate sono esportate in recorded-migrations/. La prima dipende dalla base Supabase e dalla funzione preesistente public.rls_auto_enable(); nessun replay completo o ripristino dati è stato eseguito. Non usare questi file come bootstrap PostgreSQL generico.
+Le dodici migrazioni registrate sono esportate in recorded-migrations/. La prima dipende dalla base Supabase e dalla funzione preesistente public.rls_auto_enable(); nessun replay completo o ripristino dati è stato eseguito. Non usare questi file come bootstrap PostgreSQL generico.
 
 Prima della V1.0 devono essere aggiunti il completamento profilo Google, la regola tutti Free e la scadenza automatica dopo sette giorni dalla conclusione/annullamento. L’account non scade e non va eliminato dal job dei match. I precedenti vincoli telefono/pubblicazione e storico dieci match non rappresentano ancora queste nuove regole: vedere V1-STATUS.md.
+
+## Blocco Google e Billing successivo
+
+Applicati `oauth-profiles.sql`, `free-access.sql` e `billing.sql`. I primi due completano il profilo dopo Google verificato e abilitano gioco pubblico senza SMS; il telefono resta verificato per contattare l’Host. Il terzo isola fatture/cliente/eventi di pagamento in schema privato, distingue test/live e vieta Premium senza scadenza. Il baseline `schema.sql` da solo non rappresenta l’ultima versione: usare la cronologia remota completa, senza rieseguirla alla cieca.
+
+Progetto e client Google creati; chiave non collegata a Supabase, nessun login reale. Billing Edge e webhook non distribuiti. Configurazione, prove e passaggi ancora aperti in `../BILLING-SETUP.md` e `../V1-STATUS.md`. I vecchi paragrafi SMTP/telefono descrivono il percorso email opzionale: il percorso V1.0 prioritario è Google.
