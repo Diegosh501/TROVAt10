@@ -1,6 +1,6 @@
 # Ciclo di vita e conservazione dei match
 
-Il codice è in `supabase/retention.sql`, da applicare dopo schema, notifiche, sicurezza Admin, profilo Google, accesso gratuito e Billing. **Questo documento non attesta un'applicazione remota o un job già attivo.** L'account non viene eliminato, sospeso o fatto scadere quando termina lo storico Free.
+Il codice è in `supabase/retention.sql`, da applicare dopo schema, notifiche, sicurezza Admin, profilo Google, accesso gratuito e Billing. **Questo documento non attesta un job già attivo.** Questo modulo riguarda i match e non elimina l’account. La nuova durata dell’account Free dal primo match creato è una regola separata, documentata in `ACCOUNT-LIFECYCLE.md`, attualmente disattivata e non applicata sul progetto remoto. Il modulo di retention dei match è incluso nella migrazione remota del primo checkpoint dell’11 novembre.
 
 ## Regola del piano
 

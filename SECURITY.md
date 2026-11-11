@@ -1,51 +1,59 @@
-# TROVAT1O · impostazioni cloud e sicurezza
+# Sicurezza e limiti del checkpoint
 
-## Modalità corrente
+Aggiornato l’11 novembre 2026. Non è una garanzia di assenza di vulnerabilità o un penetration test completo. Stato operativo e criteri finali: [V1-STATUS.md](V1-STATUS.md).
 
-La preview online e quella locale sono demo; `onlineReady` è `false`. La registrazione cloud non è attiva. Il database Supabase ha schema/RLS applicati ma non contiene profili o eventi ; `admin-console` v1 è pubblicata, mentre le altre Edge Functions restano da configurare. Google è ancora disattivato e non esistono account Auth reali. La chiave Supabase publishable/anon non è un segreto, ma non è inserita nell’attuale configurazione del client.
+## Perimetro attuale
 
-## Percorso V1.0 aggiornato
+Il frontend pubblico è ancora la preview 2.0.2 con dati locali. Il candidato nuovo non è pubblicato e mantiene tutti i flag di attivazione su false. Il progetto Supabase corretto contiene tredici migrazioni applicate, zero account/profili/eventi osservati, nessun Admin reale assegnato e nessun job attivo. `admin-console` versione 2 è distribuita con verifica JWT. Gli altri gestori restano da configurare e distribuire.
 
-Il percorso richiesto usa Google OAuth, con completamento del profilo, tutti i piani Free e nessuna scelta di salvataggio locale online. È ancora da implementare e configurare completamente: il vecchio trigger profilo richiede metadati del signup email, quindi Google non va attivato prima del suo adattamento. Le regole telefono pubbliche precedenti vanno riallineate al percorso gratuito, senza attivare SMS a pagamento.
+Il browser ha negato accesso alla console Google e, in seguito, ulteriori operazioni sull’anteprima locale. Non sono state aggirate le autorizzazioni usando altri browser, comandi, richieste indirette o strumenti. La nuova migrazione account ha richiesto una conferma del connettore poi scaduta: non è applicata.
 
-## Flusso email precedente, non attivo
+## Identità e autorizzazioni
 
-1. Registrazione con username, email, password, ruolo e conferma della maggiore età/consensi.
-2. Conferma email obbligatoria prima dell’accesso alle funzioni dell’app. Accesso con email/password.
-3. Il numero può essere aggiunto dopo. La verifica è richiesta per pubblicare o unirsi a eventi pubblici e per inviare segnalazioni. Evento privato e invito valido permettono l’accesso con email confermata senza OTP SMS. Twilio Verify può comportare costi.
+Il percorso V1.0 usa Google OAuth PKCE con profilo completato esplicitamente. Un’identità verificata e un profilo completo permettono il gioco pubblico senza SMS. Non viene usato il dominio Gmail come sostituto dei controlli contro abusi. Email/password, SMTP e CAPTCHA appartengono a un percorso opzionale distinto e non bloccano il bootstrap Google.
 
-Supabase Auth deve avere **Confirm email** attivo, SMTP personalizzato, URL HTTPS/redirect e protezioni CAPTCHA configurate. L’email automatica predefinita Supabase non è sufficiente per account pubblici. Accetta provider email generici verificati; richiedere Gmail, Google, Apple o Meta non migliora da solo la protezione contro abusi.
+Google non conferma un numero WhatsApp scritto in un form. La condivisione del recapito Host richiede consenso esplicito e corrispondenza HMAC al numero effettivamente verificato. Il flag del browser non basta. I client non scrivono direttamente il recapito; il gestore server verifica identità e sessione. OTP/SMS restano opzionali e spenti; il loro uso può avere costi, non autorizzati automaticamente.
 
-## Eventi e dati riservati
+Host e Sportivo non possono scegliere Admin o Premium alla registrazione. La console è protetta da allowlist UUID privata, account valido/non bloccato, sessione Auth ancora attiva, TOTP aal2 verificato recente (15 minuti), quote e audit. L’Edge usa il JWT del chiamante per RPC specifiche; non usa service-role per aggirare i controlli Admin. Un’email incorporata nel frontend non concede privilegi.
 
-- `events` non è leggibile o aggiornabile direttamente da `anon` o `authenticated`; il client usa un feed server che rimuove il luogo preciso e il pin privato per i non ammessi.
-- Creazione, modifica, gestione del roster, capienza, pin e stato passano da funzioni transazionali con controllo dell’utente, email, ruolo e stato evento.
-- Gli inviti privati sono token casuali, memorizzati solo come hash e con scadenza. Una richiesta privata necessita del token valido.
-- I dati del profilo e il telefono verificato non sono accessibili agli altri account. Il contatto WhatsApp dell’Host è separato e viene mostrato solo su consenso agli ammessi.
-- Numeri verificati, OTP temporanei, supporto e audit non sono leggibili dal client. I report sono rate-limited e hanno accesso moderazione separato.
+## Visibilità della console
 
-## OTP e anti-abuso
+Nel candidato gli utenti normali, compresi i Premium e i profili demo, non hanno l’ingresso amministrativo. L’app_metadata server è soltanto un indizio per evitare sonde inutili: il client richiede comunque una risposta valida dal dashboard protetto o un rifiuto MFA qualificato dopo il controllo dell’allowlist. Prima del secondo fattore non mostra metriche, navigazione o pratiche. Il risultato è legato a account, generazione di sessione e client attuali; logout, cambio identità, aggiornamento del token o revoca lo eliminano. Ventitré scenari delle funzioni reali coprono questi confini con trasporti controllati.
 
-Le Edge Functions locali `phone-otp-start` e `phone-otp-verify` richiedono JWT ed email confermata, origine esatta, CAPTCHA e limiti server. Twilio controlla il codice; la tabella numero temporaneo scade dopo 10 minuti ed è cancellata dopo la verifica. Nel database resta HMAC-SHA256, non il numero in chiaro. Limiti iniziali: un invio ogni 60 secondi, 5 invii al giorno, 8 tentativi per finestra di 10 minuti. Queste funzioni non sono ancora pubblicate; configurare quote provider/IP e cleanup prima dell’uso reale.
+## Database e privacy
 
-## Supporto e amministrazione
+RLS, grant minimi e RPC con controlli di proprietà proteggono il database. La tabella eventi non è leggibile o scrivibile direttamente dai client; feed e inviti mascherano luogo e coordinate dei privati prima dell’ammissione. I token invito sono casuali di 256 bit e solo il loro hash viene conservato. L’ammissione, il ritiro, i cambi di stato e la capienza sono validati dal server, non dalla sola UI.
 
-Il pannello locale mostra dati fittizi. La modalità online usa la allowlist privata del database, una sessione ancora valida, account non anonimo/bloccato e MFA TOTP `aal2` verificato negli ultimi 15 minuti. Il ruolo nei metadati serve solo alla navigazione. Le RPC verificano nuovamente il permesso anche nelle richieste dirette; `admin-console` non usa una service-role. Revoca e logout impediscono le successive operazioni sensibili. Ticket e audit vengono modificati atomicamente; le operazioni Admin sono limitate a 60/minuto. Vedi ADMIN-SETUP.md.
+Le tabelle private non hanno grant ai client; RLS senza policy di lettura è un diniego intenzionale, non una richiesta di aprirle. I linter segnalano anche RPC SECURITY DEFINER accessibili ai ruoli applicativi: ciascuna deve mantenere search path chiuso, controllo caller/proprietà e grant stretti. Non rimuovere protezioni o concedere permessi generici soltanto per azzerare un avviso.
 
-`admin-console` v1 è pubblicata, ma mancano il primo amministratore e un login OAuth/MFA reale. `support-request` resta da configurare e distribuire: richiede sessione, CAPTCHA e quota; nome/email di ricontatto solo con consenso specifico.
+Quote limitano creazioni, nuove richieste e gestione ripetuta. Il ritiro volontario resta sempre possibile. Contatori, notifiche e job sono limitati per batch e non copiano contatti nei log operativi.
 
-## Da fare prima di utenti reali
+Nel cloud il client ignora i dati demo nel browser e non salva localmente match/account/report. Cambio account e logout puliscono anche console e modali nascosti e scartano risposte tardive. La gestione push del dispositivo viene serializzata per evitare associazioni con l’account precedente. La cache v12 del candidato conserva solo la shell pubblica, senza API, richieste autorizzate o token di invito. Le risposte riservate usano no-store.
 
-1. Configurare SMTP, Turnstile, redirect HTTPS e origine CORS.
-2. Distribuire e provare le Edge Functions usando solo secret server-side.
-3. Testare sessioni reali distinte, accesso anonimo e ruoli; provare capienza concorrente, invito scaduto, cambio visibilità, recupero account e sede privata.
-4. Implementare consegna push/reminder, cleanup OTP, esportazione/cancellazione e retention.
-5. Aggiornare privacy, cookie e termini ai provider effettivi e ai flussi attivi.
+L’esportazione è limitata ai dati del chiamante e richiede una sessione viva. Il nuovo export del profilo contiene anche i dati del ciclo account; la modifica remota è nell’operazione pendente. I limiti di dimensione/paginazione evitano un falso download parziale. Nessun token Auth, impronta telefono, invito o rubrica altrui entra nell’export.
 
-Non attivare `onlineReady: true` finché le prove end-to-end non sono passate. Non includere service-role, Twilio, Turnstile secret, HMAC o Stripe secret in file pubblici, commit, log o chat.
+## Scadenze e acquisti
 
-## Isolamento client e cache
+La retention dei match usa il termine effettivo e preserva partecipanti Premium, report e vincoli. Il nuovo ciclo account parte dal primo match, ha conferma esplicita, avvisi e almeno 48 ore prima della pulizia fisica. Match necessari, partecipanti, pratiche, piano ignoto, collegamenti Billing, Storage e dipendenze nuove trattengono l’account. Il job non forza cancellazioni di report o dati condivisi per superare un errore. Nessuna pulizia è attiva automaticamente.
 
-In modalità cloud il codice ignora i dati della demo nel browser e rifiuta le scritture locali di account/eventi/notifiche. Il cambio account ripulisce anche i modali nascosti e scarta feed/profili tardivi. Il service worker in preparazione v11 conserva soltanto file pubblici, usa chiavi canoniche senza parametri invito, esclude API/richieste autorizzate e rispetta `no-store`/`private`. Le risposte Admin hanno `Cache-Control: no-store`. Questo blocco frontend non è ancora nel deploy pubblico 2.0.2.
+Billing isola test/live, verifica firma del webhook sul corpo originale, gestisce eventi duplicati e rilegge lo stato dal provider. Solo un acquisto live pagato e valido conferisce una scadenza Premium. Non fidarsi di `billing=success`, metadata, sessionStorage o di un piano scritto dal client. Nessun acquisto o addebito reale è stato eseguito.
 
-Il controllo automatico non equivale a un penetration test completo. La CSP mantiene handler inline; una sessione rubata prima della revoca e entro la finestra MFA resta un rischio da ridurre. Le tabelle private senza policy hanno diniego RLS predefinito e nessun privilegio client; gli avvisi generici sulle RPC SECURITY DEFINER richiedono revisione mirata, non sono rimossi nascondendoli.
+Il dispatcher push verifica consenso e destinatario al claim e prima dell’invio; usa payload generico, endpoint consentiti, timeout, lease e retry limitati. Un segreto server protegge la chiamata del job. Non abilitarlo senza una consegna reale di prova e verifica dei dispositivi supportati.
+
+## Segreti e dipendenze
+
+`config.js` è pubblico ed escluso da Git. Deve contenere soltanto URL, chiave publishable/anon e opzioni pubbliche. Service-role, segreti OAuth/Stripe/VAPID/OTP, credenziali e token Management restano nelle impostazioni sicure del provider. Non stamparli nei log, nei comandi condivisi o in chat. La vecchia password proposta in chat non è una credenziale da distribuire.
+
+SDK e tool sono fissati a versione o commit e hanno lockfile. L’integrità delle risorse browser Supabase e Leaflet è stata confrontata con le risposte effettive. I pacchetti escludono credenziali locali, dipendenze installate e cartelle interne. Servire la sola directory pubblica anche nei test sulla Wi-Fi.
+
+## Evidenze e gate aperti
+
+Ventidue suite Node verificano sorgenti, funzioni client e gestori con trasporti controllati. Tredici moduli SQL e dodici regressioni passano su PostgreSQL PGlite con rollback completo; sei casi di firma Stripe usano l’SDK reale. Il perimetro HTTP anonimo dell’Admin v2 rifiuta credenziali mancanti e token falso. Il browser locale ha provato i principali percorsi di creazione/richiesta/export e individuato un reale conflitto CSS corretto.
+
+Restano necessari: OAuth/MFA reali, ruoli e sessioni distinti, concorrenza tra connessioni, abuso e gateway effettivi, job/consegna push, firma/webhook nel sandbox autorizzato, cancellazione e ripristino nel servizio gestito, verifica contratti/trasferimenti e collaudo post-deploy. Non attivare il frontend cloud e non dichiarare il 100% prima dei controlli essenziali. La disponibilità del codice non equivale a servizio operativo.
+
+## Limite residuo delle sessioni ordinarie
+
+Il controllo delle sessioni vive è esplicito per Admin, Billing, export, scrittura del contatto Host e nuove RPC del ciclo account. Le normali RPC e alcune letture self usano invece `is_email_confirmed`, che verifica utente vivo/confermato/non sospeso ma non `auth.sessions`. Un JWT già emesso e poi revocato può mantenere la propria autorità ordinaria fino a exp; non acquisisce proprietà altrui o Admin. Anche la lettura del recapito Host segue le policy di ammissione senza una verifica ulteriore della sessione.
+
+Questo è un limite materiale da provare nella configurazione Auth reale, con durata JWT appropriata e valutazione di guardie di sessione aggiuntive sulle normali operazioni. Il test di sessione revocata sul lifecycle non viene presentato come copertura di tutte le RPC. La cancellazione Auth fa comunque fallire i controlli di utente esistente; una revoca della sola sessione è un caso diverso.

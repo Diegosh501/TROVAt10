@@ -65,7 +65,7 @@ begin
   if not found then
     insert into public.profiles(id,username,role,age_confirmed_at,terms_accepted_at,privacy_notice_ack_at,terms_version,privacy_notice_version)
       values(v_user,pg_catalog.btrim(p_username),p_role,pg_catalog.now(),pg_catalog.now(),pg_catalog.now(),
-        'trovatio-2026-11-09-v1','trovatio-2026-11-09-v1') returning * into v_profile;
+        'trovat1o-2026-11-11-v2','trovat1o-2026-11-11-v2') returning * into v_profile;
     insert into public.subscriptions(user_id,plan,status) values(v_user,'free','active') on conflict(user_id) do nothing;
   end if;
   -- Repeated completion is idempotent; it never overwrites a profile or plan.

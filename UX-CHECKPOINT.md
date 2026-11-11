@@ -1,3 +1,21 @@
+# Console riservata - integrazione finale dell’11 novembre
+
+Il candidato non mostra più la Console demo a utenti ordinari o locali. Free e Premium hanno soltanto le funzioni di gioco, organizzazione, piano e assistenza previste. L’ingresso dedicato nel profilo richiede una conferma del backend per l’account marcato dal server; senza TOTP recente non vengono mostrati dati o navigazione Admin. Il profilo normale rimane immediatamente utilizzabile anche quando la sonda è lenta o fallisce.
+
+Nuova suite `tests/admin-access-runtime.cjs`: 23 scenari passati, tra cui ruoli/piani ordinari, metadata falsi, link e helper diretti, MFA, revoca, logout, cambio e ritorno allo stesso account, risposte tardive e mancata esposizione dei ticket del precedente Admin. Le prove sono runtime con trasporti controllati; il browser ha negato ulteriori interazioni prima di questa modifica e il collaudo visuale dell’ingresso definitivo resta aperto. La schermata Console demo salvata nell’audit e nella guida è soltanto un riferimento storico interno.
+
+# Aggiornamento visivo e flussi dell’11 novembre 2026
+
+La nuova prova browser locale su 4176 ha verificato profilo QA, Organizza (flottante e nei propri match), creazione privata, modifica, richiesta dalla mappa, ricerca/azzera, storico con richiesta pending, filtro assistenza e download PNG. I dati sono sintetici; non è stato provato il cloud reale.
+
+Un conflitto di specificità faceva vincere il vecchio font mobile a 11 px nonostante i precedenti controlli trovassero una regola a 16 px nel sorgente. La regola effettiva è stata corretta e misurata nel browser: campi a 16 px, altezza 46 px. Viewport controllati 320, 390, 768 e 1440 px nei contesti esaminati, senza overflow orizzontale osservato. Corretto anche l’annidamento del form, consenso a larghezza piena, opzioni compatte e nomi accessibili nel supporto. Non si afferma compatibilità perfetta con ogni dispositivo.
+
+Il ciclo account è collegato a una conferma esplicita prima della creazione ed è disabilitato. I testi distinguono i sette giorni dal primo match dai sette giorni dello storico dopo la chiusura. Informative e stamp delle conferme nel candidato sono alla revisione trovat1o-2026-11-11-v2; le modifiche server relative sono ancora pendenti.
+
+La prova successiva del browser è stata negata e il controllo è terminato senza workaround. Screenshot e download già ottenuti sono conservati nell’audit locale. Non sono stati inviati messaggi ad altre persone né concessi permessi push/posizione per questa prova. L’ultima dimensione di prova era 1440x900; l’override del browser potrà essere ripristinato quando le interazioni saranno nuovamente autorizzate.
+
+## Cronologia delle verifiche precedenti
+
 # Frontend: controllo e integrazione del 10 novembre 2026
 
 `index.html` e `index-v2.html` sono identici. Queste modifiche sono nei sorgenti candidati, non costituiscono un nuovo deploy o un collaudo Google/Stripe reale.

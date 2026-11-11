@@ -1,3 +1,12 @@
+# Candidato V1.0 - ripresa dell’11 novembre 2026
+
+- Admin Edge v2 distribuita, confronto del sorgente remoto e rifiuto verificato di accessi senza credenziali/token falso. Nessun nuovo frontend pubblico.
+- Nuovo ciclo account Free dal primo match, conferma esplicita, avvisi, grazia 48 ore, protezioni su Premium, Admin, dati condivisi, acquisti e pratiche. Migrazione richiesta ma non applicata per conferma scaduta; tutte le attivazioni restano spente.
+- Test: 22 suite Node, 13 moduli SQL e 12 regressioni locali con rollback. Il browser ha provato creazione, modifica, richiesta dalla mappa, ricerca, storico, assistenza e download PNG con dati sintetici.
+- Corretto conflitto CSS che riduceva i campi mobile a 11 px: ora 16 px/46 px. Struttura del form corretta, opzioni compatte, consenso a larghezza piena e nomi accessibili nel supporto.
+- Informative pre-lancio v2 e versione delle conferme allineate nel candidato; README, stato, backend, readiness e guida illustrata aggiornati. Cache shell nuova per il prossimo deploy.
+- Sincronizzazione GitHub e ricevute CI separate dal sito esistente; nessuna spesa, acquisto o cancellazione di account reale.
+
 # 2.0.2 · 10 novembre 2026
 
 ## In preparazione - V1.0 cloud e amministrazione

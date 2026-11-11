@@ -1,6 +1,10 @@
 # Esportazione della cronologia effettiva
 
-Questa cartella conserva, nell'ordine delle versioni registrate, le nove migrazioni presenti su Supabase al 10 novembre 2026. Non sono nuove migrazioni inventate e non sono file generati con `migration new`: sono l'esportazione della cronologia applicata tramite connettore.
+Al checkpoint dell’11 novembre sono conservate **tredici migrazioni realmente registrate**. L’ultima è `20261111025149_trovat1o_online_beta_operations`: contatto Host, storico, Admin, esportazione, quote e dispatcher SQL. La nuova operazione del ciclo account NON fa parte di questa cartella e NON è applicata: vedere `../pending-operations/`.
+
+Le migrazioni sono esportazioni della cronologia del connettore, non nomi di file inventati come nuove migrazioni CLI. Non sono un backup dati o un replay verificato; richiedono la base Supabase e la funzione preesistente `public.rls_auto_enable()`. Non copiarle in `migrations/` e non lanciare `db push` senza riconciliazione e prova separata.
+
+## Verifiche storiche delle prime nove esportazioni
 
 Gli otto file iniziali (88.812 byte complessivi) hanno conteggi e MD5 confrontati con i metadati calcolati dal database. Il nono file, `20261110164243_trovat1o_platform_admin_security.sql`, ha 12.242 byte e MD5 `a0c8bac492bc42747e3452ae5f85d751`, identici al contenuto registrato. `admin-security.sql` è il blueprint leggibile di questa ultima modifica.
 

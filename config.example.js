@@ -5,6 +5,7 @@ window.TROVAT1O_CONFIG = {
   emailAuthEnabled: false,
   billingReady: false,
   exportReady: false,
+  accountLifecycleReady: false,
   billingMode: 'test',
   publicBaseUrl: '',
   supabaseUrl: '',

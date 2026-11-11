@@ -1,3 +1,7 @@
+# Stato aggiornato e cronologia di audit
+
+Per lo stato corrente dell’11 novembre leggere V1-STATUS.md. Le sezioni seguenti sono una cronologia delle prove del 10 novembre e non dichiarano che tutti i vecchi blocchi siano ancora presenti. Ora Admin Edge v2 è distribuita; 22 suite Node, 13 moduli SQL e 12 regressioni locali sono passati. Provider, account reali, job, privacy operativa e rilascio V1.0 restano aperti. La migrazione account candidata non è applicata per conferma scaduta. Nessun nuovo frontend pubblico.
+
 # Audit TROVAT1O V2 · 10 novembre 2026
 
 ## Prodotto, ambienti e limiti del rilascio

@@ -8,7 +8,7 @@ alter table private.account_export_quota enable row level security;
 revoke all on private.account_export_quota from public,anon,authenticated;
 create or replace function public.export_my_data(p_section text,p_after uuid default null)
 returns jsonb language plpgsql security definer set search_path='' as $$
-declare u uuid:=auth.uid(); sid uuid; rows jsonb; n integer;
+declare u uuid:=auth.uid(); sid uuid; rows jsonb; n integer; lifecycle jsonb;
 begin
  if u is null or not public.is_email_confirmed() or not exists(select 1 from public.profiles where id=u) then
    raise exception 'authentication_required' using errcode='PT401'; end if;
@@ -22,10 +22,16 @@ begin
    window_at=case when account_export_quota.window_at<now()-interval '1 minute' then now() else account_export_quota.window_at end returning attempts into n;
  if n>60 then raise exception 'export_rate_limited' using errcode='PT429'; end if;
  if p_section='profile' then
+   if to_regclass('private.account_lifecycle') is not null then
+     select jsonb_build_object('firstMatchAt',l.first_match_at,'policyAcknowledgedAt',l.acknowledged_at,
+       'policyVersion',l.policy_version,'firstNoticeAt',l.first_notice_at,'deletionNoticeAt',l.deletion_notice_at)
+       into lifecycle from private.account_lifecycle l where l.user_id=u;
+   end if;
    select jsonb_build_array(jsonb_build_object('id',p.id,'username',p.username,'role',p.role,'email',a.email,
      'createdAt',p.created_at,'adultConfirmedAt',p.age_confirmed_at,'termsAcceptedAt',p.terms_accepted_at,
      'privacyAcknowledgedAt',p.privacy_notice_ack_at,'termsVersion',p.terms_version,'privacyVersion',p.privacy_notice_version,
-     'phoneVerifiedAt',p.phone_verified_at,'googleName',a.raw_user_meta_data->>'full_name','googleAvatar',a.raw_user_meta_data->>'avatar_url')) into rows from public.profiles p join auth.users a on a.id=p.id where p.id=u and p_after is null;
+     'phoneVerifiedAt',p.phone_verified_at,'googleName',a.raw_user_meta_data->>'full_name','googleAvatar',a.raw_user_meta_data->>'avatar_url',
+     'accountLifecycle',lifecycle)) into rows from public.profiles p join auth.users a on a.id=p.id where p.id=u and p_after is null;
  elsif p_section='events' then
    select jsonb_agg(x.data order by x.id) into rows from(select e.id,jsonb_build_object('id',e.id,'title',e.title,'format',e.format,
      'kind',e.kind,'startsAt',e.starts_at,'venue',e.venue,'city',e.city,'latitude',e.latitude,'longitude',e.longitude,

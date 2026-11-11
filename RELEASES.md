@@ -1,3 +1,13 @@
+# Checkpoint dell’11 novembre 2026
+
+Nessun nuovo rilascio frontend: il pubblico resta 2.0.2, versione Cloudflare 79bbea69-3511-400e-8603-5de3c9acacdb. La nuova UI è solo nel candidato e negli archivi aggiornati.
+
+Aggiornamento server eseguito: admin-console versione 2, verify_jwt=true, bundle SHA-256 9fafb5f00f143e58fb9a798469a6179ad2cfc1e2d11adf1c89ab6659c49bf4ee. Il sorgente letto dal servizio coincide con quello candidato. Richieste senza credenziali o con token falso:401; preflight origine autorizzata:204. Il sorgente precedente è conservato nell’audit privato per un ritorno controllato, non è un rollback eseguito.
+
+Sincronizzazione sorgenti iniziale: commit 7c78c6277e7fd2d390c1267e21b220598aefc9a2 con CI verde. Le modifiche successive hanno un commit e una ricevuta separati. Nessun acquisto, nuovo Admin o cancellazione account attivati. Vedere V1-STATUS.md e ACCOUNT-LIFECYCLE.md.
+
+## Cronologia dei rilasci frontend
+
 # Registro rilasci TROVAT1O
 
 ## 10 novembre 2026 · 2.0.0 pubblicata prima dell’audit

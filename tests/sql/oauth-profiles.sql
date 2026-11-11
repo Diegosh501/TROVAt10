@@ -56,6 +56,8 @@ do $$ begin
     or (select username from public.profiles)<>(select first_name from oauth_fixture) then
     raise exception 'Wrong profile ownership or role'; end if;
   if (select plan from public.subscriptions)<>'free' then raise exception 'Signup is not Free'; end if;
+  if exists(select 1 from public.profiles where terms_version<>'trovat1o-2026-11-11-v2'
+    or privacy_notice_version<>'trovat1o-2026-11-11-v2') then raise exception 'Outdated policy version recorded'; end if;
 end $$;
 -- 10. Retrying cannot rename the account, change role or create another row.
 select public.complete_my_profile('different_name','sportivo',true,true,true);

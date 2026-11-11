@@ -1,108 +1,83 @@
 # TROVAT1O
 
-**Non perderti più una partita.** La prima versione aiuta a trovare e organizzare calcio amatoriale a 5, 8 e 11; il marchio è pronto ad allargarsi ad altri eventi.
+**Non perderti più una partita.** La prima versione aiuta a trovare e organizzare calcio amatoriale a 5, 8 e 11; la visione del marchio comprende attività più ampie.
 
-## Preview pubblica
+## Stato dell’11 novembre 2026
 
-[Apri TROVAT1O su Cloudflare](https://trovato.diegolucentedesign.workers.dev/)
+Il sito pubblico è ancora l’**anteprima interattiva 2.0.2 con dati locali**, non la V1.0 cloud per utenti reali:
 
-La preview gratuita usa asset statici su `workers.dev`, senza dominio acquistato. È pensata per provare la UI e i flussi sul dispositivo. Account, eventi e notifiche restano locali; non inserire dati personali. La release correttiva 2.0.2 è stata pubblicata il 10 novembre 2026; identificativi e correzioni sono registrati in [RELEASES.md](RELEASES.md).
+[Apri l’anteprima pubblica](https://trovato.diegolucentedesign.workers.dev/).
+
+I sorgenti candidati includono Google PKCE, completamento profilo, Host/Sportivo, console Admin protetta, quote, esportazione, storico, push e predisposizione Premium. La funzione server `admin-console` è aggiornata alla **versione 2**; il nuovo frontend non è stato distribuito. Tutti i flag di attivazione restano `false`. Non usare dati personali reali nella demo.
+
+Lo stato verificabile dei venti criteri è in [V1-STATUS.md](V1-STATUS.md). Non esiste una percentuale che sostituisca i test reali ancora necessari.
 
 ## Avvio locale su Mac
 
-```sh
-# Dalla cartella di progetto che contiene index.html:
-python3 -m http.server 4173 --bind 127.0.0.1
-```
-
-Apri [http://127.0.0.1:4173](http://127.0.0.1:4173). Ferma il server con `Ctrl+C`. Questo indirizzo funziona solo sul Mac. Per provarla da altri dispositivi sulla stessa Wi-Fi occorre avviare il server sull’indirizzo di rete del Mac e consentire la connessione nel firewall.
-
-## Verifiche automatiche
+Se manca `config.js`, crea la configurazione di prova:
 
 ```sh
-node tests/smoke.cjs
-node tests/ux-v2-smoke.cjs
-node tests/responsive-smoke.cjs
-node tests/brand-smoke.cjs
-node tests/interactions-smoke.cjs
-node tests/security-smoke.cjs
-node tests/cloud-integration-smoke.cjs
-node tests/runtime-regressions.cjs
-node tests/service-worker-runtime.cjs
-node tests/admin-edge-runtime.cjs
-node tests/oauth-runtime.cjs
-node tests/billing-runtime.cjs
-node tests/billing-client-runtime.cjs
-npx --yes deno@2.9.6 test --frozen --lock=supabase/deno.lock tests/billing-signature.test.ts
+cp config.example.js config.js
 ```
 
-I test controllano UI e responsive, collegamenti e handler, regole privacy nel codice, configurazione sicura e collegamenti previsti con le funzioni cloud. Non sostituiscono prove con account distinti su un backend online.
-
-## Stato cloud verificato il 10 novembre 2026
-
-- Il progetto Supabase `TROVAT1O` è attivo. Schema V2, policy RLS e funzioni transazionali sono state applicate; le tabelle applicative sono vuote.
-- Il client resta in modalità preview: `onlineReady: false`. La registrazione online non è attiva. La funzione `admin-console` v1 è pubblicata con verifica JWT e RPC riservate; non esistono ancora account amministrativi reali.
-- Google non è ancora attivo in Supabase: progetto e client Google creati, collegamento della chiave e login reale da completare. Il completamento del profilo OAuth e i gate Google sono implementati e applicati. Il percorso V1.0 prevede Google e nessun SMS obbligatorio. Il precedente flusso email/password richiederebbe SMTP personalizzato e Turnstile, non ancora configurati; Twilio resta opzionale e non attivo.
-- Le notifiche locali funzionano nella demo; push in background e pagamenti Premium non sono attivi.
-
-L’accesso al database degli eventi è chiuso al client: la ricerca usa il feed filtrato, che nasconde il campo privato agli utenti non ammessi. Le modifiche passano da funzioni server con controlli sul proprietario. I controlli Supabase hanno trovato avvisi generici su funzioni di accesso intenzionali e indici appena creati su un database senza righe; il controllo salute non ha segnalato problemi. Prima di attivare utenti reali servono comunque test con sessioni/account separati.
-
-## Pubblicazione gratuita della preview
-
-La cartella [TROVAT1O-Cloudflare-Deploy](TROVAT1O-Cloudflare-Deploy/) contiene i file pubblici e la configurazione del Worker. Dalla root sincronizza i pacchetti e gli archivi:
+Dalla cartella principale prepara i soli file pubblici e avvia il server:
 
 ```sh
 bash scripts/package-release.sh
+python3 -m http.server 4173 --bind 127.0.0.1 --directory TROVAT1O-Cloudflare-Deploy/public
 ```
 
-Poi pubblica il Worker:
+Apri [http://127.0.0.1:4173](http://127.0.0.1:4173). Per fermare il tuo server usa `Ctrl+C`; se la porta è occupata usa il server esistente o un’altra porta. Per una prova sulla stessa Wi-Fi puoi usare `--bind 0.0.0.0` e l’IP del Mac. Questo espone soltanto la cartella pubblica: non servire la root del progetto, che contiene documentazione e operazioni riservate. La demo locale non sincronizza eventi tra dispositivi.
+
+## Google, ruoli e dati online
+
+Il percorso V1.0 usa Google verificato e il completamento esplicito del profilo. Non richiede SMS a pagamento o una chiave CAPTCHA per giocare. Email/password, SMTP e OTP sono percorsi opzionali, non prerequisiti del login Google. Il telefono verificato serve alla condivisione facoltativa del recapito Host.
+
+Il server distingue ruolo operativo e piano. Free e Premium ordinari non vedono la console; la demo Admin pubblica è stata rimossa dal candidato. L’ingresso dedicato nel profilo è mostrato solo dopo una conferma del backend per l’account marcato lato server. Il ruolo Admin non è selezionabile durante la registrazione: allowlist privata, sessione viva, secondo fattore TOTP recente e autorizzazioni SQL proteggono le operazioni anche contro chiamate dirette. I match passano da RPC con controlli di proprietà e capienza; il client non legge la tabella eventi direttamente.
+
+Nel flusso cloud non viene proposta la scelta sessione/dispositivo e i dati demo non vengono usati come database condiviso. Sessione tecnica Auth, cache pubblica e identificativo per gestire le push sono separati dai match.
+
+## Free, conservazione e Premium
+
+I nuovi account partono Free. Con account verificato il limite è due eventi attivi; senza verifica consentita si può creare un evento privato ogni sette giorni. La visibilità dello storico Free termina sette giorni dopo la conclusione o l’annullamento effettivi; vedi [RETENTION-SETUP.md](RETENTION-SETUP.md).
+
+La nuova durata dell’**account** Free è distinta: sette giorni dalla creazione del primo match, Premium verificato escluso, avvisi e protezioni su dati condivisi. Codice e interfaccia sono testati localmente, ma la migrazione **non è stata applicata** perché la conferma del connettore è scaduta. Non viene cancellato alcun account online. Vedi [ACCOUNT-LIFECYCLE.md](ACCOUNT-LIFECYCLE.md).
+
+Premium previsto: €4,99/anno. Checkout, portale e webhook sono predisposti ma gli acquisti sono disattivati. I test non creano addebiti o piani reali; una pagina di ritorno non concede privilegi. Vedi [BILLING-SETUP.md](BILLING-SETUP.md).
+
+## Verifiche
+
+Le suite Node eseguono funzioni reali con trasporti controllati e controlli dei sorgenti; non sono login reali presso i fornitori:
 
 ```sh
-cd TROVAT1O-Cloudflare-Deploy
-npm ci
-npx wrangler deploy
+for test_file in tests/*.cjs; do node "$test_file"; done
 ```
 
-Questo pubblica solo la preview statica: non attiva account condivisi o il backend. `trovat10.app` si potrà collegare in seguito quando sarà acquistato e configurato. Non mettere chiavi service-role, segreti Turnstile, credenziali Twilio o chiavi Stripe nei file pubblici o nel repository.
+Il driver SQL generico salta esplicitamente il motore se non installato. Per il controllo obbligatorio PostgreSQL locale, usa le dipendenze esatte separate dall’app:
 
-## File di riferimento
+```sh
+mkdir -p tmp/local-postgres
+cp tests/fixtures/local-postgres/package.json tmp/local-postgres/package.json
+cp tests/fixtures/local-postgres/package-lock.json tmp/local-postgres/package-lock.json
+npm ci --prefix tmp/local-postgres --ignore-scripts --no-audit --no-fund
+node tests/local-postgres.cjs --require-engine
+```
 
-- `index.html`: interfaccia mobile-first e flussi locali/cloud.
-- `assets/brand/`: logo e icone PNG approvati.
-- `config.js`: impostazioni sicure della preview, senza credenziali e con cloud spento.
-- `supabase/schema.sql`, `supabase/notifications.sql`, `supabase/admin-security.sql`: blueprint dello schema e dei controlli applicati. La cronologia effettiva è conservata in `supabase/recorded-migrations/`; non è un backup né un replay verificato.
-- `supabase/functions/`: sorgenti delle funzioni. Soltanto `admin-console` v1 è stata pubblicata; supporto e OTP restano da configurare e distribuire.
-- `privacy.html`, `cookie.html`, `termini.html`, `politiche.html`: informative della preview. Prima della registrazione pubblica vanno aggiornate con provider, retention e contatti effettivi. Non sono una certificazione legale.
-- `SECURITY.md` e `DEPLOY-READINESS.md`: impostazioni, limiti e passaggi che restano per la beta online.
+Sono passati 22 suite Node, 13 moduli SQL e 12 regressioni con rollback locale; in aggiunta il checkpoint precedente ha verificato sei firme Stripe con SDK reale e i tipi dei gestori Deno. La CI ripete i controlli e il pacchetto senza pubblicare o usare segreti. Nel browser locale sono stati provati creazione, modifica, richiesta dalla mappa, ricerca, storico personale, filtro assistenza ed export PNG; il controllo successivo è stato interrotto da un diniego del browser, senza aggirarlo. Mancano OAuth/MFA reali, account distinti, concorrenza, job e prove post-deploy della V1.0.
 
-## Audit e ripristino
+## Sorgenti e distribuzione
 
-Consulta [AUDIT-PREDEPLOY.md](AUDIT-PREDEPLOY.md) per controlli eseguiti, prove non disponibili e criticità aperte; [RELEASES.md](RELEASES.md) contiene la procedura verificata di pubblicazione e rollback.
+Repository ufficiale: [Diegosh501/TROVAt10](https://github.com/Diegosh501/TROVAt10). Controlli: [GitHub Actions](https://github.com/Diegosh501/TROVAt10/actions).
 
+`config.js` è escluso da Git; in CI viene generato da `config.example.js`. Le chiavi pubblicabili e gli URL appartengono alla configurazione pubblica; chiavi privilegiate, token, segreti OAuth/Stripe/VAPID e credenziali non devono comparire lì, nei log o nel repository.
 
-## Sorgenti ufficiali e CI
+`bash scripts/package-release.sh` rigenera le copie e gli archivi dai sorgenti. La cartella `TROVAT1O-Cloudflare-Deploy/public/` è il candidato aggiornato, non la prova del contenuto attualmente online. La pubblicazione è un’operazione successiva e coordinata; seguire [DEPLOY-READINESS.md](DEPLOY-READINESS.md) e [RELEASES.md](RELEASES.md).
 
-Repository scelto dal titolare: [Diegosh501/TROVAt10](https://github.com/Diegosh501/TROVAt10). Il repository precedente trovato conserva il vecchio pacchetto di bootstrap. Il sito usa un deploy diretto Wrangler e mantiene lo stesso indirizzo workers.dev.
+## Riferimenti
 
-Il workflow in .github/workflows/ci.yml controlla test, installazione da lockfile, pacchetti e dry-run senza pubblicare né usare segreti cloud. Lo stato aggiornato è nella [pagina Actions](https://github.com/Diegosh501/TROVAt10/actions).
+- [Supabase](supabase/README.md): moduli, migrazioni applicate e operazione ancora da approvare.
+- [Admin](ADMIN-SETUP.md), [push](PUSH-SETUP.md), [quote](WRITE-QUOTAS.md), [UX](UX-CHECKPOINT.md), [sicurezza](SECURITY.md).
+- `privacy.html`, `termini.html`, `cookie.html`, `politiche.html`: revisione pre-lancio dell’11 novembre, coerente con i provider e le opzioni descritte. Richiede verifica finale dei trattamenti e contratti effettivi; non è un’attestazione legale.
+- La guida illustrata aggiornata è inclusa nel pacchetto locale, in `output/pdf/`.
 
-## Verifica prestazioni e PWA
-
-Sul rilascio HTTPS 2.0.2, Lighthouse mobile 13.5.0 ha misurato LCP 2,142 s, CLS 0, prestazioni 96/100 e accessibilità 100/100. In una sessione interattiva distinta con CPU 4× rallentata, INP 120 ms. Sono misure di laboratorio/sessione, non statistiche degli utenti reali. Ricaricamento offline da service worker, ricerca e apertura dei dettagli sono stati provati in Chrome; rete e CPU sono state ripristinate al termine.
-
-## Preparazione V1.0 successiva alla preview
-
-[V1-STATUS.md](V1-STATUS.md) distingue i venti criteri finali completati, parziali e mancanti. Nel codice cloud non compare più la scelta di salvataggio locale; profili, eventi e notifiche della demo non vengono letti o scritti nel browser. Il cambio account scarta le risposte tardive e pulisce dati privati e console. La preview pubblica 2.0.2 non incorpora ancora questo nuovo blocco dell’interfaccia.
-
-Le protezioni Admin applicate richiedono allowlist privata, sessione valida, account non bloccato e TOTP verificato negli ultimi 15 minuti. Sono passati 21 gruppi di prove SQL con rollback prima e dopo la migrazione, 24 scenari del gestore Edge e dieci suite locali. Nessuna prova sostituisce un vero login Google/MFA con account distinti.
-
-Decisioni V1.0 da completare: tutti Free, account sempre attivo e storico dei match conclusi/annullati per sette giorni dal termine effettivo. La procedura automatica di scadenza non è ancora implementata. Il titolare ha aggiunto il Premium Stripe facoltativo a 4,99 EUR/anno. Il codice è presente e testato nei limiti descritti in BILLING-SETUP.md; nessun pagamento è attivo.
-
-## Punto di ripresa
-
-Il titolare ha richiesto una pausa. Prima di proseguire leggere V1-STATUS.md, BILLING-SETUP.md e il checkpoint privato in output/handoff/RIPRESA-TROVAT1O.md, se disponibile. Dodici migrazioni reali sono esportate. Non ripetere creazione progetto Google o sandbox Stripe e non dichiarare attivo il cloud dalla sola presenza del codice.
-
-
-## Checkpoint 11 novembre
-
-Il candidato locale aggiunge retention, contatto Host verificato, operazioni Admin, export, limiti anti-abuso e push con lease; la migrazione aggregata è applicata al progetto Supabase corretto. Endpoint aggiornati, credenziali Google, test reali e rilascio frontend rimangono da completare. L’URL pubblico continua a servire la preview2.0.2. Vedere V1-STATUS.md per la nuova durata account Free richiesta (sette giorni dalla prima partita creata), non ancora attiva. Non usare le vecchie frasi sull’account sempre attivo come politica definitiva.
+La regione del database remoto è EU Central e la lettura dell’11 novembre trova utenti, profili ed eventi a zero. Hosting e progetto esistenti non richiedono un dominio comprato per le prove. Nessun nuovo piano a pagamento è stato attivato; il costo iniziale zero resta soggetto alle quote dei fornitori e non è una garanzia di risorse illimitate.

@@ -3,8 +3,8 @@ const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),asse
 const root=path.join(__dirname,'..'),html=fs.readFileSync(path.join(root,'index.html'),'utf8'),script=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(x=>x[1]).join('\n');
 new vm.Script(script,{filename:'index.html:inline-script'});
 assert.match(html,/<section id="eventsTab"/);assert.match(html,/<section id="historyTab"/);assert.match(html,/<section id="adminTab"/,'admin is integrated into the same app page');
-assert.match(html,/id="adminNav"/);assert.match(script,/onlineReady!==true\|\|authSession\?\.user\?\.app_metadata\?\.role==='admin'/,'console visibility is local demo or admin role only');
-assert.match(script,/currentLevel!=='aal2'/,'online console requires MFA');assert.match(script,/functions\.invoke\('admin-console'/,'live dashboard uses protected backend');assert.match(script,/Numeri e ticket inventati/,'offline numbers are explicitly labelled as fake');
+assert.match(html,/<button id="adminNav"[^>]* hidden>/,'admin navigation starts hidden');assert.match(html,/<section id="adminTab"[^>]* hidden>/,'admin section starts hidden');assert.match(script,/function adminCanOpen\(\)\{return !!adminAccess&&adminLive&&adminContextCurrent\(adminAccess\)\}/,'console requires server-confirmed session-bound access');
+assert.match(script,/reason==='mfa_required'/,'dedicated console uses the existing server MFA gate');assert.match(script,/functions\.invoke\('admin-console'/,'live dashboard uses protected backend');assert.doesNotMatch(script,/adminDemoMetrics|adminDemoTickets|Console · demo/,'there is no public administrative demo');assert.match(script,/function adminEntryCanOpen\(\)/,'dedicated profile entry also needs a server response');
 assert.match(html,/id="adminSearch"[\s\S]*id="adminCategory"[\s\S]*id="adminStatus"[\s\S]*id="adminSort"/,'integrated support queue has search and filters');
 assert.match(script,/contactAllowed:\$\('supportContactAllowed'\)\.checked/);assert.match(script,/attachAccount:\$\('supportAttachAccount'\)\.checked/);assert.match(script,/functions\.invoke\('support-request'/,'support submission uses backend');
 assert.match(script,/support\.trovat10@gmail\.com/);assert.match(script,/389564728222/);
@@ -16,4 +16,4 @@ const adminSecurity=fs.readFileSync(path.join(root,'supabase/admin-security.sql'
 assert.match(support,/siteverify/);assert.match(support,/consume_support_submit_quota/);assert.match(schema,/revoke all on public\.support_requests from anon,authenticated/i);assert.match(schema,/search_document tsvector generated/i);
 assert.equal(fs.readFileSync(path.join(root,'config.js'),'utf8').includes('onlineReady: false'),true,'cloud remains safely disabled pending setup');
 assert.doesNotMatch(html,/SUPABASE_SERVICE_ROLE_KEY|stripe_secret/i,'no server secrets are embedded in the page');
-console.log('PASS: single-page navigation, offline admin preview, online admin role/MFA gate, support privacy controls, server-only ticket access, analytics and safe cloud defaults.');
+console.log('PASS: single-page navigation, private Admin access without a public demo, server allowlist/MFA gate, support privacy controls, server-only ticket access, analytics and safe cloud defaults.');

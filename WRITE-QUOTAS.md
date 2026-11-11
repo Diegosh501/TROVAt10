@@ -1,3 +1,5 @@
+> Stato 11 novembre: SQL incluso nella migrazione remota 20261111025149_trovat1o_online_beta_operations. Nessun cleanup Cron attivo. I limiti sono coperti dalle regressioni locali; il collaudo con sessioni reali resta aperto.
+
 # Quote tecniche di scrittura
 
 La migrazione `supabase/write-quotas.sql` aggiunge protezioni contro creazioni/annullamenti ripetuti e cambi di partecipazione automatizzati. Si applica dopo baseline, sicurezza Admin e accesso Free. È sorgente locale finché non viene applicata e verificata nell'ambiente cloud autorizzato.

@@ -1,3 +1,7 @@
+> Ingresso aggiornato nel candidato: dopo Google, aprire Profilo. Solo l’account con hint server e conferma dell’allowlist dal backend riceve “Accesso Admin”; completare TOTP per visualizzare la console. Nessuna voce Admin per Free, Premium ordinario o demo locale. La precedente Console demo resta solo nelle immagini storiche interne.
+
+> Aggiornamento 11 novembre: gestore Admin v2 distribuito e sorgente remoto confrontato. Rifiuto HTTP 401 verificato per credenziali assenti/token falso; TOTP e primo Admin reali ancora da configurare e provare. La preview locale è distinta dall’accesso riservato online. Stato autorevole: V1-STATUS.md.
+
 # TROVAT1O - amministrazione e assistenza
 
 La preview pubblicata 2.0.2 offre **Console · demo** con numeri e ticket inventati. Non è un accesso ai dati reali. Nel flusso cloud la voce si chiama **Amministrazione**. La visibilità della voce è un aiuto di navigazione; il database autorizza ogni operazione.
@@ -40,6 +44,6 @@ Per i conteggi di utilizzo API sono opzionali `SUPABASE_MANAGEMENT_API_TOKEN` co
 
 Sono passati 21 gruppi di prove database in `tests/sql/admin-access.sql`, sia prima sia dopo l'applicazione della migrazione. Il test rifiuta database popolati, usa tre utenti/sessioni sintetici e annulla tutte le righe. Non invia email o SMS e non prova un vero scambio OAuth/MFA.
 
-`tests/admin-edge-runtime.cjs` esegue 24 scenari del vero gestore Edge con trasporti Auth/RPC simulati. Il controllo Deno dei tipi locali è passato. Le prove HTTP del deploy sono salvate nel rapporto di audit. Il login Admin reale e l'assegnazione del primo amministratore restano aperti.
+`tests/admin-edge-runtime.cjs` esegue 30 scenari del vero gestore Edge con trasporti Auth/RPC simulati. Il controllo Deno dei tipi locali è passato. Le prove HTTP del deploy sono salvate nel rapporto di audit. Il login Admin reale e l'assegnazione del primo amministratore restano aperti.
 
 Gli advisor segnalano ancora le RPC SECURITY DEFINER intenzionalmente esposte e tre tabelle private con RLS senza policy: in questo schema non esposto il diniego predefinito e l'assenza di privilegi client sono voluti. Non è una certificazione di assenza di vulnerabilità. La CSP della web app mantiene handler inline da migliorare in un intervento dedicato.

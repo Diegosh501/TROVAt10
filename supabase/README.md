@@ -1,71 +1,49 @@
-# TROVAT1O · Supabase
+# TROVAT1O - backend Supabase
 
-## Stato attuale
+## Stato effettivo dell’11 novembre 2026
 
-Il progetto `TROVAT1O` è attivo in EU Central. `schema.sql` è stato applicato al database cloud con le relative migration. Tabelle e policy RLS esistono, ma non sono presenti profili o eventi; `onlineReady` rimane `false`. La funzione `admin-console` v1 è pubblicata; SMTP, Turnstile e Google non sono configurati. Le altre Edge Functions non sono pubblicate. Nessuna sessione reale è stata usata per testare Auth o RLS.
+Il progetto corretto è `nrixslotansgrtrosaof`, nome `TROVAt10`, organizzazione `thnqvzujtphdvpzemxuz`, regione EU Central, PostgreSQL 17.11. La lettura della ripresa ha trovato zero utenti Auth, profili ed eventi. Non modificare l’altro progetto `nentyffgpuoiczdttzfu` eventualmente mostrato nel browser.
 
-Le modifiche a eventi, accesso, capienza, inviti e pin sono previste attraverso RPC con controlli server. Il browser non ha permessi di lettura o aggiornamento diretti sulla tabella `events`; legge l’RPC `event_feed`, che oscura luogo e coordinate di un evento privato fino all’ammissione. I link privati usano un token casuale di cui il database conserva soltanto SHA-256.
+Sono applicate tredici migrazioni, esportate in `recorded-migrations/`. L’ultima è `20261111025149_trovat1o_online_beta_operations`, che comprende contatto Host, storico, operazioni Admin, esportazione, quote e dispatcher SQL. Non sono attivi job. La sola Edge distribuita è `admin-console` versione 2, JWT richiesto. Google, pagamenti, push e frontend cloud restano da configurare e collaudare.
 
-## Schema
+## Moduli sorgenti
 
-- `profiles`: username, ruolo Host/Sportivo, attestazioni 18+, accettazione informativa e stato telefono.
-- `events`: calcio a 5/8/11, data, luogo e pin, capienza, visibilità, ammissione e stato. La lettura passa dal feed filtrato.
-- `event_members` e `event_invites`: richieste/partecipazioni e token invito privato.
-- `event_host_contacts`: numero WhatsApp separato dall’evento, letto solo dal creatore o da utenti ammessi quando il creatore ha dato consenso.
-- `pin_suggestions` e `player_reports`: suggerimenti e segnalazioni soggetti a controlli e limiti.
-- `support_requests`, audit e quote: tabelle solo server-side per supporto e anti-abuso.
-- `subscriptions`: stato Premium che deve essere scritto da un webhook affidabile, mai dal client.
-- Tabelle telefono OTP: quote e numero temporaneo con scadenza; richiedono cleanup.
+Per un ambiente di prova nuovo con i ruoli/schemi Supabase, l’ordine dei blueprint usato dal controllo locale è:
 
-`notifications.sql` è uno scaffold separato. Preferenze e coda push non consegnano notifiche senza dispatcher, chiavi VAPID e pianificazione Cron.
+1. `schema.sql`, `notifications.sql`, `admin-security.sql`.
+2. `oauth-profiles.sql`, `free-access.sql`, `billing.sql`.
+3. `host-contact.sql`, `retention.sql`, `admin-operations.sql`.
+4. `account-export.sql`, `write-quotas.sql`, `push-dispatch.sql`.
+5. `account-lifecycle.sql`, nuovo modulo account disattivato e **non applicato sul remoto**.
 
-## Prima di attivare account cloud
+Questi tredici moduli non corrispondono uno-a-uno alle tredici migrazioni remote. Il blueprint OAuth contiene ora la nuova versione delle informative; la relativa modifica remota è inclusa nell’operazione pendente. Non rieseguire baseline o blueprint sul database esistente. Non usare il fixture Auth dei test su Supabase.
 
-1. Configurare SMTP personalizzato, conferma email e recupero account in Supabase Auth.
-2. Configurare Turnstile e gli URL redirect/CORS HTTPS effettivi.
-3. Distribuire le Edge Functions da `functions/` e impostare i segreti sul lato server.
-4. Se si attiva la verifica telefono, configurare Twilio Verify. Il servizio SMS può costare; le partite private tramite link non richiedono SMS.
-5. Provare con utenti e sessioni separate: anonimo, Host, Sportivo, email non confermata, telefono non verificato, ammesso e non ammesso. Verificare soprattutto sede privata, capienza concorrente e ruoli.
-6. Attivare reminder/push, cleanup, esportazione/cancellazione account, retention e pagamenti solo dopo test separati.
-7. Aggiornare informative e `config.js`; non impostare `onlineReady: true` prima della verifica end-to-end.
+`pending-operations/account-lifecycle-disabled.sql` è pronto per revisione, con controllo database vuoto. La conferma del connettore è scaduta; non contiene un’attivazione automatica. Consultare `../ACCOUNT-LIFECYCLE.md` prima di proseguire.
 
-## Mappatura della UI
+## Autorizzazioni e dati
 
-| UI | Schema/backend |
-| --- | --- |
-| `date` + `time` | `events.starts_at`, conversione del fuso locale |
-| `format`, `kind`, `title` | `format`, `kind`, `title` |
-| `venue`, `city`, `lat`, `lon` | `venue`, `city`, `latitude`, `longitude` |
-| `maxPlayers`, `cost`, `skill` | `max_players`, `cost_label`, `skill` |
-| `isPublic`, `access`, `status` | `visibility`, `admission`, `status` |
-| `participants[].status` | `event_members.state` |
-| `inviteToken` | token casuale nel link; mai salvato in chiaro nel database |
+- Auth Google crea l’identità; un passaggio esplicito raccoglie username, ruolo, maggiore età e conferme. Tutti partono Free. Non inferire Admin o Premium da metadata modificabili.
+- Host/Sportivo sono ruoli operativi. Admin dipende da UUID verificato in allowlist privata, sessione viva, TOTP aal2 recente, quote e audit. Le operazioni Admin usano il JWT del chiamante e non una chiave privilegiata per aggirare questi controlli.
+- I client non leggono né modificano direttamente `events`; feed, modifiche, richieste, roster, inviti e pin usano controlli server. Un invito non mostra il campo privato prima dell’ammissione; nel database il token è solo SHA-256.
+- Il contatto Host è separato dall’evento, facoltativo e associato all’impronta del telefono effettivamente verificato. La scrittura passa dal gestore `host-contact`; nessuna condivisione basata sul solo flag del browser.
+- Supporto, quote, impronte e dati di pagamento non sono directory pubbliche. Le tabelle private hanno RLS e nessun grant ai client; l’assenza di policy di lettura è intenzionale.
+- Premium è scritto soltanto dopo una verifica server di pagamento live. Test e live sono isolati. Il modulo account protegge anche i collegamenti finanziari e non elimina clienti Stripe.
+- Storico dei match e durata dell’account sono politiche distinte, con avvisi, vincoli e attivazioni separate. Nessun job elimina dati solo perché il browser non li mostra più.
 
-Non considerare `localStorage` attendibile per identità, ruoli, capienza, autorizzazioni o pagamenti.
+## Configurazione e funzioni
 
-## Segreti e migrazioni
+Il percorso Google non richiede SMTP, SMS o Turnstile. Email/password richiederebbe la propria configurazione separata, mentre la verifica del numero è opzionale. Le URL di redirect e l’origine devono coincidere con il sito effettivo. Non usare un’origine wildcard per operazioni autenticate.
 
-`config.js` non contiene dati cloud e mantiene il servizio spento. La chiave Supabase publishable/anon è pubblica per definizione, ma va usata solo insieme a RLS; service-role, chiave privata VAPID, Turnstile secret, credenziali Twilio, HMAC telefono e token Stripe vanno impostati solo nei secrets del provider. Non copiarli in HTML, repository, log o chat.
+La chiave publishable/anon è pubblica e richiede comunque RLS. Service-role, secret OAuth, VAPID privato, chiave Stripe, segreto webhook, Turnstile e segreti OTP restano solo sul server. Il contatto Host usa lo stesso HMAC del percorso OTP. Il dispatcher ha un proprio segreto server e non è una funzione chiamabile liberamente dal browser.
 
-Il database è stato modificato tramite le migration registrate dal connettore Supabase. `schema.sql` documenta lo stato desiderato; prima di usare Supabase CLI (`db push`) allineare i file locali con l’intera cronologia remota e verificarne il diff. Non rieseguire manualmente questo baseline su un database con policy o dati già presenti.
+Impostare `verify_jwt=true` per i gestori chiamati da utenti con JWT. I webhook o i job che usano una propria autenticazione verificata possono richiedere `false`: mai disattivare il controllo senza un’autenticazione nel gestore e i relativi test. Leggere le istruzioni specifiche di Billing e push.
 
+## Prove e cronologia
 
-## Audit applicato il 10 novembre 2026
+Il driver `../tests/local-postgres.cjs --require-engine` usa PGlite 0.5.16 in memoria e pgcrypto reale: tredici moduli e dodici regressioni con rollback verificato. Auth/JWT/MFA sono fixture sintetici. Non prova scambio OAuth, concorrenza a connessioni separate, estensioni gestite, Cron, backup o provider remoti.
 
-Cronologia remota verificata: 20261110013616 trovat1o_v2_membership_privacy e 20261110015103 trovat1o_v2_notification_preferences. Le modifiche sono presenti nei blueprint schema.sql e notifications.sql. Le policy ora nascondono ai peer le richieste non ammesse e impediscono la riammissione automatica di utenti rimossi/rifiutati. Tabelle notifiche, preferenze, sottoscrizioni e coda privata sono state applicate, con opt-out ricontrollato al claim. Non esiste ancora un dispatcher di consegna.
+I test remoti vanno limitati a un ambiente di prova autorizzato e devono rifiutare database con dati esistenti. La vecchia autorizzazione a un determinato test sintetico non equivale a permesso indiscriminato di eliminare utenti reali.
 
-Il test SQL autorizzato in tests/sql/membership-decisions.sql è passato con trigger attivi e rollback; i conteggi successivi users/events/members/app_notifications/notification_delivery_queue risultano zero. Per rieseguirlo occorre un ambiente di prova o l’autorizzazione esplicita del proprietario per il progetto remoto; il controllo nel file rifiuta database popolati.
+Le migrazioni registrate dipendono dalla base Supabase e da `public.rls_auto_enable()`. Non è stato verificato un replay completo né un ripristino dei dati. Non copiare automaticamente la cronologia in `migrations/` e non lanciare `db push` senza riconciliare lo stato e provare un ambiente separato.
 
-## Blocco sicurezza Admin e requisito V1.0
-
-La migrazione effettiva 20261110164243_trovat1o_platform_admin_security è applicata. Il blueprint è admin-security.sql: allowlist privata, verifica della sessione attiva, account confermato/non bloccato, TOTP aal2 recente, quote e audit atomico dei ticket. La funzione Edge usa il token del chiamante, non una service-role per le operazioni Admin. Prove: tests/sql/admin-access.sql (21 gruppi con rollback), tests/admin-edge-runtime.cjs (24 scenari del gestore con trasporti simulati), controllo dei tipi Deno superato.
-
-Le dodici migrazioni registrate sono esportate in recorded-migrations/. La prima dipende dalla base Supabase e dalla funzione preesistente public.rls_auto_enable(); nessun replay completo o ripristino dati è stato eseguito. Non usare questi file come bootstrap PostgreSQL generico.
-
-Prima della V1.0 devono essere aggiunti il completamento profilo Google, la regola tutti Free e la scadenza automatica dopo sette giorni dalla conclusione/annullamento. L’account non scade e non va eliminato dal job dei match. I precedenti vincoli telefono/pubblicazione e storico dieci match non rappresentano ancora queste nuove regole: vedere V1-STATUS.md.
-
-## Blocco Google e Billing successivo
-
-Applicati `oauth-profiles.sql`, `free-access.sql` e `billing.sql`. I primi due completano il profilo dopo Google verificato e abilitano gioco pubblico senza SMS; il telefono resta verificato per contattare l’Host. Il terzo isola fatture/cliente/eventi di pagamento in schema privato, distingue test/live e vieta Premium senza scadenza. Il baseline `schema.sql` da solo non rappresenta l’ultima versione: usare la cronologia remota completa, senza rieseguirla alla cieca.
-
-Progetto e client Google creati; chiave non collegata a Supabase, nessun login reale. Billing Edge e webhook non distribuiti. Configurazione, prove e passaggi ancora aperti in `../BILLING-SETUP.md` e `../V1-STATUS.md`. I vecchi paragrafi SMTP/telefono descrivono il percorso email opzionale: il percorso V1.0 prioritario è Google.
+Stato generale: [V1-STATUS.md](../V1-STATUS.md). Impostazioni: [Admin](../ADMIN-SETUP.md), [Billing](../BILLING-SETUP.md), [match](../RETENTION-SETUP.md), [account](../ACCOUNT-LIFECYCLE.md), [push](../PUSH-SETUP.md), [quote](../WRITE-QUOTAS.md).
