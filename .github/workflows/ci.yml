@@ -118,7 +118,9 @@ jobs:
           cp tests/fixtures/native-postgres/package-lock.json tmp/native-postgres/package-lock.json
           npm ci --prefix tmp/native-postgres --ignore-scripts --no-audit --no-fund
       - name: Verify private backup encryption
-        run: node tests/integration/backup-envelope.test.cjs
+        run: |
+          node tests/integration/backup-envelope.test.cjs
+          node tests/integration/native-config.test.cjs
       - name: Replay migrations, force concurrent calls, and restore encrypted dump
         env:
           TROVAT1O_PG_CONTAINER_ID: ${{ job.services.postgres.id }}
