@@ -6,7 +6,7 @@
 
 | Ambiente | Collegamento | Stato |
 | --- | --- | --- |
-| Collaudo cloud | https://v1-check-trovato.diegolucentedesign.workers.dev/ | `1.0.0-cloud-test.4`: Google, profilo e partite reali su Supabase; non è ancora un lancio pubblico definitivo |
+| Collaudo cloud | https://v1-check-trovato.diegolucentedesign.workers.dev/ | `1.0.0-cloud-test.9`: Google, profilo e partite reali su Supabase; non è ancora un lancio pubblico definitivo |
 | Sito principale | https://trovato.diegolucentedesign.workers.dev/ | `1.0.0-rc.1`: anteprima interattiva con dati locali |
 | Sorgenti e pacchetto locale | Questo repository | Candidato aggiornato; i flag di attivazione sono disabilitati per impostazione predefinita |
 
@@ -14,15 +14,16 @@ Il collaudo è separato dal traffico del sito principale. Un caricamento con `wr
 
 ## Risultati verificati
 
-- Google OAuth configurato sul progetto corretto `nrixslotansgrtrosaof`; primo profilo Host Free completato con le dichiarazioni esplicite del titolare. Nuovo login riuscito anche dopo la disattivazione della vecchia chiave Google.
-- Due partite private di collaudo salvate nel database. Creazione, modifica, riapertura, annullamento e storico verificati nell'interfaccia. Nessuna prenotazione reale.
-- Cambio Host/Sportivo persistente dopo ricaricamento e ritorno guidato a Host. Il ruolo operativo non attribuisce privilegi di piattaforma.
-- Esportazione personale JSON scaricata con tutte le nove sezioni. PNG della partita scaricato e ispezionato: logo e sito presenti, luogo privato escluso anche dai metadata.
-- **24 suite Node** superate; **15 moduli SQL e 14 regressioni** con rollback nel PostgreSQL locale. I test con trasporti o identità controllate non sostituiscono account Google distinti, MFA reale o concorrenza remota.
-- Form verificato a 320, 390, 768 e 1440 pixel: nessun overflow orizzontale osservato nei contesti controllati, caratteri dei campi a 16 px.
-- `admin-console` v4 e `host-contact` v1 pubblicate: origini HTTPS esatte e contesto per richiesta. Il secondo fattore Admin è ancora da attivare personalmente.
+- Due identità Google reali, due profili separati Free; consenso Google in produzione. Host e Sportivo condividono lo stesso modello di account; l’Admin rimane una diversa autorizzazione server.
+- Tre partite di collaudo persistenti. Flusso pubblico provato: creazione → ricerca → richiesta → ammissione → avvio → conclusione → storico ritrovato dallo Sportivo dopo un nuovo accesso. Nessuna prenotazione reale.
+- Invito privato copiato e riaperto prima del login; ritorno da Google allo stesso evento. Sede mascherata prima dell’ammissione e dopo rimozione. Una nuova richiesta non riammette automaticamente.
+- Esportazione personale JSON con nove sezioni e PNG scaricati. Logo e sito nei metadata; sede privata, nomi e token esclusi dal PNG privato.
+- **25 suite Node; 15 moduli SQL e 15 regressioni locali.** **11/11 controlli backend reali come Sportivo e 11/11 come Host ordinario**. La sonda del titolare riceve `mfa_required` sia da SQL sia da Edge. La console completa richiede il TOTP personale, rinviato dal titolare.
+- Larghezze controllate: 320, 390, 768 e 1440 px; campi a 16 px e azioni profilo dentro i bordi. Non è una garanzia su ogni dispositivo.
+- `admin-console` v4 e `host-contact` v1 pubblicate; 17 migrazioni sul progetto corretto. La correzione degli avvisi distingue avvio, conclusione, annullamento e cambio dei dettagli.
+- **15/25 criteri V1 verificati nel collaudo; 3/11 scenari finali chiusi (A, B, D)**. Le cifre misurano criteri verificati, non tempo residuo o percentuale di codice. La V1 completa non è ancora rilasciata sul principale.
 
-La precedente verifica della preview principale ha confrontato 17 asset e rifiutato cinque percorsi riservati. Non attribuirle implicitamente la prova dei flussi cloud.
+Il collaudo ha controlli HTTPS, asset e percorsi riservati propri. Non attribuirgli la pubblicazione coordinata della V1 sul principale.
 
 ## Avvio locale su Mac
 
@@ -50,6 +51,8 @@ Il percorso Google già collaudato usa un'email verificata e il completamento es
 Lo stesso account può passare da Sportivo a Host. Soltanto il creatore gestisce il proprio evento. L'Admin di piattaforma è autorizzato in una allowlist privata: sessione Auth viva, TOTP recente e controlli SQL sono indispensabili. L'email scritta nel browser, `user_metadata`, Free o Premium non concedono Admin. Il suggerimento server in `app_metadata` abilita solo la sonda dell'ingresso dedicato; non autorizza dati o azioni. Gli utenti ordinari non hanno una Console demo.
 
 Nel flusso cloud non si sceglie tra sessione e dispositivo: profilo e partite sono nel database. Sessione tecnica Auth e cache di asset pubblici hanno funzioni diverse. Non usare il service worker come archivio di API private.
+
+La condivisione apre un pannello con **Copia invito** sempre disponibile. La condivisione nativa è un’azione separata e non blocca la copia. Un token privato corrente viene preservato nei refresh della stessa sessione in memoria; dopo un nuovo accesso, generarne uno nuovo sostituisce il precedente e la UI lo avverte. Gli inviti non sono archiviati nei dati demo o nell’export personale.
 
 ## Free, storico e acquisti
 
@@ -88,7 +91,7 @@ node tests/local-postgres.cjs --require-engine
 
 PGlite usa PostgreSQL 18.6; il servizio ospitato usa PostgreSQL 17.11. Le fixture Auth/JWT/MFA non sono scambi con i provider reali. La CI ripete controlli Node, SQL obbligatorio, tipi Deno, firme Stripe e confezionamento, senza pubblicare o richiedere segreti.
 
-**Il database remoto ora contiene un profilo reale. Non rieseguire i vecchi test remoti che richiedono un database vuoto.** Conservare i rollback e usare ambienti isolati per prove sintetiche.
+**Il database remoto ora contiene due account e due profili reali. Non rieseguire i vecchi test remoti che richiedono un database vuoto.** Conservare i rollback e usare ambienti isolati per prove sintetiche.
 
 ## Sorgenti, rilascio e ripresa
 

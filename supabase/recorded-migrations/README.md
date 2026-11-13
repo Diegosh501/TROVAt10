@@ -1,3 +1,13 @@
+# Cronologia effettiva — 13 novembre 2026
+
+Sono conservate **17 migrazioni realmente registrate**. Le successive al checkpoint storico comprendono ciclo account disattivato, guardie sulle sessioni vive, richiesta autenticata di cancellazione e correzione dei testi di avvio/conclusione.
+
+Ultima: `20261113121927_trovat1o_event_status_notification_copy.sql`. Il file è stato preparato con la CLI ufficiale, applicato via connettore e riconciliato con la versione effettivamente registrata dal server. `notifications.sql` è il blueprint corrente. Il test locale `tests/sql/event-notifications.sql` ha riprodotto il testo sbagliato prima della correzione e verifica i quattro casi dopo di essa.
+
+La cronologia non è un backup dei dati né una prova di ripristino. Il ciclo account è applicato con attivazione e purge spenti. Non eseguire automaticamente db push o i vecchi test riservati a un database remoto vuoto.
+
+## Storico conservato dell’11 novembre
+
 # Esportazione della cronologia effettiva
 
 Al checkpoint dell’11 novembre sono conservate **tredici migrazioni realmente registrate**. L’ultima è `20261111025149_trovat1o_online_beta_operations`: contatto Host, storico, Admin, esportazione, quote e dispatcher SQL. La nuova operazione del ciclo account NON fa parte di questa cartella e NON è applicata: vedere `../pending-operations/`.

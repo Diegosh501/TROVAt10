@@ -1,4 +1,4 @@
-const CACHE='trovatio-shell-2026-11-13-v16';
+const CACHE='trovatio-shell-2026-11-13-v20';
 const SHELL=['./','./index.html','./index-v2.html','./politiche.html','./privacy.html','./termini.html','./cookie.html','./site.webmanifest','./config.js','./assets/brand/favicon.png','./assets/brand/trovat1o-logo.png','./assets/brand/apple-touch-icon.png','./assets/brand/icon-192.png','./assets/brand/icon-512.png'];
 function notificationPath(value){const fallback='/index.html?notifications=1';if(typeof value!=='string'||!value.startsWith('/'))return fallback;try{const url=new URL(value,self.location.origin);return url.origin===self.location.origin?url.pathname+url.search+url.hash:fallback}catch{return fallback}}
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting())));

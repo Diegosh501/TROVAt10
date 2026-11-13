@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="it"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>TROVAT1O · Collaudo permessi</title>
+<style>body{font:16px/1.5 system-ui;max-width:780px;margin:32px auto;padding:0 20px;color:#123526}h1{font-size:26px}label{display:block;margin-top:18px}input,button{font:inherit;padding:12px;border:1px solid #a6b9aa;border-radius:8px}input{box-sizing:border-box;width:100%}button{margin:20px 8px 0 0;background:#00633a;color:white;min-height:48px}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f2f7ef;padding:16px;border-radius:10px}a{color:#00633a}</style>
+<h1>Collaudo dei permessi cloud</h1>
+<p>Pagina di prova separata dall’app. Usa la sessione già aperta e mostra soltanto esiti e codici, mai credenziali o dati personali.</p>
+<p>Con l’Admin verifica il blocco MFA senza avviare l’attivazione. Con lo Sportivo prova anche accessi e azioni che devono essere negati sull’evento privato di collaudo. Non usare eventi di persone reali.</p>
+<label for="target">ID dell’evento privato di collaudo</label><input id="target" placeholder="UUID del solo evento di prova" autocomplete="off">
+<label for="targetUser">ID dell’altro account di collaudo (facoltativo)</label><input id="targetUser" placeholder="UUID dell’Host di prova" autocomplete="off">
+<button id="run" type="button">Verifica permessi</button><a href="/">Torna all’app</a>
+<pre id="results" role="status" aria-live="polite">Pronto. Accedi prima nell’app.</pre>
+<script src="/config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" integrity="sha384-gnyZit14c5lnGcarmA166QQjjJXpucw25ogZXuwH3HxxY904zHkBqmxVpelsPorb" crossorigin="anonymous"></script>
+<script>
+document.getElementById('run').addEventListener('click',async()=>{
+ const button=document.getElementById('run'),out=document.getElementById('results'),c=window.TROVAT1O_CONFIG,rows=[];button.disabled=true;
+ const show=()=>{out.textContent=JSON.stringify({capturedAt:new Date().toISOString(),checks:rows},null,2)};
+ const add=(name,passed,observed)=>{rows.push({name,passed,observed});show()};
+ const reasons=new Set(['admin_required','mfa_required','forbidden','unauthorized','event_owner_required','event_roster_forbidden','invite_required','event_closed','invalid_invite','session_revoked','invalid_member_action']);
+ const reason=error=>reasons.has(error?.message)?error.message:error?.code||'unexpected_error';
+ try{
+  if(!c?.onlineReady||!c.supabaseUrl||!c.supabaseAnonKey)throw Error('cloud_not_configured');
+  const client=supabase.createClient(c.supabaseUrl,c.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:false,detectSessionInUrl:false,flowType:'pkce'}});
+  const {data,error}=await client.auth.getUser();if(error||!data.user)throw Error('login_required');const user=data.user,adminHint=user.app_metadata?.role==='admin';
+  add('Authenticated session',true,adminHint?'Admin: MFA denial probe only':'Ordinary account: no Admin hint');
+  const admin=await client.rpc('admin_dashboard');add('Admin RPC gate',!!admin.error&&admin.error.message===(adminHint?'mfa_required':'admin_required'),reason(admin.error));
+  const edge=await client.functions.invoke('admin-console',{body:{action:'dashboard'}});let edgeReason=edge.data?.error||'',status=edge.error?.context?.status||0;
+  if(edge.error?.context?.json)try{const body=await edge.error.context.json();edgeReason=body.error||body.message||edgeReason}catch{}
+  const expected=adminHint?'mfa_required':'forbidden';add('Admin Edge gate',status===403&&edgeReason===expected,{status,reason:reasons.has(edgeReason)?edgeReason:'unexpected_error'});
+  if(adminHint){add('Ordinary account checks',null,'Skipped: sign in as the separate Sportivo first');return}
+  const target=document.getElementById('target').value.trim();if(!/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i.test(target))throw Error('test_event_id_required');
+  const profiles=await client.from('profiles').select('id').neq('id',user.id);add('Other profiles remain private',!profiles.error&&profiles.data.length===0,profiles.error?reason(profiles.error):{rows:profiles.data.length});
+  const event=await client.from('events').select('id,venue').eq('id',target);add('Private event base table',(!event.error&&event.data.length===0)||event.error?.code==='42501',event.error?reason(event.error):{rows:event.data.length});
+  const roster=await client.rpc('event_roster',{p_event_id:target});add('Foreign private roster',roster.error?.code==='42501'&&roster.error.message==='event_roster_forbidden',reason(roster.error));
+  const edit=await client.rpc('update_event_status',{p_event_id:target,p_status:'cancelled'});add('Non-owner status change',edit.error?.code==='42501'&&edit.error.message==='event_owner_required',reason(edit.error));
+  const manage=await client.rpc('manage_event_member',{p_event_id:target,p_user_id:user.id,p_state:'approved'});add('Self-admission to another event',manage.error?.code==='22023'&&manage.error.message==='invalid_member_action',reason(manage.error));
+  const peer=document.getElementById('targetUser').value.trim();if(/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i.test(peer)&&peer!==user.id){const other=await client.rpc('manage_event_member',{p_event_id:target,p_user_id:peer,p_state:'approved'});add('Non-owner participant management',other.error?.code==='42501'&&other.error.message==='event_owner_required',reason(other.error))}
+  const contact=await client.from('event_host_contacts').select('whatsapp_phone').eq('event_id',target);add('Private host contact',(!contact.error&&contact.data.length===0)||contact.error?.code==='42501',contact.error?reason(contact.error):{rows:contact.data.length});
+  const invite=await client.rpc('request_event_join',{p_event_id:target,p_invite_token:'0'.repeat(64)});add('Invalid private invitation',invite.error?.code==='42501'&&invite.error.message==='invite_required',reason(invite.error));
+ }catch(error){add('Setup / transport',false,['cloud_not_configured','login_required','test_event_id_required'].includes(error.message)?error.message:'unexpected_error')}
+ finally{button.disabled=false}
+});
+</script></html>

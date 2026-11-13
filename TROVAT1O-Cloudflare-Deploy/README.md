@@ -1,16 +1,22 @@
-# TROVAT1O · Cloudflare preview
+# TROVAT1O · Pacchetto di rilascio
 
-[Apri la preview pubblica](https://trovato.diegolucentedesign.workers.dev/)
+Candidato sorgente **1.0.0-rc.6**. Questa cartella viene rigenerata da `bash scripts/package-release.sh`: il suo `public/config.js` predefinito resta una preview, con attivazioni spente. Non copiare chiavi server nei file pubblici.
 
-Il Worker serve solo gli asset statici in `public/`. La configurazione mantiene `onlineReady: false`; profili demo, eventi, richieste e promemoria restano locali al browser. Non inserire dati reali. Il backend Supabase ha lo schema V2 applicato ma non ha ancora utenti, Edge Functions o provider Auth configurati.
+Il collaudo cloud effettivo è [1.0.0-cloud-test.9](https://v1-check-trovato.diegolucentedesign.workers.dev/), Cloudflare `e8f686ad-d452-4a88-8f1c-b7fa310f64b5`. Usa una configurazione separata, soli parametri pubblicabili e il progetto Supabase corretto. Il pacchetto del collaudo distribuito viene fornito separatamente dal sorgente locale.
 
-Per aggiornare la preview, sincronizzare `public/` dalla versione locale, creare di nuovo l’archivio statico e pubblicare:
+Il sito principale resta [1.0.0-rc.1](https://trovato.diegolucentedesign.workers.dev/), anteprima locale. Un caricamento `wrangler versions upload` aggiorna una versione/alias di prova, non il traffico principale.
+
+## Verifica senza pubblicare
+
+Dalla root dei sorgenti:
 
 ```sh
-cd "/Users/claudia/.codex/.chatgpt-projects/g-p-6ad372b660b0819189c0e8409c915b87/TROVAT1O-Cloudflare-Deploy"
-tar -xzf trovato-static-assets.tar.gz -C .
-npm ci
-npx wrangler deploy
+bash scripts/package-release.sh
+cd TROVAT1O-Cloudflare-Deploy
+npm ci --ignore-scripts --no-audit --no-fund
+./node_modules/.bin/wrangler deploy --dry-run
 ```
 
-`workers.dev` è gratuito e non richiede l’acquisto di `trovat10.app`. Il dominio personalizzato potrà essere collegato più avanti. Non mettere file Supabase o segreti dentro `public/`.
+Prima del rilascio effettivo: chiudere i gate in V1-STATUS.md, predisporre configurazione, origine e redirect esatti, verificare servizi e permessi. Pubblicare una versione coordinata e riprovare i flussi sul medesimo URL. Conservare versione precedente e procedura di recupero; non confondere rollback frontend con ripristino dei dati.
+
+Per navigare localmente, servire soltanto `public/`, mai l’intero progetto. Il dominio gratuito basta al collaudo; il futuro dominio acquistato richiederà aggiornamenti coerenti di link, OAuth, CORS e informative.
