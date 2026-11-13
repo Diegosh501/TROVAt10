@@ -1,3 +1,9 @@
+# Aggiornamento verificato — rc.8 / cloud-test.11, 13 novembre 2026
+
+28/28 suite Node, incluse otto nuove regressioni su caricamento, errori rete, isolamento e uscita. Sei prove HTTP con 18 operazioni sovrapposte nel collaudo: limite Free, candidature duplicate, doppia uscita, nuova richiesta, ammissione/avvio e conclusione. Timestamp di chiusura verificato direttamente nel database: il DTO del feed non espone quella colonna. Il primo controllo del campo e la prima enumerazione che includeva `_headers` sono stati corretti come verificatori; ricevute iniziali conservate, senza cancellare risultati sfavorevoli.
+
+Collaudo aggiornato: 19/19 asset esatti, cinque percorsi riservati negati. Test reale di rete lenta, offline, recupero e tocco Profilo durante la disconnessione riusciti. Main rc.1 invariato; 17 migrazioni, due account e quattro partite sintetiche. Cron non installato, zero sottoscrizioni push, nessun automatismo o pagamento attivato. La contesa dell’ultimo posto fra due Sportivi Google remoti e gli altri gate V1 restano aperti. Il precedente CI non verifica questi nuovi sorgenti: consultare la ricevuta del nuovo commit.
+
 
 **Prove PostgreSQL native aggiuntive:** [run verificato](https://github.com/Diegosh501/TROVAt10/actions/runs/43481338497), PostgreSQL 17.11 isolato: 17 migrazioni registrate riprodotte, 16 regressioni, nove scenari realmente concorrenti e dump cifrato ripristinato in un secondo database. Confrontati dati e sicurezza di 42 tabelle, 42 policy, 96 funzioni, 177 vincoli, 11 trigger, 84 indici e quattro sequenze. Quattro modifiche negative ai permessi/RLS vengono rilevate; sei guardie locali e quattro sonde native proteggono l’isolamento. Le otto prove di cifratura passano. Auth resta un fixture e non è stato eseguito un recupero completo del progetto Supabase reale. [Procedura backup](BACKUP-RESTORE-SETUP.md).
 

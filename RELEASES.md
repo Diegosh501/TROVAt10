@@ -2,12 +2,12 @@
 
 Questa sezione prevale sullo storico conservato sotto. Stato dettagliato: **V1-STATUS.md**.
 
-- **Collaudo cloud:** https://v1-check-trovato.diegolucentedesign.workers.dev/, `1.0.0-cloud-test.10`, Cloudflare `8ac772c9-508b-47db-8487-14b9d0946a2d`. Candidato sorgente `1.0.0-rc.7`, cache pubblica v21. Il principale resta `1.0.0-rc.1`, preview locale: nessun nuovo traffico di produzione è stato attivato.
-- **Due account Google e due profili Free reali.** Tre eventi di prova: un privato programmato, un privato annullato e un pubblico concluso. Nessuna prenotazione o pagamento. Pubblicazione, richiesta, ammissione, avvio, conclusione e storico sono stati provati fra account distinti.
+- **Collaudo cloud:** https://v1-check-trovato.diegolucentedesign.workers.dev/, `1.0.0-cloud-test.11`, Cloudflare `efaa577e-d2aa-47ba-bbae-92c2c06ef11f`. Candidato sorgente `1.0.0-rc.8`, cache pubblica v22. Il principale resta `1.0.0-rc.1`, preview locale: nessun nuovo traffico di produzione è stato attivato.
+- **Due account Google e due profili Free reali.** Quattro eventi di prova: un privato programmato, un privato annullato e due pubblici conclusi. Nessuna prenotazione o pagamento. Pubblicazione, richiesta, ammissione, avvio, conclusione e storico sono stati provati fra account distinti.
 - **Inviti:** copia effettiva del link, ingresso anonimo e ritorno da Google verificati. Sede privata mascherata per ospite, pending e rimosso; visibile solo dopo ammissione. Una nuova richiesta dopo rimozione resta pending. Il token resta in memoria, non nell’archivio locale dei match; generare un nuovo invito dopo una nuova sessione sostituisce quello precedente, con avviso.
 - **Sicurezza reale:** 11/11 controlli HTTP con Sportivo e 11/11 con Host ordinario. Admin SQL/Edge negati, profili altrui invisibili, sede/roster/contatto privati protetti e azioni altrui respinte. Due sonde del titolare confermano `mfa_required`. Nessun enrollment MFA simulato: il titolare lo ha rinviato.
 - **Backend:** progetto `nrixslotansgrtrosaof`, 17 migrazioni. Nuova migrazione `20261113121927_trovat1o_event_status_notification_copy`: testo corretto per avvio e conclusione; tipo, permessi e coda invariati. Admin Edge v4 e contatto Host v1 attivi. Nessun job di purge/retention/push attivo.
-- **Controlli:** 27 suite Node; 16 moduli SQL e 16 regressioni locali, compresi avvisi di stato. Le fixture non provano Auth gestita, concorrenza HTTP, Cron o ripristino. Quattro larghezze già controllate: 320, 390, 768 e 1440 px.
+- **Controlli:** 28 suite Node; 16 moduli SQL e 16 regressioni locali, compresi avvisi di stato. Le fixture non provano Auth gestita, concorrenza HTTP, Cron o ripristino. Quattro larghezze già controllate: 320, 390, 768 e 1440 px.
 - **Master R3:** 15/25 criteri verificati nel collaudo = 60% dei criteri, non del tempo o del codice. Scenari A, B, D e H chiusi nell’ambito documentato: 3/11. Pin riservati verificati con coordinate presenti: 33/33 controlli reali nei cinque stati creatore, pending, ammesso, rimosso e anonimo. Persistenza su altro dispositivo, concorrenza, automatismi e recupero restano aperti.
 - **Assistenza nuova:** handler, UI, quote e registri anti-riuso/idempotenza verificati localmente. Migrazione pendente: due conferme del connettore scadute, nessun DDL applicato. Il modulo resta spento e la UI presenta il contatto email. Leggere [SUPPORT-SETUP.md](SUPPORT-SETUP.md). CAPTCHA caricato solo su richiesta, indipendente dall’accesso Google.
 - **Residui:** TOTP e uso completo Admin, email/password con SMTP/conferma/reset/anti-abuso, assistenza, push/promemoria, retention/account lifecycle, cancellazione effettiva, backup/ripristino, informative e rilascio sul principale. Acquisti Premium €4,99/anno spenti. Nessun servizio a pagamento acquistato.
@@ -25,6 +25,10 @@ Nessun nuovo rilascio frontend: il pubblico resta 2.0.2, versione Cloudflare 79b
 Aggiornamento server eseguito: admin-console versione 2, verify_jwt=true, bundle SHA-256 9fafb5f00f143e58fb9a798469a6179ad2cfc1e2d11adf1c89ab6659c49bf4ee. Il sorgente letto dal servizio coincide con quello candidato. Richieste senza credenziali o con token falso:401; preflight origine autorizzata:204. Il sorgente precedente è conservato nell’audit privato per un ritorno controllato, non è un rollback eseguito.
 
 Sincronizzazione sorgenti iniziale: commit 7c78c6277e7fd2d390c1267e21b220598aefc9a2 con CI verde. Le modifiche successive hanno un commit e una ricevuta separati. Nessun acquisto, nuovo Admin o cancellazione account attivati. Vedere V1-STATUS.md e ACCOUNT-LIFECYCLE.md.
+
+## 13 novembre 2026 — collaudo cloud-test.11
+
+Caricato con `wrangler versions upload --preview-alias v1-check`; versione Cloudflare `efaa577e-d2aa-47ba-bbae-92c2c06ef11f`. Candidato rc.8, cache v22. 19 asset HTTPS confrontati integralmente, cinque percorsi riservati negati, intestazioni effettive controllate e principale rc.1 confermato. `_headers` è interpretato dal servizio e resta non scaricabile. Browser: attesa con rete lenta, errore offline, recupero e uscita concorrente con Profilo verificati; rete ripristinata e sessione finale disconnessa. Non è un rilascio della V1 completa in produzione.
 
 ## Cronologia dei rilasci frontend
 

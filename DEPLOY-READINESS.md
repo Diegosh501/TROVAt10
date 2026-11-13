@@ -2,12 +2,12 @@
 
 Questa sezione prevale sullo storico conservato sotto. Stato dettagliato: **V1-STATUS.md**.
 
-- **Collaudo cloud:** https://v1-check-trovato.diegolucentedesign.workers.dev/, `1.0.0-cloud-test.10`, Cloudflare `8ac772c9-508b-47db-8487-14b9d0946a2d`. Candidato sorgente `1.0.0-rc.7`, cache pubblica v21. Il principale resta `1.0.0-rc.1`, preview locale: nessun nuovo traffico di produzione è stato attivato.
-- **Due account Google e due profili Free reali.** Tre eventi di prova: un privato programmato, un privato annullato e un pubblico concluso. Nessuna prenotazione o pagamento. Pubblicazione, richiesta, ammissione, avvio, conclusione e storico sono stati provati fra account distinti.
+- **Collaudo cloud:** https://v1-check-trovato.diegolucentedesign.workers.dev/, `1.0.0-cloud-test.11`, Cloudflare `efaa577e-d2aa-47ba-bbae-92c2c06ef11f`. Candidato sorgente `1.0.0-rc.8`, cache pubblica v22. Il principale resta `1.0.0-rc.1`, preview locale: nessun nuovo traffico di produzione è stato attivato.
+- **Due account Google e due profili Free reali.** Quattro eventi di prova: un privato programmato, un privato annullato e due pubblici conclusi. Nessuna prenotazione o pagamento. Pubblicazione, richiesta, ammissione, avvio, conclusione e storico sono stati provati fra account distinti.
 - **Inviti:** copia effettiva del link, ingresso anonimo e ritorno da Google verificati. Sede privata mascherata per ospite, pending e rimosso; visibile solo dopo ammissione. Una nuova richiesta dopo rimozione resta pending. Il token resta in memoria, non nell’archivio locale dei match; generare un nuovo invito dopo una nuova sessione sostituisce quello precedente, con avviso.
 - **Sicurezza reale:** 11/11 controlli HTTP con Sportivo e 11/11 con Host ordinario. Admin SQL/Edge negati, profili altrui invisibili, sede/roster/contatto privati protetti e azioni altrui respinte. Due sonde del titolare confermano `mfa_required`. Nessun enrollment MFA simulato: il titolare lo ha rinviato.
 - **Backend:** progetto `nrixslotansgrtrosaof`, 17 migrazioni. Nuova migrazione `20261113121927_trovat1o_event_status_notification_copy`: testo corretto per avvio e conclusione; tipo, permessi e coda invariati. Admin Edge v4 e contatto Host v1 attivi. Nessun job di purge/retention/push attivo.
-- **Controlli:** 27 suite Node; 16 moduli SQL e 16 regressioni locali, compresi avvisi di stato. Le fixture non provano Auth gestita, concorrenza HTTP, Cron o ripristino. Quattro larghezze già controllate: 320, 390, 768 e 1440 px.
+- **Controlli:** 28 suite Node; 16 moduli SQL e 16 regressioni locali, compresi avvisi di stato. Le fixture non provano Auth gestita, concorrenza HTTP, Cron o ripristino. Quattro larghezze già controllate: 320, 390, 768 e 1440 px.
 - **Master R3:** 15/25 criteri verificati nel collaudo = 60% dei criteri, non del tempo o del codice. Scenari A, B, D e H chiusi nell’ambito documentato: 3/11. Pin riservati verificati con coordinate presenti: 33/33 controlli reali nei cinque stati creatore, pending, ammesso, rimosso e anonimo. Persistenza su altro dispositivo, concorrenza, automatismi e recupero restano aperti.
 - **Assistenza nuova:** handler, UI, quote e registri anti-riuso/idempotenza verificati localmente. Migrazione pendente: due conferme del connettore scadute, nessun DDL applicato. Il modulo resta spento e la UI presenta il contatto email. Leggere [SUPPORT-SETUP.md](SUPPORT-SETUP.md). CAPTCHA caricato solo su richiesta, indipendente dall’accesso Google.
 - **Residui:** TOTP e uso completo Admin, email/password con SMTP/conferma/reset/anti-abuso, assistenza, push/promemoria, retention/account lifecycle, cancellazione effettiva, backup/ripristino, informative e rilascio sul principale. Acquisti Premium €4,99/anno spenti. Nessun servizio a pagamento acquistato.
@@ -15,6 +15,9 @@ Questa sezione prevale sullo storico conservato sotto. Stato dettagliato: **V1-S
 - Sorgenti, CI e integrità degli archivi hanno ricevute separate nel checkpoint privato. Un vecchio verde non verifica nuove modifiche. Non eseguire i test che richiedono un DB remoto vuoto: contiene account reali.
 
 **Prove PostgreSQL native aggiuntive:** [run verificato](https://github.com/Diegosh501/TROVAt10/actions/runs/43481338497), PostgreSQL 17.11 isolato: 17 migrazioni registrate riprodotte, 16 regressioni, nove scenari realmente concorrenti e dump cifrato ripristinato in un secondo database. Confrontati dati e sicurezza di 42 tabelle, 42 policy, 96 funzioni, 177 vincoli, 11 trigger, 84 indici e quattro sequenze. Quattro modifiche negative ai permessi/RLS vengono rilevate; sei guardie locali e quattro sonde native proteggono l’isolamento. Le otto prove di cifratura passano. Auth resta un fixture e non è stato eseguito un recupero completo del progetto Supabase reale. [Procedura backup](BACKUP-RESTORE-SETUP.md).
+
+
+**Nuove verifiche effettive:** sei race HTTP e 18 operazioni nel collaudo. Caricamento lento, offline, recupero e uscita verificati nel browser; otto nuove regressioni proteggono i confini della sessione. Contesa remota dell’ultimo posto, MFA personale, servizi e gate di produzione ancora aperti.
 
 
 ---

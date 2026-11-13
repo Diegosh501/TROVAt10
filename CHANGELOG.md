@@ -1,3 +1,11 @@
+# Candidato rc.8 / collaudo cloud-test.11 — 13 novembre 2026
+
+- Stato di caricamento esplicito per lista e I miei match: nessun risultato vuoto prematuro; gli errori di trasporto terminano l’attesa e consentono il recupero.
+- Uscita serializzata: callback di sessioni precedenti e nuovi login non possono concorrere con una disconnessione in corso. Profilo mostra un messaggio durante l’attesa, con percorsi distinti per caricamento, completamento o errore.
+- Otto nuove regressioni, 28 suite Node riuscite e prove browser di rete lenta/offline, recupero e tocco su Profilo durante l’uscita. Corretto anche un controllo test dipendente dal singolare/plurale dei giorni nell’infografica.
+- Sei prove concorrenti HTTP, 18 operazioni sul collaudo, con i due Google già autorizzati. Limiti Free, unicità delle richieste, uscita/rientro e stati coerenti; la contesa dell’ultimo posto fra due Sportivi resta testata nel database nativo isolato.
+- Aggiornato il solo alias di collaudo, cache v22; principale rc.1 invariato. Nessun DDL, nuovo utente, acquisto, job o cancellazione.
+
 # Candidato rc.7 / collaudo cloud-test.10 — 13 novembre 2026
 
 - Nuovo controllo PostgreSQL 17.11 isolato in CI: replay delle 17 migrazioni, regressioni, nove scenari concorrenti e ripristino cifrato in un database nuovo, con confronto di dati e permessi effettivi. Backup operatori cifrato in streaming; otto prove e protezioni dell’ambiente di test. Nessun backup di dati reali o servizio a pagamento attivato.

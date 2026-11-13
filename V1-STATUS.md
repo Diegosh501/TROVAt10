@@ -4,9 +4,9 @@ Aggiornato il 13 novembre 2026. Questo documento sostituisce le vecchie percentu
 
 ## Versioni
 
-- **Collaudo cloud reale:** https://v1-check-trovato.diegolucentedesign.workers.dev/ - `1.0.0-cloud-test.10`, Cloudflare `8ac772c9-508b-47db-8487-14b9d0946a2d`.
+- **Collaudo cloud reale:** https://v1-check-trovato.diegolucentedesign.workers.dev/ - `1.0.0-cloud-test.11`, Cloudflare `efaa577e-d2aa-47ba-bbae-92c2c06ef11f`.
 - **Sito principale:** https://trovato.diegolucentedesign.workers.dev/ - `1.0.0-rc.1`, Cloudflare `959a4c70-a070-4ee8-aa21-b306260b3165`. Resta l'anteprima con dati locali.
-- **Supabase:** `nrixslotansgrtrosaof`, 17 migrazioni. Due account Google reali, due profili Free e tre eventi di collaudo: un privato programmato, un privato annullato e un pubblico concluso.
+- **Supabase:** `nrixslotansgrtrosaof`, 17 migrazioni. Due account Google reali, due profili Free e quattro eventi di collaudo: un privato programmato, un privato annullato e due pubblici conclusi.
 - **Server pubblicati:** `admin-console` v4, `host-contact` v1. Le altre funzioni necessarie devono essere configurate e provate prima dell'apertura definitiva.
 
 Il collaudo usa dati reali persistenti. Non è una demo locale, ma non costituisce ancora la V1 finale aperta al pubblico.
@@ -15,7 +15,7 @@ Il collaudo usa dati reali persistenti. Non è una demo locale, ma non costituis
 
 | Verifica | Risultato | Cosa dimostra |
 | --- | --- | --- |
-| Suite Node | `██████████` 27/27 | Controlli del codice e funzioni con trasporti controllati |
+| Suite Node | `██████████` 28/28 | Controlli del codice e funzioni con trasporti controllati |
 | Moduli SQL locali | `██████████` 16/16 | Applicazione dei moduli nel PostgreSQL locale |
 | Regressioni SQL | `██████████` 16/16 | Policy e transizioni su fixture con rollback |
 | Login Google e profilo | `██████████` 2 identità reali verificate | Accesso, consenso, Free e profili separati |
@@ -31,6 +31,8 @@ La barra non misura codice scritto o tempo residuo. I gate degli altri criteri r
 **Prove PostgreSQL native aggiuntive:** [run verificato](https://github.com/Diegosh501/TROVAt10/actions/runs/43481338497), PostgreSQL 17.11 isolato: 17 migrazioni registrate riprodotte, 16 regressioni, nove scenari realmente concorrenti e dump cifrato ripristinato in un secondo database. Confrontati dati e sicurezza di 42 tabelle, 42 policy, 96 funzioni, 177 vincoli, 11 trigger, 84 indici e quattro sequenze. Quattro modifiche negative ai permessi/RLS vengono rilevate; sei guardie locali e quattro sonde native proteggono l’isolamento. Le otto prove di cifratura passano. Auth resta un fixture e non è stato eseguito un recupero completo del progetto Supabase reale. [Procedura backup](BACKUP-RESTORE-SETUP.md).
 
 
+**Aggiornamento cloud-test.11:** sei prove HTTP realmente sovrapposte, 18 operazioni tra i due account Google autorizzati: creazione al limite Free, otto richieste duplicate, doppia uscita, nuova candidatura, ammissione contro avvio e doppia conclusione. Una sola partita sintetica aggiunta e conclusa, nessuna cancellazione. Le otto regressioni nuove e il browser verificano caricamento lento, rete assente, recupero e uscita. La prova iniziale cercava erroneamente `closed_at` nel DTO compatibile del feed; il controllo SQL separato conferma il timestamp reale. La ricevuta iniziale è conservata. Per la contesa remota dell’ultimo posto servono ancora due Sportivi distinti: il caso resta verificato soltanto nel PostgreSQL nativo.
+
 ## I 25 criteri della V1
 
 VERIFICATO indica l'ambito effettivamente provato nel collaudo o nella ripresa. Non anticipa il rilascio sul sito principale.
@@ -38,14 +40,14 @@ VERIFICATO indica l'ambito effettivamente provato nel collaudo o nella ripresa. 
 | # | Criterio | Stato attuale | Evidenza e parte residua |
 | --- | --- | --- | --- |
 | 1 | Servizio raggiungibile | VERIFICATO | URL HTTPS di collaudo raggiunto e usato realmente; principale ancora preview |
-| 2 | Release identificabile | VERIFICATO | Versioni Cloudflare e release pubbliche distinte; candidato rc.7 e collaudo cloud-test.10 identificati; ricevute di sorgenti/CI nel checkpoint privato |
+| 2 | Release identificabile | VERIFICATO | Versioni Cloudflare e release pubbliche distinte; candidato rc.8 e collaudo cloud-test.11 identificati; ricevute di sorgenti/CI nel checkpoint privato |
 | 3 | Autenticazione reale | PARZIALE | Google funziona; percorso email/password, SMTP, conferma e recupero ancora aperti nel Master |
 | 4 | Google OAuth | VERIFICATO | Login reale anche dopo revoca della vecchia chiave; nuova credenziale custodita in Supabase |
 | 5 | Profili persistenti | VERIFICATO | Due profili Google separati, ritrovati dopo nuovo accesso; entrambi Free |
 | 6 | Assegnazione ruoli | VERIFICATO | Host/Sportivo cambiati sul server e persistenti; Admin assegnato separatamente e non selezionabile |
 | 7 | Dashboard Admin protetta | PARZIALE | Allowlist e gate backend operativi; TOTP personale rinviato dal titolare, metriche reali non ancora aperte |
 | 8 | Flussi Host/Sportivo | VERIFICATO | Evento pubblico creato, richiesto da altro account, approvato, avviato e concluso; ruoli ordinari controllati |
-| 9 | Partite nel cloud | VERIFICATO | Tre eventi persistenti, inclusi annullato e concluso; storico ritrovato anche dal partecipante |
+| 9 | Partite nel cloud | VERIFICATO | Quattro eventi persistenti, inclusi annullato e conclusi; storico ritrovato anche dal partecipante |
 | 10 | Partecipazioni | VERIFICATO | Richiesta/pending, ammissione, conteggio, rimozione e nuova richiesta provati nel cloud |
 | 11 | Inviti e privacy | VERIFICATO | Copia reale, ingresso anonimo e OAuth, sede mascherata prima/dopo rimozione; token non pubblicato nei metadata PNG |
 | 12 | Comunicazioni necessarie | PARZIALE | Avvisi e preferenze SQL presenti; assistenza protetta testata localmente ma non attivata; push e promemoria pianificati non completati |
@@ -73,9 +75,9 @@ VERIFICATO indica l'ambito effettivamente provato nel collaudo o nella ripresa. 
 | D - Permessi | VERIFICATO: richieste dirette SQL/Edge e dati privati da Sportivo e Host ordinario | Console completa resta nel distinto scenario C |
 | E - Persistenza | Evento e storico visti da due account, anche dopo nuovo Google login | Altro dispositivo fisico ancora da provare |
 | F - Retention | Regressioni SQL a sette giorni e vincoli | Job reale in ambiente approvato e risultato operativo |
-| G - Errori | Campi vuoti rifiutati; suite su sessioni, rete e risposte tardive | Collaudo reale completo dei servizi; race osservata corretta e coperta da regressioni |
+| G - Errori | Campi vuoti rifiutati; suite su sessioni, rete e risposte tardive | Rete lenta/offline, recupero e uscita osservati e corretti; completare errori dei servizi ancora spenti |
 | H - Privacy | VERIFICATO: inviti e precedenti controlli backend, più 33/33 letture reali con pin non nullo: creatore, pending, ammesso, rimosso e anonimo | Completato nel collaudo nell’ambito documentato; nessuna certificazione generale |
-| I - Concorrenza | Nove casi su PostgreSQL 17.11 con connessioni distinte e sovrapposizione osservata: doppie richieste, ultimo posto, ammissioni, avvio, Free e supporto | Prova HTTP concorrente nel servizio ancora da completare |
+| I - Concorrenza | Nove casi su PostgreSQL 17.11 con connessioni distinte e sovrapposizione osservata: doppie richieste, ultimo posto, ammissioni, avvio, Free e supporto | Sei race HTTP nel servizio verificate; la contesa dell’ultimo posto tra due Sportivi remoti distinti resta da provare |
 | L - Ripristino | Dump cifrato sintetico ripristinato in un secondo database: 42 tabelle e catalogo di sicurezza coerenti; sorgenti/versione frontend conservati | Backup e ripristino dell’intero progetto Supabase reale, oggetti e configurazione ancora da provare |
 | M - Produzione | HTTPS, asset e percorsi riservati della preview controllati | Rilascio coordinato V1 e smoke sul medesimo URL principale |
 
