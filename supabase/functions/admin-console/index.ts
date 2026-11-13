@@ -108,6 +108,18 @@ Deno.serve(async req => {
     } else if (body.action === 'cancel-event') {
       if(!isId(body.id)) return json({error:'invalid_request'},400);
       rpc='admin_cancel_event';args={p_id:body.id};
+    } else if (body.action === 'erasure-preview' || body.action === 'erasure-execute') {
+      // Separate rollout and database gates. Existing deployments stay off;
+      // the user JWT still reaches the allowlist/MFA-protected transaction.
+      if (Deno.env.get('ACCOUNT_ERASURE_EXECUTION_ENABLED') !== 'true') return json({ error: 'unavailable' }, 503);
+      const execute = body.action === 'erasure-execute';
+      const keys = execute ? ['action', 'id', 'reviewToken', 'confirmation'] : ['action', 'id'];
+      if (!isId(body.id) || Object.keys(body).some(key => !keys.includes(key)) ||
+        (execute && (typeof body.reviewToken !== 'string' || !/^[a-f0-9]{64}$/.test(body.reviewToken) || body.confirmation !== 'CANCELLA ACCOUNT'))) {
+        return json({ error: 'invalid_request' }, 400);
+      }
+      rpc = execute ? 'admin_execute_account_erasure' : 'admin_preview_account_erasure';
+      args = { p_request_id: body.id, ...(execute ? { p_review_token: body.reviewToken, p_confirmation: body.confirmation } : {}) };
     } else if (body.action === 'dashboard') rpc = 'admin_dashboard';
     else if (body.action === 'audit') rpc = 'admin_audit_log';
     else if (body.action === 'tickets') {
@@ -134,6 +146,15 @@ Deno.serve(async req => {
       if (error.code === 'PT404') return json({ error: 'not_found' }, 404);
       if (error.code === '22023') return json({ error: 'invalid_request' }, 400);
       return json({ error: 'unavailable' }, 503);
+    }
+    if (rpc === 'admin_preview_account_erasure' || rpc === 'admin_execute_account_erasure') {
+      const valid = data && typeof data === 'object' && data.requestId === body.id &&
+        ((data.status === 'blocked' && typeof data.reason === 'string' && data.accountErased === false && data.accessClosed === false) ||
+         (data.status === 'ready' && rpc === 'admin_preview_account_erasure' && typeof data.reviewToken === 'string' &&
+          /^[a-f0-9]{64}$/.test(data.reviewToken) && data.accountErased === false && data.accessClosed === false) ||
+         (data.status === 'completed' && data.accountErased === true && data.accessClosed === true));
+      if (!valid) return json({ error: 'unavailable' }, 503);
+      return json(data);
     }
     if (rpc === 'admin_dashboard') return json({ ...data, usage: await readUsage() });
     return json(['admin_update_support_ticket','admin_set_user_role','admin_review_report','admin_cancel_event'].includes(rpc) ? { ok: data === true } : data);

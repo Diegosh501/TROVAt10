@@ -1,7 +1,9 @@
-# Operazioni preparate, non applicate
+# Operazioni candidate e riferimenti storici
 
-`account-lifecycle-disabled.sql` contiene la migrazione candidata dell’11 novembre: aggiorna la versione delle conferme e l’esportazione del profilo e installa il ciclo account con entrambe le opzioni disattivate. Il file ha una protezione che rifiuta l’esecuzione se il progetto contiene utenti, profili o eventi.
+Stato del 13 novembre 2026: il progetto remoto ha **17 migrazioni registrate** e contiene account reali. Non rieseguire baseline o fixture che richiedono zero utenti; non usare `db push` senza riconciliare la cronologia.
 
-Il connettore ha richiesto una conferma operativa poi scaduta. La lettura successiva ha confermato che NON è applicata: restano tredici migrazioni remote e nessuna tabella `private.account_lifecycle`.
+- `20261113161033_trovat1o_verified_support_submission.sql`: candidato assistenza verificato localmente e in PostgreSQL nativo. Non applicato: due conferme tecniche del connettore scadute, consenso chat valido. Non aggirare la conferma e non ripetere automaticamente il ciclo.
+- `20261113223917_trovat1o_reviewed_erasure_execution.sql`: nuovo candidato per conferma recente dell’utente, revisione Admin/TOTP, protezione delle dipendenze e cancellazione transazionale. Nome generato da Supabase CLI 3.1.0; contenuto identico a `../account-erasure-execution.sql`. Esecuzione inizialmente disabilitata; nessuna cancellazione reale o applicazione remota. Le prove locali non attestano l’integrazione sul servizio gestito.
+- `account-lifecycle-disabled.sql`: **riferimento storico, da non riapplicare**. La migrazione corrispondente è stata successivamente registrata come `20261111124013_trovat1o_account_lifecycle_disabled.sql`. La tabella esiste; enforcement e purge rimangono disattivati. Il vecchio file conserva il controllo di database vuoto e non è una nuova operazione da eseguire.
 
-Questo file non è una migrazione registrata, non va copiato in `recorded-migrations/` e non va avviato con `db push`. Va riesaminato con le dipendenze reali e approvato attraverso il servizio quando il titolare è disponibile. Non usare un altro canale per aggirare la conferma. L’attivazione della regola e del purge è un passaggio separato, successivo alle prove reali.
+Solo una migrazione effettivamente riuscita, con versione restituita dal server e sorgente confrontato, va aggiunta a `recorded-migrations/`. Pubblicare un file candidato non lo applica. Abilitare il servizio, attivare un job o consentire cancellazioni sono passaggi distinti, successivi alle verifiche e alle autorizzazioni pertinenti.

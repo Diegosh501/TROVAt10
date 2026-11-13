@@ -24,7 +24,7 @@ async function isolationProbes(){
 }
 
 async function regression(db,file){const before=await counts(db);try{await db.query(await read(file));assert.deepEqual(await counts(db),before,'fixture rollback changed rows: '+file);report.regressions.push({file,passed:true})}catch(e){await db.query('rollback;reset role').catch(()=>{});throw Error(file+': '+e.message)}}
-async function caller(c,user,role='authenticated'){await c.query('begin');await c.query('set local role '+role);await c.query("select set_config('request.jwt.claims',$1,true)",[JSON.stringify(user?{sub:user.id,session_id:user.session,role,aal:'aal1'}:{role})])}
+async function caller(c,user,role='authenticated'){await c.query('begin');await c.query('set local role '+role);await c.query("select set_config('request.jwt.claims',$1,true)",[JSON.stringify(user?{sub:user.id,session_id:user.session,role,aal:user.aal||'aal1',...(user.amr?{amr:user.amr}:{})}:{role})])}
 async function call(dbName,user,sql,values=[],role='authenticated'){const c=await connect(dbName);try{await caller(c,user,role);const r=await c.query(sql,values);await c.query('commit');return r.rows}catch(e){await c.query('rollback').catch(()=>{});throw e}finally{await close(c)}}
 async function race(db,dbName,name,operations,hold){
  const blocker=await connect(dbName),clients=[];let released=false;
@@ -64,6 +64,44 @@ async function supportRaces(db,dbName,users){let result;const hash=()=>crypto.ra
  // Use one preclaimed nonce to force both transactions to overlap on its row.
  const replayHash=hash(),replayOwner=users[8],replayRequest=crypto.randomUUID();await call(dbName,null,supportOp(replayOwner,replayRequest,replayHash).sql,supportOp(replayOwner,replayRequest,replayHash).values,'service_role');result=await race(db,dbName,'verified CAPTCHA hash cannot be replayed by other accounts',[supportOp(users[9],crypto.randomUUID(),replayHash),supportOp(users[10],crypto.randomUUID(),replayHash)],{text:"select token_hash from private.support_captcha_redemptions where token_hash=decode($1,'hex') for update",values:[replayHash]});assert.ok(result.every(x=>!x.ok&&x.code==='PT409'&&x.reason==='captcha_reused'));mark();
 }
+async function erasureRaces(db,dbName,users){
+ const admin=users[2],factor=crypto.randomUUID();
+ await db.query("insert into auth.mfa_factors(id,user_id,factor_type,status) values($1,$2,'totp','verified')",[factor,admin.id]);
+ await db.query("update auth.sessions set factor_id=$1,aal='aal2' where id=$2",[factor,admin.session]);
+ await db.query('insert into private.platform_admins(user_id) values($1)',[admin.id]);
+ admin.aal='aal2';admin.amr=[{method:'totp',timestamp:Date.now()/1000}];
+ await call(dbName,null,"select public.set_account_erasure_execution_enabled(true,'trovat1o-erasure-2026-11-13-v1')",[],'service_role');
+ const prepare=async user=>{
+  await db.query("insert into public.subscriptions(user_id,plan,status) values($1,'free','active') on conflict(user_id) do nothing",[user.id]);
+  const id=(await call(dbName,user,'select public.request_account_erasure(true) as receipt'))[0].receipt.id;
+  await call(dbName,user,'select public.confirm_my_account_erasure($1,true)',[id]);
+  const preview=(await call(dbName,admin,'select public.admin_preview_account_erasure($1) as receipt',[id]))[0].receipt;
+  assert.equal(preview.status,'ready');return {id,token:preview.reviewToken};
+ };
+ const erase=r=>({user:admin,sql:"select public.admin_execute_account_erasure($1,$2,'CANCELLA ACCOUNT') as receipt",values:[r.id,r.token]});
+ const hold=u=>({text:'with a as (select id from auth.users where id=$1 for update) select p.id from public.profiles p join a on a.id=p.id for update of p',values:[u.id]});
+ let target=users[11],r=await prepare(target),result=await race(db,dbName,'duplicate erasure execution returns one completion and one receipt',[erase(r),erase(r)],hold(target));
+ assert.ok(result.every(x=>x.ok&&x.rows[0].receipt.status==='completed'));
+ assert.equal(result.filter(x=>x.rows[0].receipt.reused===false).length,1);assert.equal(result.filter(x=>x.rows[0].receipt.reused===true).length,1);
+ assert.equal((await db.query('select count(*)::int as n from auth.users where id=$1',[target.id])).rows[0].n,0);mark();
+ target=users[14];r=await prepare(target);result=await race(db,dbName,'new user confirmation cannot race a stale admin erasure capability',[erase(r),{user:target,sql:'select public.confirm_my_account_erasure($1,true) as receipt',values:[r.id]}],hold(target));
+ const deleted=(await db.query('select count(*)::int as n from auth.users where id=$1',[target.id])).rows[0].n===0;
+ if(deleted){assert.ok(result[0].ok&&result[0].rows[0].receipt.status==='completed');assert.ok(!result[1].ok&&result[1].code==='PT401')}
+ else{assert.ok(result[1].ok);assert.ok(!result[0].ok&&result[0].code==='PT403'&&result[0].reason==='erasure_review_required')}
+ mark();
+ target=users[15];r=await prepare(target);result=await race(db,dbName,'new Billing lease and erasure preserve the account or reject checkout before payment',[erase(r),{role:'service_role',sql:"select public.billing_service('checkout-lock',jsonb_build_object('mode','test','user_id',$1::text)) as receipt",values:[target.id]}],hold(target));
+ const alive=(await db.query('select count(*)::int as n from auth.users where id=$1',[target.id])).rows[0].n===1;
+ if(alive){assert.ok(result[1].ok);assert.ok(result[0].ok&&result[0].rows[0].receipt.status==='blocked'&&result[0].rows[0].receipt.reason==='billing')}
+ else{assert.ok(result[0].ok&&result[0].rows[0].receipt.status==='completed');assert.ok(!result[1].ok&&['23503','PT401'].includes(result[1].code))}
+ assert.equal((await db.query('select count(*)::int as n from private.billing_accounts b left join public.profiles p on p.id=b.user_id where p.id is null')).rows[0].n,0);mark();
+ target=users[5];r=await prepare(target);result=await race(db,dbName,'administrator revocation serializes with irreversible execution',[erase(r),{role:'service_role',sql:'select public.provision_platform_admin($1,false) as revoked',values:[admin.id]}],{text:'select user_id from private.platform_admins where user_id=$1 for update',values:[admin.id]});
+ assert.ok(result[1].ok);const survived=(await db.query('select count(*)::int as n from auth.users where id=$1',[target.id])).rows[0].n===1;
+ if(survived)assert.ok(!result[0].ok&&result[0].code==='PT403');else assert.ok(result[0].ok&&result[0].rows[0].receipt.status==='completed');
+ assert.equal((await db.query('select enabled from private.platform_admins where user_id=$1',[admin.id])).rows[0].enabled,false);mark();
+ await db.query('select public.provision_platform_admin($1,true)',[admin.id]);
+ report.erasureRaces=4;report.realAccountDeletionPerformed=false;
+}
+
 function acl(value,type,owner){return "(select jsonb_agg(jsonb_build_object('grantor',pg_get_userbyid(a.grantor),'grantee',case when a.grantee=0 then 'PUBLIC' else pg_get_userbyid(a.grantee) end,'privilege',a.privilege_type,'grantable',a.is_grantable) order by a.grantor,a.grantee,a.privilege_type,a.is_grantable) from aclexplode(coalesce("+value+",acldefault('"+type+"',"+owner+"))) a)"}
 async function snapshot(db){
  const tables=(await db.query("select schemaname,tablename from pg_tables where schemaname in ('auth','public','private') order by 1,2")).rows,rows=[];
@@ -97,9 +135,10 @@ async function restoreRehearsal(db,source,users){const before=await snapshot(db)
   await isolatedCluster();await isolationProbes();const source=await scratch(),db=await connect(source);
   report.server=(await db.query('select version() as version')).rows[0].version;assert.ok(/^PostgreSQL 17\./.test(report.server));await db.query("select set_config('trovat1o.isolated_fixture','true',false)");await db.query(await read('tests/integration/native-fixture.sql'));
   const migrations=(await fs.readdir(path.join(root,'supabase/recorded-migrations'))).filter(x=>/^\d{14}_.+\.sql$/.test(x)).sort();assert.equal(migrations.length,17,'Reconcile any new remote migration before changing this gate');for(const name of migrations){const sql=await read('supabase/recorded-migrations/'+name);await db.query(sql);report.recordedMigrations.push({file:name,sha256:crypto.createHash('sha256').update(sql).digest('hex'),passed:true})}console.log('PASS: all 17 recorded migrations replayed on fresh PostgreSQL');
-  const regressions=(await fs.readdir(path.join(root,'tests/sql'))).filter(x=>x.endsWith('.sql')&&!['local-fixture.sql','support-submit.sql'].includes(x)).sort();for(const file of regressions)await regression(db,'tests/sql/'+file);console.log('PASS: '+regressions.length+' regressions against the recorded cloud schema');
+  const regressions=(await fs.readdir(path.join(root,'tests/sql'))).filter(x=>x.endsWith('.sql')&&!['local-fixture.sql','support-submit.sql','account-erasure-execution.sql'].includes(x)).sort();for(const file of regressions)await regression(db,'tests/sql/'+file);console.log('PASS: '+regressions.length+' regressions against the recorded cloud schema');
   await db.query(await read('supabase/pending-operations/20261113161033_trovat1o_verified_support_submission.sql'));await regression(db,'tests/sql/support-submit.sql');report.pendingSupportMigrationTestedOnly=true;
-  const users=await seedUsers(db);await concurrency(db,source,users);await supportRaces(db,source,users);await restoreRehearsal(db,source,users);report.passed=true;
+  await db.query(await read('supabase/pending-operations/20261113223917_trovat1o_reviewed_erasure_execution.sql'));await regression(db,'tests/sql/account-erasure-execution.sql');report.pendingErasureExecutionTestedOnly=true;
+  const users=await seedUsers(db);await concurrency(db,source,users);await supportRaces(db,source,users);await erasureRaces(db,source,users);await restoreRehearsal(db,source,users);report.passed=true;
  }finally{
   await Promise.allSettled([...active].map(close));for(const name of made.reverse())await control.query('drop database '+ident(name));await control.end();report.isolatedDatabasesRemoved=true;
  }

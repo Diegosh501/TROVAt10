@@ -1,6 +1,6 @@
 # Richieste di cancellazione account
 
-Stato del 13 novembre 2026: **richiesta autenticata operativa nel backend e nel collaudo; cancellazione/chiusura automatica non implementata**. Non equiparare un ticket risolto a dati cancellati.
+Stato del 13 novembre 2026: **richiesta autenticata operativa nel backend e nel collaudo; esecuzione della cancellazione preparata come candidato locale disabilitato, non applicato o attivo nel cloud**. Non equiparare un ticket risolto a dati cancellati.
 
 ## Utente
 
@@ -30,3 +30,19 @@ Il client usa erasureRequestsReady. La configurazione di esempio e il sito pubbl
 - Regressione SQL locale e sul database Supabase: privilegi, conferme false/null, isolamento, idempotenza, Free/Premium, conservazione di ticket aperti, quote e revoca sessione.
 - Prova Supabase effettuata prima di creare il vero account del titolare, con fixture sintetiche e ROLLBACK: zero utenti, ticket ed eventi residui. Il file rifiuta database popolati: **non rieseguirlo ora sul progetto che contiene utenti reali**.
 - Nessuna cancellazione reale o chiusura del conto del titolare provata. Il percorso completo resta aperto.
+
+## Candidato di esecuzione riservata, non attivo
+
+`account-erasure-execution.sql` aggiunge un percorso distinto dal ticket: l’utente conferma esplicitamente la propria richiesta con una sessione realmente creata da meno di 15 minuti; un token appena rinnovato non basta. `confirm_my_account_erasure` non accetta un destinatario diverso dal chiamante. L’Admin deve superare allowlist, sessione viva e TOTP recente. Ruolo Host, Premium e metadata del browser non concedono questo accesso.
+
+`admin_preview_account_erasure` restituisce soltanto esito e motivo del blocco oppure un codice di revisione casuale, valido cinque minuti e legato all’Admin. `admin_execute_account_erasure` richiede quel codice e la frase esatta `CANCELLA ACCOUNT`, ripete i controlli e serializza le dipendenze. Le conferme non vengono preselezionate. Un nuovo riesame o una nuova conferma dell’utente invalida il precedente codice.
+
+La cancellazione resta bloccata da amministrazione, Premium attivo, collegamenti finanziari anche scaduti o checkout pendenti, partite ancora intestate, partecipazioni attive, contributi di posizione, segnalazioni, sospensioni di conservazione, oggetti Storage, altri ticket anche chiusi da minimizzare e dipendenze sconosciute. Una pratica bloccata non chiude l’accesso e non viene dichiarata cancellata. Gli account Admin richiedono un percorso di successione separato.
+
+Per un account privo di vincoli, la stessa transazione elimina le sessioni e Auth, verifica la rimozione di profilo e identità e minimizza la ricevuta. Un errore di dipendenze ripristina anche le sessioni: nessun falso successo o chiusura parziale. Un secondo invio restituisce la ricevuta già completata. Le ricevute finali non contengono user ID, session ID o codice di revisione; l’audit conserva l’Admin e il riferimento alla pratica. L’account Google esterno non viene cancellato, né vengono trattati pagamenti o log dei fornitori come eliminati automaticamente.
+
+Due gate restano spenti: impostazione SQL `account_erasure_execution_settings.enabled=false` ed ambiente Edge `ACCOUNT_ERASURE_EXECUTION_ENABLED` assente/false. La nuova Edge usa il token dell’Admin e la chiave pubblica, senza service-role. Le azioni `erasure-preview` e `erasure-execute` hanno corpo limitato, campi esatti e risposte no-store. L’interfaccia per conferma recente e revisione operativa deve essere integrata e verificata prima dell’attivazione; il solo codice server non completa il flusso online.
+
+Prove attuali: regressione dedicata e tutte le 17 regressioni SQL locali con rollback verificato; 44 casi dell’handler Admin, di cui sei nuovi sul percorso. PostgreSQL nativo concorrente, Auth/Storage del servizio reale, MFA personale e cancellazione reale autorizzata restano verifiche distinte. La migrazione candidata non è stata applicata e nessun utente reale è stato cancellato.
+
+Riferimento primario: [gestione utenti Supabase](https://supabase.com/docs/guides/auth/managing-user-data). La cancellazione di Auth da sola non invalida immediatamente un JWT; il codice elimina le sessioni e i controlli applicativi richiedono utente e sessione vivi. Le dipendenze del servizio gestito richiedono comunque una prova specifica prima del rilascio.
