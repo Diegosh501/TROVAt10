@@ -101,7 +101,6 @@ jobs:
       CI: 'true'
       TROVAT1O_ISOLATED_PG_TEST: 'true'
       TROVAT1O_PG_TEST_URL: postgresql://postgres:ci_synthetic_only@127.0.0.1:5432/trovat1o_ci_control
-      TROVAT1O_PG_CONTAINER_ID: ${{ job.services.postgres.id }}
     steps:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -121,4 +120,6 @@ jobs:
       - name: Verify private backup encryption
         run: node tests/integration/backup-envelope.test.cjs
       - name: Replay migrations, force concurrent calls, and restore encrypted dump
+        env:
+          TROVAT1O_PG_CONTAINER_ID: ${{ job.services.postgres.id }}
         run: node tests/integration/native-postgres.cjs
