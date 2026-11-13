@@ -1,83 +1,93 @@
-# Stato autorevole — 13 novembre 2026
+# V1.0 ONLINE - stato verificabile
 
-Questa sezione prevale sui checkpoint storici sottostanti.
+Aggiornato il 13 novembre 2026. Questo documento sostituisce le vecchie percentuali dei checkpoint. Il Master corrente comprende **25 criteri e 11 scenari finali** A-I, L, M.
 
-- Pubblico aggiornato: **1.0.0-rc.1**, anteprima interattiva, https://trovato.diegolucentedesign.workers.dev/ . Versione Cloudflare `959a4c70-a070-4ee8-aa21-b306260b3165`, pubblicata l’11 novembre. Non è ancora V1.0 cloud.
-- Nuova verifica HTTPS del 13 novembre: **17/17 asset identici**, intestazioni corrette, **5/5 percorsi riservati negati**. Ricevuta: `output/audit/2026-11-13/live-verification.json`.
-- Supabase corretto `nrixslotansgrtrosaof`: **15 migrazioni**. Ciclo account applicato e **enabled=false, purge_enabled=false**. Nessun job installato, nessuna cancellazione attiva. Utenti/eventi reali ancora zero.
-- Nuovo modulo `supabase/session-security.sql` applicato: sessione Auth esatta e viva, account valido, **10 policy RLS restrittive** con USING/WITH CHECK. Non annulla richieste già in corso o snapshot MVCC precedenti.
-- Test locale aggiornato: **14 moduli SQL / 13 regressioni** con rollback, compresa session-security. Due controlli negativi rilevano un bypass intenzionale dei gate/RLS. Auth e JWT sono fixture, non login reali. Ultima esecuzione Node: **22/22**.
-- Il tentativo Google del 13 novembre, dopo la conferma «Impostazione modificata», è ancora negato dalla regola salvata/gestita del browser. Nessun aggiramento. Provider Google non completato; frontend mantiene tutti i Ready=false.
-- Master aggiornato: `output/handoff/OBIETTIVO-MASTER-R3.md`, **25 criteri V1 e 11 scenari reali** A–I,L,M. Nessuno scenario integralmente collaudato online: **0/11**. V2=PUBLIC BETA; V3=STABLE; V4=COMPLETE PLATFORM. Le vecchie barre 0/7 descrivono il precedente obiettivo.
-- Cancellazione volontaria ancora mancante: audit `output/audit/2026-11-11/erasure-readiness-review.md`. Non equiparare scadenza Free a diritto di cancellazione. Conservazione Billing/dipendenze da risolvere prima del purge.
-- Prossime priorità: Google–Supabase sul progetto corretto; Admin reale TOTP; due identità Host/Sportivo e persistenza; export/erasure/supporto e retention server; ripristino; poi collaudo V1. Push e apertura beta V2 successive. Premium/Stripe predisposti ma pagamenti spenti, tutti iniziano Free.
-- Nessun nuovo costo, SMS, acquisto o account Admin creato. Il dominio acquistato resta futuro.
+## Versioni
 
----
+- **Collaudo cloud reale:** https://v1-check-trovato.diegolucentedesign.workers.dev/ - `1.0.0-cloud-test.4`, Cloudflare `d775cc22-ab21-406e-ab37-7e7fd15a7db1`.
+- **Sito principale:** https://trovato.diegolucentedesign.workers.dev/ - `1.0.0-rc.1`, Cloudflare `959a4c70-a070-4ee8-aa21-b306260b3165`. Resta l'anteprima con dati locali.
+- **Supabase:** `nrixslotansgrtrosaof`, 16 migrazioni. Un account reale, un profilo e due eventi privati di collaudo: uno programmato, uno annullato.
+- **Server pubblicati:** `admin-console` v4, `host-contact` v1. Le altre funzioni necessarie devono essere configurate e provate prima dell'apertura definitiva.
 
-## Documento e checkpoint precedenti
+Il collaudo usa dati reali persistenti. Non è una demo locale, ma non costituisce ancora la V1 finale aperta al pubblico.
 
-# Stato verificabile della V1.0 ONLINE
+## Barre basate sulle prove
 
-Aggiornato l’11 novembre 2026 dopo la ripresa del checkpoint. Questo file sostituisce le vecchie percentuali e le descrizioni storiche conservate nell’archivio di audit.
-
-**Frontend pubblico:** anteprima 2.0.2 su https://trovato.diegolucentedesign.workers.dev/ . **Candidato locale:** successivo, con nuove protezioni e flussi. **Server Admin:** versione 2 distribuita e confrontata con il sorgente. Nessun nuovo deploy frontend.
-
-## Decisioni correnti
-
-- Google verificato, completamento profilo esplicito, Host/Sportivo dello stesso account. Admin è un permesso server con sessione viva e TOTP recente.
-- Dati condivisi nel cloud; niente scelta sessione/dispositivo nel flusso online. La demo resta separata, con dati sintetici locali.
-- Tutti gli account partono Free. Premium facoltativo a €4,99/anno, acquisti ancora spenti.
-- Nuova durata account Free: sette giorni dal PRIMO match creato, esclusione del Premium verificato attivo, avvisi e conservazione prudente. Codice testato ma migrazione e attivazione ancora mancanti.
-- Storico Free: sette giorni dalla conclusione/annullamento effettivi. Il codice SQL è applicato; il job non è attivato.
-- Niente SMS obbligatori con Google verificato; il numero Host condiviso resta opzionale e richiede verifica e consenso.
-- Niente chat. Avvisi, richieste e promemoria; primo perimetro calcio 5/8/11, lista/mappa, eventi pubblici o privati, inviti e PNG con logo.
-- Nessun acquisto di dominio o aumento a pagamento dell’infrastruttura autorizzato automaticamente.
-
-## Venti criteri finali
-
-| Criterio | Stato | Evidenza e limite |
+| Verifica | Risultato | Cosa dimostra |
 | --- | --- | --- |
-| URL pubblico HTTPS | VERIFICATO per preview | Il dominio gratuito esiste; non è ancora la V1.0 cloud |
-| Build e pacchetto | VERIFICATO per il candidato | Test e confezionamento locali; CI e archivi identificati nei report, nessun deploy implicito |
-| Autenticazione Google | PARZIALE | PKCE e profilo presenti; trasferimento credenziale/provider e login reale mancanti |
-| Profili persistenti | IMPLEMENTATO | SQL applicato e fixture testati; profili reali ancora zero |
-| Ruoli distinti | PARZIALE | Controlli server presenti; Host/Sportivo/Admin reali ancora da collaudare |
-| Console riservata | PARZIALE | Edge v2 distribuita; token falso/assenza credenziali rifiutati. Allowlist e TOTP reali da configurare |
-| Navigazione per ruolo | VERIFICATA in locale | Browser e trasporti controllati; collaudo cloud ancora necessario |
-| Gestione eventi cloud | PARZIALE | RPC applicate, UI collegata; nessun evento reale creato |
-| Persistenza multi-dispositivo | DA VERIFICARE | Prove con due identità e browser/dispositivi reali mancanti |
-| Partecipazioni e comunicazioni | PARZIALE | Richieste e notifiche SQL presenti; push e promemoria reali da configurare e consegnare |
-| Nuovi account Free | IMPLEMENTATO | Profilo server parte Free; nessun acquisto test attribuisce Premium live |
-| Scadenze automatiche | PARZIALE | Match SQL applicato, job spento. Account SQL/client testati, migrazione non applicata |
-| Sicurezza essenziale | PARZIALE | RLS, confini account, MFA, quote e handler testati; nessuna garanzia contro ogni attacco e prove reali ancora aperte |
-| Account distinti reali | DA VERIFICARE | Fixture e profilo demo non equivalgono a login Google reali |
-| Smoke post-deploy V1.0 | MANCANTE | Disponibili prove della preview e del perimetro anonimo dell’Edge Admin |
-| Nessun blocco fondamentale | NON DIMOSTRATO | Google, provider/funzioni, automatismi e prove reali sono ancora gate |
-| Infrastruttura iniziale gratuita | PARZIALE | Servizi esistenti; quota/continuità/backup da convalidare prima del lancio |
-| Nessuna spesa non autorizzata | VERIFICATO per questa ripresa | Nessun piano comprato, SMS inviato o pagamento reale eseguito |
-| Documentazione aggiornata | AGGIORNATA al checkpoint | README, informative v2 e guida 8 pagine; revisione dei contratti/provider ancora necessaria |
-| Recupero | PARZIALE | Tredici migrazioni preservate e rollback hosting documentato; backup dati e ripristino integrale non provati |
+| Suite Node | `██████████` 24/24 | Controlli del codice e funzioni con trasporti controllati |
+| Moduli SQL locali | `██████████` 15/15 | Applicazione dei moduli nel PostgreSQL locale |
+| Regressioni SQL | `██████████` 14/14 | Policy e transizioni su fixture con rollback |
+| Login Google e profilo | `██████████` 1 identità reale verificata | Accesso, consenso e persistenza del profilo del titolare |
+| Azioni reali cloud mirate | `██████████` 17/17 osservate | Creazione, modifica, limiti, storico, ruolo, export e PNG sullo stesso account |
+| Scenari finali del Master | `░░░░░░░░░░` 0/11 interamente chiusi | Servono ancora prove multiutente, MFA, job e ripristino |
 
-## Risultati della ripresa
+Le 17 azioni mirate sono state eseguite sul collaudo cloud-test.2; sul successivo cloud-test.4 sono stati riprovati salvataggio, Organizza, etichette e tutte le azioni del profilo a quattro larghezze. Le regressioni automatiche coprono le correzioni intermedie. Queste barre non si sommano in una percentuale generale. Una suite SQL o una singola azione riuscita non chiude uno scenario completo e non certifica l'assenza di vulnerabilità.
 
-- Nuova richiesta Admin completata nel candidato: niente Console demo per utenti locali o normali, Premium non concede Admin, ingresso dal profilo soltanto dopo sonda qualificata del backend. La marcatura server è un hint, non un permesso. Ventitré scenari aggiuntivi verificano metadata falsi, revoca, link diretto, cambio account, logout e risposte tardive. La verifica online con Google/TOTP reale resta aperta.
-- I due rilievi sul ciclo account sono corretti: timestamp reale dopo il blocco dell’ACK e rinnovo conservazione serializzato sugli stessi parent del worker. La regressione rifiuta il vecchio timestamp di inizio transazione; la concorrenza reale a più connessioni resta da provare.
+## I 25 criteri della V1
 
-- Primo commit di sincronizzazione sorgenti: `7c78c6277e7fd2d390c1267e21b220598aefc9a2`, 118 file; CI [42951137476](https://github.com/Diegosh501/TROVAt10/actions/runs/42951137476) verde. Le modifiche successive hanno una ricevuta separata nel report finale: non attribuire loro automaticamente il verde di questo commit.
-- 22 suite Node; 13 moduli SQL e 12 regressioni con conteggi identici dopo rollback nel PostgreSQL locale. PGlite 0.5.16 usa PostgreSQL 18.6, diverso dal remoto 17.11: non prova GoTrue, MFA reale, concorrenza o Cron.
-- Browser locale: profilo QA, creazione privata da Organizza, modifica, presenza nei propri match, assenza dalla ricerca pubblica, ricerca/azzera, pin mappa, richiesta pending, filtro assistenza e download PNG. Viewport 320/390/768/1440 senza overflow osservato nei contesti esaminati. Corretto il font dei campi che una vecchia regola rendeva 11 px: ora 16 px e 46 px di altezza su mobile. Non sono stati verificati tutti i browser o tutti i dispositivi.
-- Le misure statiche responsive precedenti non avevano individuato il conflitto di specificità CSS; sono state integrate da misure effettive del browser. Struttura del form corretta, opzioni compatte, consenso a larghezza piena e nomi accessibili aggiunti al supporto.
-- Admin Edge v2: sorgente remoto identico, JWT richiesto, richieste senza credenziali e con token falso restituiscono 401; preflight dell’origine autorizzata 204. Non è una prova di accesso Admin reale.
-- Health Supabase senza avvisi. I linter di sicurezza segnalano policy assenti sulle tabelle private chiuse ai client e RPC SECURITY DEFINER intenzionali: sono avvisi da revisionare nel contesto dei controlli, non permessi da aprire automaticamente.
+VERIFICATO indica l'ambito effettivamente provato nel collaudo o nella ripresa. Non anticipa il rilascio sul sito principale.
 
-## Blocchi e prossimi passi
+| # | Criterio | Stato attuale | Evidenza e parte residua |
+| --- | --- | --- | --- |
+| 1 | Servizio raggiungibile | VERIFICATO | URL HTTPS di collaudo raggiunto e usato realmente; principale ancora preview |
+| 2 | Release identificabile | VERIFICATO | Versioni Cloudflare e release pubbliche distinte; nuovo candidato da sincronizzare nel rilascio successivo |
+| 3 | Autenticazione reale | PARZIALE | Google funziona; percorso email/password, SMTP, conferma e recupero ancora aperti nel Master |
+| 4 | Google OAuth | VERIFICATO | Login reale anche dopo revoca della vecchia chiave; nuova credenziale custodita in Supabase |
+| 5 | Profili persistenti | VERIFICATO | Profilo del titolare ritrovato dopo ricaricamento e nuovo accesso |
+| 6 | Assegnazione ruoli | VERIFICATO | Host/Sportivo cambiati sul server e persistenti; Admin assegnato separatamente e non selezionabile |
+| 7 | Dashboard Admin protetta | PARZIALE | Allowlist e gate backend operativi; TOTP personale rinviato dal titolare, metriche reali non ancora aperte |
+| 8 | Flussi Host/Sportivo | PARZIALE | Creazione, modifica, annullamento e cambio ruolo reali; richiesta/ammissione fra due persone ancora da provare |
+| 9 | Partite nel cloud | VERIFICATO | Due partite private nel DB, una annullata nello storico; persistenza dopo nuovo login |
+| 10 | Partecipazioni | PARZIALE | SQL/RPC e quote testati; scambio reale Host/Sportivo mancante |
+| 11 | Inviti e privacy | PARZIALE | PNG privato ispezionato senza sede, nomi o token; invito fra utenti distinti ancora da collaudare |
+| 12 | Comunicazioni necessarie | PARZIALE | Avvisi e preferenze SQL presenti; normale assistenza, push e promemoria pianificati non completati |
+| 13 | Persistenza fra dispositivi | DA VERIFICARE | Nuovo accesso nello stesso browser riuscito; non vale come altro account/dispositivo |
+| 14 | Tutti iniziano Free | VERIFICATO | Profilo reale Free, default server controllato; acquisti ancora spenti |
+| 15 | Retention sette giorni | PARZIALE | Moduli e regressioni presenti; job spenti e nessuna cancellazione automatica attiva |
+| 16 | Funzioni server necessarie | PARZIALE | Admin e contatto Host pubblicate; perimetro restante ancora da configurare |
+| 17 | Permessi backend | PARZIALE | RLS, caller/sessione, CORS e rifiuto anonimo testati; prove reali su ruoli ordinari distinti mancanti |
+| 18 | Test multiutente | DA VERIFICARE | Una sola identità reale; fixture non sostituiscono il test |
+| 19 | Nessun blocco conosciuto | NON DIMOSTRATO | Configurazioni e flussi residui aperti; race del salvataggio corretta nel candidato, con regressioni su risposte differite; altri gate restano aperti |
+| 20 | Limiti economici | VERIFICATO | Nessun piano comprato, SMS inviato o pagamento reale; dominio acquistato rinviato |
+| 21 | Backup/ripristino/rollback | PARZIALE | Sorgenti/migrazioni e versione hosting precedente conservati; recupero completo dei dati non provato |
+| 22 | Informative adeguate | PARZIALE | Pagine versionate e consenso profilo acquisito; verifiche su servizi attivi, accordi e cancellazione effettiva aperte |
+| 23 | Controlli post-deploy | DA ESEGUIRE | Collaudo cloud separato provato; nessun post-deploy della V1 completa sul principale |
+| 24 | Documentazione | VERIFICATO | README e stato correnti aggiornati, limiti espliciti; ricevute del commit/CI e guida nel pacchetto di ripresa |
+| 25 | Checkpoint riutilizzabile | VERIFICATO | File privati di ripresa, versioni e punti aperti conservati; non distribuire il checkpoint come sito |
 
-1. Accesso alle console: il browser Google ha un diniego salvato; non aggirarlo. Il browser Supabase mostrava un account/progetto diverso da quello collegato al connettore. Riconciliare l’accesso al progetto corretto `nrixslotansgrtrosaof` prima di configurare Google. L’ultima interazione sul browser locale è stata anch’essa negata: non riprovare attraverso altri strumenti o superfici.
-2. La nuova operazione `supabase/pending-operations/account-lifecycle-disabled.sql` ha richiesto una conferma operativa poi scaduta. Lettura successiva: nessuna tabella lifecycle, tredici migrazioni, zero utenti. File pronto per revisione/approvazione; non applicato e nessuna cancellazione attiva.
-3. Completare provider, Admin reale, funzioni, push/reminder, esportazione/cancellazione su richiesta e job. Prima di attivare la durata Free proposta, rendere effettivo il percorso Premium, comunicare condizioni e provare casi di acquisto/scadenza in ambiente approvato.
-4. Verificare contratti dati/trasferimenti, gestione delle pratiche e backup/ripristino; provare i flussi A-G con account distinti e solo dopo effettuare il rilascio frontend coordinato e lo smoke online.
+## Scenari finali: prove ancora da chiudere
 
-`onlineReady`, `emailAuthEnabled`, `billingReady`, `exportReady`, `accountLifecycleReady`, `pushReady` restano false; Billing è in modalità test. Il pubblico non deve vedere un successo simulato presentato come azione cloud.
+| Scenario | Prova fatta | Mancanza determinante |
+| --- | --- | --- |
+| A - Sportivo | Google, profilo, ruolo, ricerca e riapertura sul titolare | Richiesta e stato partecipazione con altro utente reale |
+| B - Host | Due creazioni private, modifica, limite Free, annullamento e storico | Pubblicazione, richieste/ammissioni reali e conclusione con partecipanti |
+| C - Admin | Allowlist, sessione viva, ingresso dedicato dopo sonda qualificata | Enrollment TOTP personale e uso reale della console |
+| D - Permessi | RPC/RLS, sessione revocata e metadata falsi in test | Host e Sportivo distinti contro backend reale |
+| E - Persistenza | Match e ruolo dopo ricaricamento e nuovo Google login | Altro account e altro dispositivo |
+| F - Retention | Regressioni SQL a sette giorni e vincoli | Job reale in ambiente approvato e risultato operativo |
+| G - Errori | Campi vuoti rifiutati; suite su sessioni, rete e risposte tardive | Collaudo reale completo dei servizi; race osservata corretta e coperta da regressioni |
+| H - Privacy | Sede privata assente dal feed; PNG e metadata senza sede esatta | Scenari reali anonimo/estraneo/pending/ammesso/rimosso |
+| I - Concorrenza | Serializzazione progettata e fixture | Richieste HTTP realmente simultanee, capienza e transizioni |
+| L - Ripristino | Versione precedente e sorgenti conservati | Backup dati e ripristino integrale provati |
+| M - Produzione | HTTPS, asset e percorsi riservati della preview controllati | Rilascio coordinato V1 e smoke sul medesimo URL principale |
 
-Riferimenti: [readiness](DEPLOY-READINESS.md), [account](ACCOUNT-LIFECYCLE.md), [match](RETENTION-SETUP.md), [Billing](BILLING-SETUP.md), [push](PUSH-SETUP.md). Non dichiarare il 100% finché i venti criteri non hanno evidenza reale.
+## Configurazioni e sicurezza
+
+Google usa il client esistente e il callback del solo progetto corretto. Redirect di collaudo esatto, niente wildcard. Nonce checks attivi e email verificata richiesta. Collegamento di configurazione GitHub-Supabase revocato e chiave Google precedente disattivata con consenso specifico. Nuovo login dell'app verificato dopo queste operazioni. Nessun token o segreto è incluso nel pacchetto.
+
+L'account Admin è del titolare già indicato. Il secondo fattore non è stato creato o simulato; il titolare ha scelto di farlo più tardi. Una password storica in chat non è una credenziale da riutilizzare.
+
+`onlineReady`, `exportReady` ed `erasureRequestsReady` sono veri solo nel collaudo. Email/password, Billing, push e ciclo account restano spenti. La configurazione di default dei sorgenti resta preview. Il modulo di cancellazione registra una pratica, non chiude accesso o dati: [ERASURE-REQUESTS.md](ERASURE-REQUESTS.md).
+
+Non eseguire più i vecchi test remoti che esigono zero utenti: ora il titolare ha un account reale. Per prove sintetiche usare isolamento e rollback; le fixture locali non dimostrano backup o autenticazione reale.
+
+## Ordine di completamento
+
+1. Integrare le correzioni minime, sincronizzare GitHub e verificare CI e pacchetti senza segreti.
+2. Completare personalmente il TOTP e collaudare la console; provare gli altri account/dispositivi senza inventare identità Google.
+3. Configurare i percorsi del Master ancora aperti: email/SMTP/anti-abuso, assistenza, comunicazioni, job e cancellazione effettiva. Gli acquisti restano facoltativi e spenti fino a prove autorizzate.
+4. Provare concorrenza, retention e ripristino in sicurezza; adeguare le informative ai servizi effettivi.
+5. Solo dopo il superamento dei gate, pubblicare una release coordinata sul principale e chiudere lo scenario M.
+
+Il dominio personalizzato non è un requisito del collaudo gratuito e non equivale all'ultima percentuale mancante dell'intero progetto. V2 PUBLIC BETA, V3 STABLE e V4 COMPLETE PLATFORM restano milestone successive alla V1.

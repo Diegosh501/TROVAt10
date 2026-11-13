@@ -3,15 +3,15 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.0';
 // The caller's token reaches narrow database RPCs. This endpoint has no use for
 // a service-role key and cannot bypass the database's administrator checks.
 const origin = Deno.env.get('APP_ORIGIN') ?? 'https://trovato.diegolucentedesign.workers.dev';
-const cors = {
-  'Access-Control-Allow-Origin': origin,
-  'Access-Control-Allow-Headers': 'authorization, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Vary': 'Origin',
-};
-const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
-  status, headers: { ...cors, 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' },
-});
+// Optional, explicit test origin only; it does not match sibling subdomains.
+const testOrigin = Deno.env.get('APP_TEST_ORIGIN') ?? '';
+function isHttpsOrigin(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return !value.includes('*') && url.protocol === 'https:' && url.origin === value;
+  } catch { return false; }
+}
+const validOrigins = isHttpsOrigin(origin) && (testOrigin === '' || isHttpsOrigin(testOrigin));
 
 async function readUsage() {
   const unavailable = { available: false, observedAt: null, counts: null };
@@ -56,10 +56,21 @@ async function readBody(req: Request): Promise<Record<string, unknown>> {
 }
 
 Deno.serve(async req => {
-  let validOrigin = false;
-  try { validOrigin = new URL(origin).origin === origin && new URL(origin).protocol === 'https:'; } catch { /* fail closed */ }
-  if (!validOrigin) return json({ error: 'unavailable' }, 503);
-  if (req.headers.get('Origin') !== origin) return json({ error: 'unavailable' }, 403);
+  const requestOrigin = req.headers.get('Origin') || '';
+  const allowedOrigin = validOrigins && (requestOrigin === origin || (testOrigin !== '' && requestOrigin === testOrigin));
+  // Each request gets its own headers/response factory, including error paths.
+  // Never reflect an origin that was not matched against this configuration.
+  const cors: Record<string, string> = {
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Vary': 'Origin',
+    ...(allowedOrigin ? { 'Access-Control-Allow-Origin': requestOrigin } : {}),
+  };
+  const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
+    status, headers: { ...cors, 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' },
+  });
+  if (!validOrigins) return json({ error: 'unavailable' }, 503);
+  if (!allowedOrigin) return json({ error: 'unavailable' }, 403);
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
   if (req.method !== 'POST') return json({ error: 'invalid_method' }, 405);
   const auth = req.headers.get('Authorization') || '';

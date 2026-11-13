@@ -7,7 +7,7 @@ FINAL_DIR="$PROJECT_ROOT/TROVAT1O-Local-Final-Preview"
 DEPLOY_DIR="$PROJECT_ROOT/TROVAT1O-Cloudflare-Deploy"
 
 WEB_FILES=(index.html index-v2.html config.js release.json sw.js site.webmanifest robots.txt _headers privacy.html cookie.html termini.html politiche.html)
-DOC_FILES=(README.md DEPLOY-READINESS.md SECURITY.md BRAND-GUIDE.md UX-ITERATION-V2.md ADMIN-SETUP.md BILLING-SETUP.md RETENTION-SETUP.md ACCOUNT-LIFECYCLE.md PUSH-SETUP.md WRITE-QUOTAS.md UX-CHECKPOINT.md V1-STATUS.md CHANGELOG.md AUDIT-PREDEPLOY.md RELEASES.md)
+DOC_FILES=(README.md DEPLOY-READINESS.md SECURITY.md BRAND-GUIDE.md UX-ITERATION-V2.md ADMIN-SETUP.md BILLING-SETUP.md RETENTION-SETUP.md ACCOUNT-LIFECYCLE.md ERASURE-REQUESTS.md PUSH-SETUP.md WRITE-QUOTAS.md UX-CHECKPOINT.md V1-STATUS.md CHANGELOG.md AUDIT-PREDEPLOY.md RELEASES.md)
 DEPLOY_FILES=(README.md package.json package-lock.json wrangler.jsonc)
 
 mkdir -p "$STATIC_DIR/assets/brand" "$DEPLOY_DIR/public/assets/brand" "$FINAL_DIR/assets" "$FINAL_DIR/TROVAT1O-Cloudflare-Deploy/public"

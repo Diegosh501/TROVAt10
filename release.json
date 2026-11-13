@@ -1,8 +1,8 @@
 {
   "product": "TROVAT1O",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0-rc.2",
   "mode": "interactive-preview",
-  "releaseDate": "2026-11-11",
+  "releaseDate": "2026-11-13",
   "onlineAccountsEnabled": false,
   "cloudPersistenceEnabled": false,
   "paidSubscriptionsEnabled": false,

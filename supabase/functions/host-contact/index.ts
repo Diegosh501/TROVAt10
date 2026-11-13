@@ -1,9 +1,11 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.0';
 const origin=Deno.env.get('APP_ORIGIN')||'';
-const cors={'Access-Control-Allow-Origin':origin,'Access-Control-Allow-Headers':'authorization,apikey,content-type',
-  'Access-Control-Allow-Methods':'POST,OPTIONS','Vary':'Origin'};
-const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...cors,
-  'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
+const testOrigin=Deno.env.get('APP_TEST_ORIGIN')??'';
+function isHttpsOrigin(value:string):boolean{
+  try{const url=new URL(value);return !value.includes('*')&&url.protocol==='https:'&&url.origin===value}
+  catch{return false}
+}
+const validOrigins=isHttpsOrigin(origin)&&(testOrigin===''||isHttpsOrigin(testOrigin));
 async function readBody(req:Request){
   const reader=req.body?.getReader();if(!reader)throw new Error('invalid_request');
   const chunks:Uint8Array[]=[];let size=0;
@@ -13,8 +15,16 @@ async function readBody(req:Request){
   return JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));
 }
 Deno.serve(async req=>{
-  try{if(new URL(origin).origin!==origin||new URL(origin).protocol!=='https:')return json({error:'unavailable'},503)}catch{return json({error:'unavailable'},503)}
-  if(req.headers.get('Origin')!==origin)return json({error:'forbidden'},403);
+  const requestOrigin=req.headers.get('Origin')||'';
+  const allowedOrigin=validOrigins&&(requestOrigin===origin||(testOrigin!==''&&requestOrigin===testOrigin));
+  // Keep response headers local to this request, including denied requests.
+  const cors:Record<string,string>={'Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods':'POST, OPTIONS','Vary':'Origin',
+    ...(allowedOrigin?{'Access-Control-Allow-Origin':requestOrigin}:{})};
+  const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...cors,
+    'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
+  if(!validOrigins)return json({error:'unavailable'},503);
+  if(!allowedOrigin)return json({error:'forbidden'},403);
   if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors});
   if(req.method!=='POST')return json({error:'invalid_method'},405);
   const bearer=req.headers.get('Authorization')||'';

@@ -31,7 +31,7 @@ try {
 assert.equal(engineVersion, '0.5.16', 'Use the audited exact PGlite engine version');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const digest = content => crypto.createHash('sha256').update(content).digest('hex');
-const migrations = ['schema.sql', 'notifications.sql', 'admin-security.sql', 'oauth-profiles.sql', 'free-access.sql', 'billing.sql', 'host-contact.sql', 'retention.sql', 'admin-operations.sql', 'account-export.sql', 'write-quotas.sql', 'push-dispatch.sql', 'account-lifecycle.sql', 'session-security.sql']
+const migrations = ['schema.sql', 'notifications.sql', 'admin-security.sql', 'oauth-profiles.sql', 'free-access.sql', 'billing.sql', 'host-contact.sql', 'retention.sql', 'admin-operations.sql', 'account-export.sql', 'write-quotas.sql', 'push-dispatch.sql', 'account-lifecycle.sql', 'session-security.sql', 'account-erasure-requests.sql']
   .map(file => `supabase/${file}`);
 const required = new Set(migrations);
 const selected = [];

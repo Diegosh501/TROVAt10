@@ -5,12 +5,13 @@ const {stripTypeScriptTypes}=require('node:module');
 const source=fs.readFileSync(path.join(__dirname,'..','supabase/functions/admin-console/index.ts'),'utf8').replace(/^import .*?;\s*/,'');
 const js=stripTypeScriptTypes(source,{mode:'strip'});
 const appOrigin='https://trovato.diegolucentedesign.workers.dev';
+const testOrigin='https://v1-check-trovato.diegolucentedesign.workers.dev';
 let passed=0;
 function boot(options={}){
  let handler;const rpcCalls=[],clientCalls=[];
  const env={APP_ORIGIN:appOrigin,SUPABASE_URL:'https://test.supabase.co',SUPABASE_ANON_KEY:'public-test-key',...(options.env||{})};
  const context={Request,Response,URL,TextDecoder,Uint8Array,Error,JSON,Array,Deno:{env:{get:key=>env[key]},serve:fn=>{handler=fn}},createClient:(url,key,config)=>{
-  clientCalls.push({url,key,config});return {auth:{getUser:async()=>{if(options.throwAuth)throw new Error('private upstream diagnostic');return options.userResult||{data:{user:{id:'synthetic-admin',email_confirmed_at:'2026-11-10T00:00:00Z',is_anonymous:false}},error:null}}},rpc:async(name,args)=>{rpcCalls.push({name,args});return options.rpcResult||{data:name==='admin_update_support_ticket'?true:{metrics:{totalUsers:0}},error:null}}}
+  clientCalls.push({url,key,config});return {auth:{getUser:async()=>{if(options.throwAuth)throw new Error('private upstream diagnostic');return options.userResult||{data:{user:{id:'synthetic-admin',email_confirmed_at:'2026-11-10T00:00:00Z',is_anonymous:false}},error:null}}},rpc:async(name,args)=>{rpcCalls.push({name,args});if(options.rpc)return options.rpc({name,args,authorization:config.global.headers.Authorization});return options.rpcResult||{data:name==='admin_update_support_ticket'?true:{metrics:{totalUsers:0}},error:null}}}
  }};
  vm.runInNewContext(js,context,{filename:'admin-console/index.ts'});
  async function request(body={action:'dashboard'},extra={}){return handler(new Request(appOrigin+'/functions/v1/admin-console',{method:'POST',headers:{Origin:appOrigin,Authorization:'Bearer synthetic-access-token','Content-Type':'application/json',...(extra.headers||{})},body:typeof body==='string'?body:JSON.stringify(body),...(extra.request||{})}))}
@@ -23,6 +24,35 @@ async function check(label,fn){await fn();console.log('PASS '+(++passed)+': '+la
  await check('non-HTTPS production origin fails closed',async()=>{assert.equal((await boot({env:{APP_ORIGIN:'http://example.test'}}).request()).status,503)});
  await check('foreign origin and missing origin are rejected before Auth',async()=>{const b=boot();for(const origin of ['https://attacker.invalid','null',''])assert.equal((await b.request(undefined,{headers:{Origin:origin}})).status,403);assert.equal(b.clientCalls.length,0)});
  await check('only exact-origin preflight succeeds',async()=>{const b=boot();const r=await b.handler(new Request(appOrigin,{method:'OPTIONS',headers:{Origin:appOrigin}}));assert.equal(r.status,204);assert.equal(r.headers.get('Access-Control-Allow-Origin'),appOrigin);assert.equal(b.clientCalls.length,0)});
+ await check('test origin is disabled until explicitly configured',async()=>{for(const value of [undefined,'']){const b=boot({env:{APP_TEST_ORIGIN:value}});const r=await b.handler(new Request(appOrigin,{method:'OPTIONS',headers:{Origin:testOrigin}}));assert.equal(r.status,403);assert.equal(r.headers.get('Access-Control-Allow-Origin'),null);assert.equal(b.clientCalls.length,0)}});
+ await check('both configured exact origins receive their own preflight headers',async()=>{const b=boot({env:{APP_TEST_ORIGIN:testOrigin}});for(const origin of [appOrigin,testOrigin]){const r=await b.handler(new Request(appOrigin,{method:'OPTIONS',headers:{Origin:origin,'Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'authorization, x-client-info, apikey, content-type'}}));assert.equal(r.status,204);assert.equal(r.headers.get('Access-Control-Allow-Origin'),origin);assert.equal(r.headers.get('Vary'),'Origin');assert.equal(r.headers.get('Access-Control-Allow-Methods'),'POST, OPTIONS');assert.equal(r.headers.get('Access-Control-Allow-Headers'),'authorization, x-client-info, apikey, content-type')}assert.equal(b.clientCalls.length,0)});
+ await check('preflight never reflects arbitrary requested headers',async()=>{const b=boot({env:{APP_TEST_ORIGIN:testOrigin}});const r=await b.handler(new Request(appOrigin,{method:'OPTIONS',headers:{Origin:testOrigin,'Access-Control-Request-Headers':'authorization,x-attacker-header'}}));assert.equal(r.status,204);assert.equal(r.headers.get('Access-Control-Allow-Headers'),'authorization, x-client-info, apikey, content-type');assert.doesNotMatch(r.headers.get('Access-Control-Allow-Headers'),/attacker/);assert.equal(b.clientCalls.length,0)});
+ await check('malformed test configuration fails closed for production and test requests',async()=>{for(const value of ['*','https://*.example.test','http://example.test','https://example.test/','https://example.test/path','https://example.test?query=1','https://example.test#fragment','https://user:password@example.test',' https://example.test','https://example.test,https://other.test']){const b=boot({env:{APP_TEST_ORIGIN:value}});for(const origin of [appOrigin,testOrigin]){const r=await b.request(undefined,{headers:{Origin:origin}});assert.equal(r.status,503,value);assert.equal(r.headers.get('Access-Control-Allow-Origin'),null,value)}assert.equal(b.clientCalls.length,0,value)}});
+ await check('wildcard/path/query production origins are rejected as configuration',async()=>{for(const value of ['https://*.example.test','https://example.test/','https://example.test/path','https://example.test?query=1','https://example.test#fragment']){const b=boot({env:{APP_ORIGIN:value,APP_TEST_ORIGIN:testOrigin}});const r=await b.request(undefined,{headers:{Origin:testOrigin}});assert.equal(r.status,503,value);assert.equal(r.headers.get('Access-Control-Allow-Origin'),null,value);assert.equal(b.clientCalls.length,0,value)}});
+ await check('configured test origin does not permit suffixes siblings paths or absent origins',async()=>{const b=boot({env:{APP_TEST_ORIGIN:testOrigin}});for(const origin of [testOrigin+'.attacker.invalid','https://sibling-trovato.diegolucentedesign.workers.dev',testOrigin+'/',testOrigin+'?query=1','null','']){for(const method of ['OPTIONS','POST']){const r=await b.handler(new Request(appOrigin,{method,headers:{Origin:origin}}));assert.equal(r.status,403,origin);assert.equal(r.headers.get('Access-Control-Allow-Origin'),null,origin)}}assert.equal(b.clientCalls.length,0)});
+ await check('test-origin responses still require caller authentication and preserve MFA denial',async()=>{const missing=boot({env:{APP_TEST_ORIGIN:testOrigin}});let r=await missing.request(undefined,{headers:{Origin:testOrigin,Authorization:''}});assert.equal(r.status,401);assert.equal(r.headers.get('Access-Control-Allow-Origin'),testOrigin);assert.equal(missing.rpcCalls.length,0);const forged=boot({env:{APP_TEST_ORIGIN:testOrigin},userResult:{data:{user:null},error:{message:'invalid token'}}});r=await forged.request(undefined,{headers:{Origin:testOrigin}});assert.equal(r.status,401);assert.equal(r.headers.get('Access-Control-Allow-Origin'),testOrigin);assert.equal(forged.rpcCalls.length,0);const mfa=boot({env:{APP_TEST_ORIGIN:testOrigin},rpcResult:{data:null,error:{code:'PT403',message:'mfa_required'}}});r=await mfa.request(undefined,{headers:{Origin:testOrigin}});assert.equal(r.status,403);assert.equal(r.headers.get('Access-Control-Allow-Origin'),testOrigin);assert.deepEqual(await r.json(),{error:'mfa_required'});assert.equal(mfa.clientCalls[0].key,'public-test-key');assert.equal(mfa.clientCalls[0].config.global.headers.Authorization,'Bearer synthetic-access-token')});
+ await check('concurrent production and test requests retain isolated origin headers and caller tokens',async()=>{
+  let resolveProduction,resolveTest,resolveReached;
+  const production=new Promise(r=>{resolveProduction=r}),test=new Promise(r=>{resolveTest=r}),reached=new Promise(r=>{resolveReached=r});
+  let arrivals=0;
+  const b=boot({env:{APP_TEST_ORIGIN:testOrigin},rpc:({authorization})=>{if(++arrivals===2)resolveReached();return authorization==='Bearer production-caller'?production:test}});
+  const first=b.request(undefined,{headers:{Origin:appOrigin,Authorization:'Bearer production-caller'}});
+  const second=b.request(undefined,{headers:{Origin:testOrigin,Authorization:'Bearer test-caller'}});
+  let timeout;
+  try{await Promise.race([reached,new Promise((_,reject)=>{timeout=setTimeout(()=>reject(new Error('requests did not reach independent RPCs')),1000)})]);}
+  finally{clearTimeout(timeout)}
+  resolveTest({data:{metrics:{totalUsers:1}},error:null});
+  const testResponse=await second;
+  assert.equal(testResponse.headers.get('Access-Control-Allow-Origin'),testOrigin);
+  assert.equal(testResponse.headers.get('Vary'),'Origin');
+  resolveProduction({data:null,error:{code:'PT403',message:'mfa_required'}});
+  const productionResponse=await first;
+  assert.equal(productionResponse.status,403);
+  assert.equal(productionResponse.headers.get('Access-Control-Allow-Origin'),appOrigin);
+  assert.deepEqual(await productionResponse.json(),{error:'mfa_required'});
+  assert.deepEqual(b.clientCalls.map(call=>call.config.global.headers.Authorization),['Bearer production-caller','Bearer test-caller']);
+  assert.equal((await b.request(undefined,{headers:{Origin:'https://attacker.invalid'}})).headers.get('Access-Control-Allow-Origin'),null);
+ });
  await check('unexpected methods are refused',async()=>{assert.equal((await boot().handler(new Request(appOrigin,{headers:{Origin:appOrigin}}))).status,405)});
  await check('missing bearer token is unauthorized',async()=>{const b=boot();assert.equal((await b.request(undefined,{headers:{Authorization:''}})).status,401);assert.equal(b.rpcCalls.length,0)});
  await check('a forged bearer token must pass real Auth verification',async()=>{const b=boot({userResult:{data:{user:null},error:{message:'bad signature'}}});assert.equal((await b.request()).status,401);assert.equal(b.rpcCalls.length,0)});

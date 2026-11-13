@@ -1,78 +1,82 @@
-# Stato autorevole — 13 novembre 2026
-
-Questa sezione prevale sui checkpoint storici sottostanti.
-
-- Pubblico aggiornato: **1.0.0-rc.1**, anteprima interattiva, https://trovato.diegolucentedesign.workers.dev/ . Versione Cloudflare `959a4c70-a070-4ee8-aa21-b306260b3165`, pubblicata l’11 novembre. Non è ancora V1.0 cloud.
-- Nuova verifica HTTPS del 13 novembre: **17/17 asset identici**, intestazioni corrette, **5/5 percorsi riservati negati**. Ricevuta: `output/audit/2026-11-13/live-verification.json`.
-- Supabase corretto `nrixslotansgrtrosaof`: **15 migrazioni**. Ciclo account applicato e **enabled=false, purge_enabled=false**. Nessun job installato, nessuna cancellazione attiva. Utenti/eventi reali ancora zero.
-- Nuovo modulo `supabase/session-security.sql` applicato: sessione Auth esatta e viva, account valido, **10 policy RLS restrittive** con USING/WITH CHECK. Non annulla richieste già in corso o snapshot MVCC precedenti.
-- Test locale aggiornato: **14 moduli SQL / 13 regressioni** con rollback, compresa session-security. Due controlli negativi rilevano un bypass intenzionale dei gate/RLS. Auth e JWT sono fixture, non login reali. Ultima esecuzione Node: **22/22**.
-- Il tentativo Google del 13 novembre, dopo la conferma «Impostazione modificata», è ancora negato dalla regola salvata/gestita del browser. Nessun aggiramento. Provider Google non completato; frontend mantiene tutti i Ready=false.
-- Master aggiornato: `output/handoff/OBIETTIVO-MASTER-R3.md`, **25 criteri V1 e 11 scenari reali** A–I,L,M. Nessuno scenario integralmente collaudato online: **0/11**. V2=PUBLIC BETA; V3=STABLE; V4=COMPLETE PLATFORM. Le vecchie barre 0/7 descrivono il precedente obiettivo.
-- Cancellazione volontaria ancora mancante: audit `output/audit/2026-11-11/erasure-readiness-review.md`. Non equiparare scadenza Free a diritto di cancellazione. Conservazione Billing/dipendenze da risolvere prima del purge.
-- Prossime priorità: Google–Supabase sul progetto corretto; Admin reale TOTP; due identità Host/Sportivo e persistenza; export/erasure/supporto e retention server; ripristino; poi collaudo V1. Push e apertura beta V2 successive. Premium/Stripe predisposti ma pagamenti spenti, tutti iniziano Free.
-- Nessun nuovo costo, SMS, acquisto o account Admin creato. Il dominio acquistato resta futuro.
-
----
-
-## Documento e checkpoint precedenti
-
 # TROVAT1O
 
-**Non perderti più una partita.** La prima versione aiuta a trovare e organizzare calcio amatoriale a 5, 8 e 11; la visione del marchio comprende attività più ampie.
+**Non perderti più una partita.** La prima versione aiuta a trovare e organizzare calcio amatoriale a 5, 8 e 11. La visione del marchio comprende attività più ampie.
 
-## Stato dell’11 novembre 2026
+## Versioni effettive - 13 novembre 2026
 
-Il sito pubblico è ancora l’**anteprima interattiva 2.0.2 con dati locali**, non la V1.0 cloud per utenti reali:
+| Ambiente | Collegamento | Stato |
+| --- | --- | --- |
+| Collaudo cloud | https://v1-check-trovato.diegolucentedesign.workers.dev/ | `1.0.0-cloud-test.4`: Google, profilo e partite reali su Supabase; non è ancora un lancio pubblico definitivo |
+| Sito principale | https://trovato.diegolucentedesign.workers.dev/ | `1.0.0-rc.1`: anteprima interattiva con dati locali |
+| Sorgenti e pacchetto locale | Questo repository | Candidato aggiornato; i flag di attivazione sono disabilitati per impostazione predefinita |
 
-[Apri l’anteprima pubblica](https://trovato.diegolucentedesign.workers.dev/).
+Il collaudo è separato dal traffico del sito principale. Un caricamento con `wrangler versions upload` non è un rilascio in produzione. [V1-STATUS.md](V1-STATUS.md) registra i **25 criteri** del Master R3 e gli **11 scenari finali**. Non dichiarare la V1 completata prima di soddisfarli.
 
-I sorgenti candidati includono Google PKCE, completamento profilo, Host/Sportivo, console Admin protetta, quote, esportazione, storico, push e predisposizione Premium. La funzione server `admin-console` è aggiornata alla **versione 2**; il nuovo frontend non è stato distribuito. Tutti i flag di attivazione restano `false`. Non usare dati personali reali nella demo.
+## Risultati verificati
 
-Lo stato verificabile dei venti criteri è in [V1-STATUS.md](V1-STATUS.md). Non esiste una percentuale che sostituisca i test reali ancora necessari.
+- Google OAuth configurato sul progetto corretto `nrixslotansgrtrosaof`; primo profilo Host Free completato con le dichiarazioni esplicite del titolare. Nuovo login riuscito anche dopo la disattivazione della vecchia chiave Google.
+- Due partite private di collaudo salvate nel database. Creazione, modifica, riapertura, annullamento e storico verificati nell'interfaccia. Nessuna prenotazione reale.
+- Cambio Host/Sportivo persistente dopo ricaricamento e ritorno guidato a Host. Il ruolo operativo non attribuisce privilegi di piattaforma.
+- Esportazione personale JSON scaricata con tutte le nove sezioni. PNG della partita scaricato e ispezionato: logo e sito presenti, luogo privato escluso anche dai metadata.
+- **24 suite Node** superate; **15 moduli SQL e 14 regressioni** con rollback nel PostgreSQL locale. I test con trasporti o identità controllate non sostituiscono account Google distinti, MFA reale o concorrenza remota.
+- Form verificato a 320, 390, 768 e 1440 pixel: nessun overflow orizzontale osservato nei contesti controllati, caratteri dei campi a 16 px.
+- `admin-console` v4 e `host-contact` v1 pubblicate: origini HTTPS esatte e contesto per richiesta. Il secondo fattore Admin è ancora da attivare personalmente.
+
+La precedente verifica della preview principale ha confrontato 17 asset e rifiutato cinque percorsi riservati. Non attribuirle implicitamente la prova dei flussi cloud.
 
 ## Avvio locale su Mac
 
-Se manca `config.js`, crea la configurazione di prova:
+Se manca la configurazione locale, creala dal modello:
 
 ```sh
 cp config.example.js config.js
 ```
 
-Dalla cartella principale prepara i soli file pubblici e avvia il server:
+Non sovrascrivere una configurazione già predisposta. Dalla cartella principale:
 
 ```sh
 bash scripts/package-release.sh
 python3 -m http.server 4173 --bind 127.0.0.1 --directory TROVAT1O-Cloudflare-Deploy/public
 ```
 
-Apri [http://127.0.0.1:4173](http://127.0.0.1:4173). Per fermare il tuo server usa `Ctrl+C`; se la porta è occupata usa il server esistente o un’altra porta. Per una prova sulla stessa Wi-Fi puoi usare `--bind 0.0.0.0` e l’IP del Mac. Questo espone soltanto la cartella pubblica: non servire la root del progetto, che contiene documentazione e operazioni riservate. La demo locale non sincronizza eventi tra dispositivi.
+Apri http://127.0.0.1:4173 e ferma il server con `Ctrl+C`. Per la stessa Wi-Fi puoi usare `--bind 0.0.0.0` e l'IP del Mac; esponi esclusivamente la cartella pubblica. Non servire la root del progetto, i sorgenti SQL, i backup o il checkpoint. La configurazione locale predefinita resta una demo: non sincronizza partite fra dispositivi.
 
-## Google, ruoli e dati online
+## Account, ruoli e dati
 
-Il percorso V1.0 usa Google verificato e il completamento esplicito del profilo. Non richiede SMS a pagamento o una chiave CAPTCHA per giocare. Email/password, SMTP e OTP sono percorsi opzionali, non prerequisiti del login Google. Il telefono verificato serve alla condivisione facoltativa del recapito Host.
+Il percorso Google già collaudato usa un'email verificata e il completamento esplicito del profilo. Non richiede SMS per giocare. Il telefono Host condiviso resta facoltativo, con verifica e consenso; il numero non è una rubrica pubblica.
 
-Il server distingue ruolo operativo e piano. Free e Premium ordinari non vedono la console; la demo Admin pubblica è stata rimossa dal candidato. L’ingresso dedicato nel profilo è mostrato solo dopo una conferma del backend per l’account marcato lato server. Il ruolo Admin non è selezionabile durante la registrazione: allowlist privata, sessione viva, secondo fattore TOTP recente e autorizzazioni SQL proteggono le operazioni anche contro chiamate dirette. I match passano da RPC con controlli di proprietà e capienza; il client non legge la tabella eventi direttamente.
+**Email/password, conferma email, recupero password, SMTP personalizzato e Turnstile restano requisiti aperti del Master R3.** Non sono stati provati o attivati nel collaudo; `emailAuthEnabled` resta `false`. Non presentarli come disponibili.
 
-Nel flusso cloud non viene proposta la scelta sessione/dispositivo e i dati demo non vengono usati come database condiviso. Sessione tecnica Auth, cache pubblica e identificativo per gestire le push sono separati dai match.
+Lo stesso account può passare da Sportivo a Host. Soltanto il creatore gestisce il proprio evento. L'Admin di piattaforma è autorizzato in una allowlist privata: sessione Auth viva, TOTP recente e controlli SQL sono indispensabili. L'email scritta nel browser, `user_metadata`, Free o Premium non concedono Admin. Il suggerimento server in `app_metadata` abilita solo la sonda dell'ingresso dedicato; non autorizza dati o azioni. Gli utenti ordinari non hanno una Console demo.
 
-## Free, conservazione e Premium
+Nel flusso cloud non si sceglie tra sessione e dispositivo: profilo e partite sono nel database. Sessione tecnica Auth e cache di asset pubblici hanno funzioni diverse. Non usare il service worker come archivio di API private.
 
-I nuovi account partono Free. Con account verificato il limite è due eventi attivi; senza verifica consentita si può creare un evento privato ogni sette giorni. La visibilità dello storico Free termina sette giorni dopo la conclusione o l’annullamento effettivi; vedi [RETENTION-SETUP.md](RETENTION-SETUP.md).
+## Free, storico e acquisti
 
-La nuova durata dell’**account** Free è distinta: sette giorni dalla creazione del primo match, Premium verificato escluso, avvisi e protezioni su dati condivisi. Codice e interfaccia sono testati localmente, ma la migrazione **non è stata applicata** perché la conferma del connettore è scaduta. Non viene cancellato alcun account online. Vedi [ACCOUNT-LIFECYCLE.md](ACCOUNT-LIFECYCLE.md).
+Tutti gli account creati partono Free. Con account verificato il limite è due eventi attivi. Per l'eventuale percorso privo di verifica consentita è prevista una partita privata ogni sette giorni.
 
-Premium previsto: €4,99/anno. Checkout, portale e webhook sono predisposti ma gli acquisti sono disattivati. I test non creano addebiti o piani reali; una pagina di ritorno non concede privilegi. Vedi [BILLING-SETUP.md](BILLING-SETUP.md).
+Le due regole dei sette giorni sono distinte:
 
-## Verifiche
+- **Account Free:** il conteggio richiesto parte dal primo match creato. Il modulo è applicato ma `enabled=false` e `purge_enabled=false`; nessun account è cancellato automaticamente. Premium verificato, Admin e vincoli su dati condivisi sono protetti.
+- **Storico:** la finestra Free parte dalla conclusione o dall'annullamento effettivi. Il codice SQL è applicato; il job non è attivo.
 
-Le suite Node eseguono funzioni reali con trasporti controllati e controlli dei sorgenti; non sono login reali presso i fornitori:
+Non attivare eliminazioni prima di backup/ripristino, comunicazioni, verifiche sui dati condivisi e percorso di gestione effettivo. Vedi [ACCOUNT-LIFECYCLE.md](ACCOUNT-LIFECYCLE.md) e [RETENTION-SETUP.md](RETENTION-SETUP.md).
+
+Premium previsto a **€4,99/anno**, acquisti disabilitati. Checkout, portale e webhook sono predisposti; nessun pagamento live o acquisto è stato usato come test. Vedi [BILLING-SETUP.md](BILLING-SETUP.md).
+
+## Privacy e assistenza
+
+Il download personale è operativo nel collaudo. La richiesta autenticata di cancellazione entra nella coda protetta di assistenza: **una ricevuta di richiesta non significa accesso chiuso o dati cancellati**. Vedi [ERASURE-REQUESTS.md](ERASURE-REQUESTS.md).
+
+La chiusura completa dell'account, i vincoli di conservazione e la cancellazione effettiva restano da completare. Anche il normale invio assistenza, i promemoria pianificati e le push richiedono ulteriore configurazione e prova. I contatti diretti del supporto sono indicati nell'app. Non dichiarare conclusi accordi con fornitori, informative o verifiche normative non eseguiti.
+
+## Verifiche ripetibili
 
 ```sh
 for test_file in tests/*.cjs; do node "$test_file"; done
 ```
 
-Il driver SQL generico salta esplicitamente il motore se non installato. Per il controllo obbligatorio PostgreSQL locale, usa le dipendenze esatte separate dall’app:
+Per rendere obbligatorio il motore PostgreSQL locale, usa le dipendenze esatte separate dall'app:
 
 ```sh
 mkdir -p tmp/local-postgres
@@ -82,21 +86,16 @@ npm ci --prefix tmp/local-postgres --ignore-scripts --no-audit --no-fund
 node tests/local-postgres.cjs --require-engine
 ```
 
-Sono passati 22 suite Node, 13 moduli SQL e 12 regressioni con rollback locale; in aggiunta il checkpoint precedente ha verificato sei firme Stripe con SDK reale e i tipi dei gestori Deno. La CI ripete i controlli e il pacchetto senza pubblicare o usare segreti. Nel browser locale sono stati provati creazione, modifica, richiesta dalla mappa, ricerca, storico personale, filtro assistenza ed export PNG; il controllo successivo è stato interrotto da un diniego del browser, senza aggirarlo. Mancano OAuth/MFA reali, account distinti, concorrenza, job e prove post-deploy della V1.0.
+PGlite usa PostgreSQL 18.6; il servizio ospitato usa PostgreSQL 17.11. Le fixture Auth/JWT/MFA non sono scambi con i provider reali. La CI ripete controlli Node, SQL obbligatorio, tipi Deno, firme Stripe e confezionamento, senza pubblicare o richiedere segreti.
 
-## Sorgenti e distribuzione
+**Il database remoto ora contiene un profilo reale. Non rieseguire i vecchi test remoti che richiedono un database vuoto.** Conservare i rollback e usare ambienti isolati per prove sintetiche.
 
-Repository ufficiale: [Diegosh501/TROVAt10](https://github.com/Diegosh501/TROVAt10). Controlli: [GitHub Actions](https://github.com/Diegosh501/TROVAt10/actions).
+## Sorgenti, rilascio e ripresa
 
-`config.js` è escluso da Git; in CI viene generato da `config.example.js`. Le chiavi pubblicabili e gli URL appartengono alla configurazione pubblica; chiavi privilegiate, token, segreti OAuth/Stripe/VAPID e credenziali non devono comparire lì, nei log o nel repository.
+Repository scelto: [Diegosh501/TROVAt10](https://github.com/Diegosh501/TROVAt10). Esiti correnti: [GitHub Actions](https://github.com/Diegosh501/TROVAt10/actions). Il verde di un vecchio commit non verifica nuove modifiche.
 
-`bash scripts/package-release.sh` rigenera le copie e gli archivi dai sorgenti. La cartella `TROVAT1O-Cloudflare-Deploy/public/` è il candidato aggiornato, non la prova del contenuto attualmente online. La pubblicazione è un’operazione successiva e coordinata; seguire [DEPLOY-READINESS.md](DEPLOY-READINESS.md) e [RELEASES.md](RELEASES.md).
+`config.js` è escluso da Git. Gli URL e le sole chiavi pubblicabili vanno nella configurazione pubblica. Segreti OAuth, Stripe, VAPID, token e chiavi privilegiate restano nei servizi autorizzati, mai nel codice client, in un ticket o nei log. Il collegamento GitHub-Supabase usato per configurare il servizio è stato revocato con consenso; il nuovo login alla console potrà richiedere di autorizzarlo di nuovo.
 
-## Riferimenti
+`scripts/package-release.sh` rigenera copie e archivi dai sorgenti e confronta gli ingressi. Il pacchetto locale comprende backend, test, documentazione e guida PDF. Configurazione del collaudo e checkpoint privato restano separati dai file pubblici. Seguire [DEPLOY-READINESS.md](DEPLOY-READINESS.md), [supabase/README.md](supabase/README.md), [ADMIN-SETUP.md](ADMIN-SETUP.md), [PUSH-SETUP.md](PUSH-SETUP.md) e [SECURITY.md](SECURITY.md).
 
-- [Supabase](supabase/README.md): moduli, migrazioni applicate e operazione ancora da approvare.
-- [Admin](ADMIN-SETUP.md), [push](PUSH-SETUP.md), [quote](WRITE-QUOTAS.md), [UX](UX-CHECKPOINT.md), [sicurezza](SECURITY.md).
-- `privacy.html`, `termini.html`, `cookie.html`, `politiche.html`: revisione pre-lancio dell’11 novembre, coerente con i provider e le opzioni descritte. Richiede verifica finale dei trattamenti e contratti effettivi; non è un’attestazione legale.
-- La guida illustrata aggiornata è inclusa nel pacchetto locale, in `output/pdf/`.
-
-La regione del database remoto è EU Central e la lettura dell’11 novembre trova utenti, profili ed eventi a zero. Hosting e progetto esistenti non richiedono un dominio comprato per le prove. Nessun nuovo piano a pagamento è stato attivato; il costo iniziale zero resta soggetto alle quote dei fornitori e non è una garanzia di risorse illimitate.
+Il dominio acquistato verrà collegato dopo il collaudo; il dominio gratuito è sufficiente per provarlo. Nessun piano a pagamento, SMS o acquisto è stato attivato in questa ripresa. Costi futuri e continuità dipendono dai limiti reali dei piani scelti.

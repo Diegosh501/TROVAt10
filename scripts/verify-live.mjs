@@ -4,7 +4,9 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const publicDir=path.join(root,'TROVAT1O-Cloudflare-Deploy/public');
+// A version preview can use its own public configuration without replacing
+// the production candidate. Compare against the directory actually uploaded.
+const publicDir=path.resolve(root,process.argv[4]||'TROVAT1O-Cloudflare-Deploy/public');
 const base=new URL(process.argv[2]||'https://trovato.diegolucentedesign.workers.dev/');
 if(base.protocol!=='https:')throw new Error('HTTPS required');
 const reportPath=path.resolve(root,process.argv[3]||'output/audit/2026-11-11/live-verification.json');
