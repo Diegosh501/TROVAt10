@@ -1,3 +1,13 @@
+# Audit corrente — candidato rc.7 / cloud-test.10, 13 novembre 2026
+
+Questa sezione prevale sulle verifiche storiche. 27/27 suite Node e 16/16 regressioni SQL locali. Handler supporto reale con trasporti controllati: 17 scenari; UI: 14; bootstrap: 7. Due mutazioni locali negative rilevate. Nuovo supporto non attivo: due conferme migration scadute e schema remoto invariato, 17 migrazioni. Nessun aggiramento della conferma tecnica.
+
+Pin privato sintetico realmente salvato dall’Host; 33/33 controlli sul database con sessioni ordinarie nei cinque stati creatore, pending, ammesso, rimosso e anonimo. Coordinate e sede nascoste quando non consentite; base events, roster e profili altrui non utilizzabili per aggirare il feed. Prove prive di JWT/coordinate nei risultati.
+
+HTTPS cloud-test.10: 19/19 file corrispondenti, cinque percorsi riservati negati, intestazioni verificate. La prima verifica durante la propagazione ha trovato un vecchio index-v2; il controllo ripetuto dopo l’allineamento passa integralmente. Principale non aggiornato. TOTP Admin rinviato e servizi indicati in V1-STATUS restano gate reali: non è una certificazione di invulnerabilità o di V1 completata.
+
+---
+
 # Stato aggiornato e cronologia di audit
 
 Per lo stato corrente dell’11 novembre leggere V1-STATUS.md. Le sezioni seguenti sono una cronologia delle prove del 10 novembre e non dichiarano che tutti i vecchi blocchi siano ancora presenti. Ora Admin Edge v2 è distribuita; 22 suite Node, 13 moduli SQL e 12 regressioni locali sono passati. Provider, account reali, job, privacy operativa e rilascio V1.0 restano aperti. La migrazione account candidata non è applicata per conferma scaduta. Nessun nuovo frontend pubblico.

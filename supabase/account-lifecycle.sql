@@ -160,6 +160,8 @@ returns boolean language sql stable security definer set search_path='' as $$
     ('auth.users','public.profiles','id','c'),
     ('auth.users','public.support_request_audit','actor_id','a'),
     ('auth.users','public.support_submit_quota','user_id','c'),
+    ('auth.users','private.support_submission_receipts','user_id','c'),
+    ('auth.users','private.support_captcha_redemptions','user_id','n'),
     ('auth.users','private.platform_admins','user_id','c'),
     ('auth.users','private.admin_action_quota','user_id','c'),
     ('auth.users','private.admin_audit','actor_id','n'),

@@ -1,8 +1,8 @@
 # TROVAT1O · Pacchetto di rilascio
 
-Candidato sorgente **1.0.0-rc.6**. Questa cartella viene rigenerata da `bash scripts/package-release.sh`: il suo `public/config.js` predefinito resta una preview, con attivazioni spente. Non copiare chiavi server nei file pubblici.
+Candidato sorgente **1.0.0-rc.7**. Questa cartella viene rigenerata da `bash scripts/package-release.sh`: il suo `public/config.js` predefinito resta una preview, con attivazioni spente. Non copiare chiavi server nei file pubblici.
 
-Il collaudo cloud effettivo è [1.0.0-cloud-test.9](https://v1-check-trovato.diegolucentedesign.workers.dev/), Cloudflare `e8f686ad-d452-4a88-8f1c-b7fa310f64b5`. Usa una configurazione separata, soli parametri pubblicabili e il progetto Supabase corretto. Il pacchetto del collaudo distribuito viene fornito separatamente dal sorgente locale.
+Il collaudo cloud effettivo è [1.0.0-cloud-test.10](https://v1-check-trovato.diegolucentedesign.workers.dev/), Cloudflare `8ac772c9-508b-47db-8487-14b9d0946a2d`. Usa una configurazione separata, soli parametri pubblicabili e il progetto Supabase corretto. Il pacchetto del collaudo distribuito viene fornito separatamente dal sorgente locale.
 
 Il sito principale resta [1.0.0-rc.1](https://trovato.diegolucentedesign.workers.dev/), anteprima locale. Un caricamento `wrangler versions upload` aggiorna una versione/alias di prova, non il traffico principale.
 

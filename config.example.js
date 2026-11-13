@@ -3,6 +3,7 @@
 window.TROVAT1O_CONFIG = {
   onlineReady: false,
   emailAuthEnabled: false,
+  supportReady: false,
   billingReady: false,
   exportReady: false,
   erasureRequestsReady: false,
@@ -12,6 +13,7 @@ window.TROVAT1O_CONFIG = {
   supabaseUrl: '',
   supabaseAnonKey: '',
   turnstileSiteKey: '',
+  supportTurnstileSiteKey: '',
   vapidPublicKey: '',
   pushReady: false
 };

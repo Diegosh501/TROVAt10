@@ -55,7 +55,7 @@ jobs:
 
       - name: Check payment functions and actual Stripe signature verification
         run: |
-          npx --yes deno@2.9.6 check --frozen --lock=supabase/deno.lock supabase/functions/billing/index.ts supabase/functions/stripe-webhook/index.ts supabase/functions/admin-console/index.ts supabase/functions/host-contact/index.ts supabase/functions/push-dispatch/index.ts
+          npx --yes deno@2.9.6 check --frozen --lock=supabase/deno.lock supabase/functions/billing/index.ts supabase/functions/stripe-webhook/index.ts supabase/functions/admin-console/index.ts supabase/functions/host-contact/index.ts supabase/functions/push-dispatch/index.ts supabase/functions/support-request/index.ts
           npx --yes deno@2.9.6 test --frozen --lock=supabase/deno.lock tests/billing-signature.test.ts
 
       - name: Package release from source

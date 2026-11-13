@@ -6,7 +6,7 @@
 
 | Ambiente | Collegamento | Stato |
 | --- | --- | --- |
-| Collaudo cloud | https://v1-check-trovato.diegolucentedesign.workers.dev/ | `1.0.0-cloud-test.9`: Google, profilo e partite reali su Supabase; non è ancora un lancio pubblico definitivo |
+| Collaudo cloud | https://v1-check-trovato.diegolucentedesign.workers.dev/ | `1.0.0-cloud-test.10`: Google, profilo e partite reali su Supabase; non è ancora un lancio pubblico definitivo |
 | Sito principale | https://trovato.diegolucentedesign.workers.dev/ | `1.0.0-rc.1`: anteprima interattiva con dati locali |
 | Sorgenti e pacchetto locale | Questo repository | Candidato aggiornato; i flag di attivazione sono disabilitati per impostazione predefinita |
 
@@ -18,10 +18,14 @@ Il collaudo è separato dal traffico del sito principale. Un caricamento con `wr
 - Tre partite di collaudo persistenti. Flusso pubblico provato: creazione → ricerca → richiesta → ammissione → avvio → conclusione → storico ritrovato dallo Sportivo dopo un nuovo accesso. Nessuna prenotazione reale.
 - Invito privato copiato e riaperto prima del login; ritorno da Google allo stesso evento. Sede mascherata prima dell’ammissione e dopo rimozione. Una nuova richiesta non riammette automaticamente.
 - Esportazione personale JSON con nove sezioni e PNG scaricati. Logo e sito nei metadata; sede privata, nomi e token esclusi dal PNG privato.
-- **25 suite Node; 15 moduli SQL e 15 regressioni locali.** **11/11 controlli backend reali come Sportivo e 11/11 come Host ordinario**. La sonda del titolare riceve `mfa_required` sia da SQL sia da Edge. La console completa richiede il TOTP personale, rinviato dal titolare.
+- **27 suite Node; 16 moduli SQL e 16 regressioni locali.** **11/11 controlli backend reali come Sportivo e 11/11 come Host ordinario**. La sonda del titolare riceve `mfa_required` sia da SQL sia da Edge. La console completa richiede il TOTP personale, rinviato dal titolare.
 - Larghezze controllate: 320, 390, 768 e 1440 px; campi a 16 px e azioni profilo dentro i bordi. Non è una garanzia su ogni dispositivo.
 - `admin-console` v4 e `host-contact` v1 pubblicate; 17 migrazioni sul progetto corretto. La correzione degli avvisi distingue avvio, conclusione, annullamento e cambio dei dettagli.
-- **15/25 criteri V1 verificati nel collaudo; 3/11 scenari finali chiusi (A, B, D)**. Le cifre misurano criteri verificati, non tempo residuo o percentuale di codice. La V1 completa non è ancora rilasciata sul principale.
+- **15/25 criteri V1 verificati nel collaudo; 4/11 scenari finali chiusi (A, B, D, H)**. Le cifre misurano criteri verificati, non tempo residuo o percentuale di codice. La V1 completa non è ancora rilasciata sul principale.
+
+La riservatezza dei pin è stata provata con coordinate presenti: **33/33 controlli reali** nei cinque stati creatore, pending, ammesso, rimosso e anonimo. Il backend nasconde sede, coordinate e roster quando non consentiti.
+
+**Assistenza:** il modulo sicuro ha 17 prove dell’handler, 14 della UI e una regressione SQL dedicata. È ancora disattivato: migrazione remota in attesa di conferma tecnica e widget Turnstile reale da configurare. La UI propone l’email invece di un invio non operativo. La libreria CAPTCHA è separata dal caricamento Google. Vedi [SUPPORT-SETUP.md](SUPPORT-SETUP.md).
 
 Il collaudo ha controlli HTTPS, asset e percorsi riservati propri. Non attribuirgli la pubblicazione coordinata della V1 sul principale.
 

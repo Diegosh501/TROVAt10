@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="it"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>TROVAT1O · Collaudo riservatezza</title>
+<style>body{font:16px/1.5 system-ui;max-width:780px;margin:28px auto;padding:0 20px;color:#123526}h1{font-size:25px}label{display:block;margin-top:16px}input,select,button{font:inherit;padding:12px;border:1px solid #a6b9aa;border-radius:8px}input,select{box-sizing:border-box;width:100%}button{margin:20px 8px 0 0;background:#00633a;color:#fff;min-height:48px}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f2f7ef;padding:16px;border-radius:10px}a{color:#00633a}</style>
+<h1>Collaudo della riservatezza</h1><p>Solo letture con i permessi della sessione corrente. Il risultato mostra esiti e conteggi: non include coordinate, nomi, recapiti o token. Usa soltanto l’evento sintetico di collaudo, con un pin già salvato dall’Host.</p>
+<label for="target">ID dell’evento privato di prova</label><input id="target" autocomplete="off" placeholder="UUID dell’evento sintetico">
+<label for="expected">Stato da verificare</label><select id="expected"><option value="owner">Creatore: sede e pin disponibili</option><option value="pending">In attesa: sede e pin nascosti</option><option value="approved">Ammesso: sede e pin disponibili</option><option value="removed">Rimosso: sede e pin nascosti</option><option value="anonymous">Non autenticato: evento escluso dalla ricerca</option></select>
+<label for="invitation">Link di invito (facoltativo; non finisce nel risultato)</label><input id="invitation" type="password" autocomplete="off" placeholder="Incolla il solo invito sintetico">
+<button id="run" type="button">Verifica riservatezza</button><a href="/">Torna all’app</a><pre id="results" role="status" aria-live="polite">Pronto.</pre>
+<script src="/config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" integrity="sha384-gnyZit14c5lnGcarmA166QQjjJXpucw25ogZXuwH3HxxY904zHkBqmxVpelsPorb" crossorigin="anonymous"></script>
+<script>
+document.getElementById('run').addEventListener('click',async()=>{
+ const button=document.getElementById('run'),out=document.getElementById('results'),c=window.TROVAT1O_CONFIG,rows=[],expected=document.getElementById('expected').value;
+ button.disabled=true;const add=(name,passed,observed)=>{rows.push({name,passed,observed});out.textContent=JSON.stringify({capturedAt:new Date().toISOString(),expected,checks:rows},null,2)};
+ try{
+  const target=document.getElementById('target').value.trim();if(!/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i.test(target)||!c?.onlineReady)throw Error('setup');
+  const client=supabase.createClient(c.supabaseUrl,c.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:false,detectSessionInUrl:false,flowType:'pkce'}});
+  const auth=await client.auth.getUser(),user=auth.data?.user;add('Expected authentication state',expected==='anonymous'?!user:!!user,!!user?'authenticated':'anonymous');
+  if((expected==='anonymous')===!!user)throw Error('wrong_session');
+  const feed=await client.rpc('event_feed');if(feed.error)throw Error('feed');const event=feed.data?.find(x=>x.id===target),visible=['owner','approved'].includes(expected);
+  add('Discovery / membership boundary',expected==='anonymous'?!event:!!event&&(expected==='owner'?event.creator_id===user.id:event.my_state===expected),event?event.my_state||'creator':'absent');
+  if(event){const pin=event.latitude!=null||event.longitude!=null;add('Non-null private pin visibility',visible?Number.isFinite(event.latitude)&&Number.isFinite(event.longitude):event.latitude===null&&event.longitude===null,pin?'present':'hidden');add('Private venue visibility',visible?!!event.venue&&event.venue!=='Luogo comunicato dopo l’ammissione':event.venue==='Luogo comunicato dopo l’ammissione',visible?'permitted':'masked')}
+  const base=await client.from('events').select('id,latitude,longitude').eq('id',target);add('Base event table cannot bypass feed',base.error?.code==='42501'||!base.error&&base.data.length===0,base.error?.code||{rows:base.data.length});
+  if(!visible){const pins=await client.from('pin_suggestions').select('id,latitude,longitude').eq('event_id',target);add('Unauthorized pin suggestions',pins.error?.code==='42501'||!pins.error&&pins.data.length===0,pins.error?.code||{rows:pins.data.length});const roster=await client.rpc('event_roster',{p_event_id:target});add('Unauthorized roster',roster.error?.code==='42501',roster.error?.code||'unexpected')}
+  if(user){const profiles=await client.from('profiles').select('id').neq('id',user.id);add('Other personal profiles remain private',!profiles.error&&profiles.data.length===0,profiles.error?.code||{rows:profiles.data.length})}
+  const invitation=document.getElementById('invitation').value.trim();if(invitation){const link=new URL(invitation);if(link.origin!==location.origin)throw Error('invite_origin');const params=new URLSearchParams(link.hash.slice(1)),token=params.get('invito')||link.searchParams.get('invito');if(!/^[a-f0-9]{64}$/.test(token||''))throw Error('invite_format');const preview=await client.rpc('get_event_invitation',{p_token:token});const item=preview.data?.find(x=>x.event_id===target);add('Invite reveals no exact venue or pin',!preview.error&&!!item&&item.venue==='Luogo comunicato dopo l’ammissione'&&item.latitude==null&&item.longitude==null,preview.error?.code||{rows:preview.data?.length||0});document.getElementById('invitation').value=''}
+ }catch{add('Test setup / transport',false,'Verify session, event ID and optional invitation without sharing secrets')}
+ finally{button.disabled=false}
+});
+</script></html>

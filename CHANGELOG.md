@@ -1,3 +1,11 @@
+# Candidato rc.7 / collaudo cloud-test.10 — 13 novembre 2026
+
+- Assistenza disattivata: contatto email diretto, senza pulsante di invio non operativo. CAPTCHA caricato solo aprendo i percorsi pertinenti; la sua indisponibilità non impedisce il caricamento Google.
+- Percorso supporto pronto per il server: origini esatte, sessione verificata due volte, corpo limitato, conferme esplicite, quota e ricevuta atomiche, protezione anti-riuso CAPTCHA e retry con la stessa ricevuta per 24 ore. Schema remoto non applicato: conferme tecniche scadute. Nessun falso invio riuscito.
+- 27 suite Node, 16 moduli e 16 regressioni SQL locali. 33 controlli reali dei pin privati su coordinate presenti, prima/dopo ammissione e rimozione, più creatore e anonimo. Scenario H chiuso nell’ambito provato.
+- Collaudo Cloudflare aggiornato e verificato; sito principale ancora rc.1. Nessun pagamento, purge, job o nuovo fattore MFA attivato.
+- Istruzioni supporto, guida, checkpoint, pacchetti e sorgenti allineati. I risultati locali non equivalgono a CAPTCHA, assistenza o ripristino operativi.
+
 # Candidato V1.0 - ripresa dell’11 novembre 2026
 
 - Admin Edge v2 distribuita, confronto del sorgente remoto e rifiuto verificato di accessi senza credenziali/token falso. Nessun nuovo frontend pubblico.

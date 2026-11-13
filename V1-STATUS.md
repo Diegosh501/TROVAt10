@@ -4,7 +4,7 @@ Aggiornato il 13 novembre 2026. Questo documento sostituisce le vecchie percentu
 
 ## Versioni
 
-- **Collaudo cloud reale:** https://v1-check-trovato.diegolucentedesign.workers.dev/ - `1.0.0-cloud-test.9`, Cloudflare `e8f686ad-d452-4a88-8f1c-b7fa310f64b5`.
+- **Collaudo cloud reale:** https://v1-check-trovato.diegolucentedesign.workers.dev/ - `1.0.0-cloud-test.10`, Cloudflare `8ac772c9-508b-47db-8487-14b9d0946a2d`.
 - **Sito principale:** https://trovato.diegolucentedesign.workers.dev/ - `1.0.0-rc.1`, Cloudflare `959a4c70-a070-4ee8-aa21-b306260b3165`. Resta l'anteprima con dati locali.
 - **Supabase:** `nrixslotansgrtrosaof`, 17 migrazioni. Due account Google reali, due profili Free e tre eventi di collaudo: un privato programmato, un privato annullato e un pubblico concluso.
 - **Server pubblicati:** `admin-console` v4, `host-contact` v1. Le altre funzioni necessarie devono essere configurate e provate prima dell'apertura definitiva.
@@ -15,14 +15,14 @@ Il collaudo usa dati reali persistenti. Non è una demo locale, ma non costituis
 
 | Verifica | Risultato | Cosa dimostra |
 | --- | --- | --- |
-| Suite Node | `██████████` 25/25 | Controlli del codice e funzioni con trasporti controllati |
-| Moduli SQL locali | `██████████` 15/15 | Applicazione dei moduli nel PostgreSQL locale |
-| Regressioni SQL | `██████████` 15/15 | Policy e transizioni su fixture con rollback |
+| Suite Node | `██████████` 27/27 | Controlli del codice e funzioni con trasporti controllati |
+| Moduli SQL locali | `██████████` 16/16 | Applicazione dei moduli nel PostgreSQL locale |
+| Regressioni SQL | `██████████` 16/16 | Policy e transizioni su fixture con rollback |
 | Login Google e profilo | `██████████` 2 identità reali verificate | Accesso, consenso, Free e profili separati |
 | Azioni reali cloud mirate | `██████████` 17/17 osservate | Creazione, modifica, limiti, storico, ruolo, export e PNG sullo stesso account |
-| Scenari finali del Master | `░░░░░░░░░░` 3/11 interamente chiusi | Chiusi A, B e D; MFA, altro dispositivo, job e ripristino aperti |
+| Scenari finali del Master | `████░░░░░░` 4/11 interamente chiusi | Chiusi A, B, D e H; MFA, altro dispositivo, job e ripristino aperti |
 
-La base comprende 17 azioni mirate su cloud-test.2 e il controllo a quattro larghezze su cloud-test.4. Le prove successive chiudono i flussi pubblici fra due Google reali, gli inviti privati e le richieste dirette al backend: 11/11 verifiche con Sportivo e 11/11 con Host ordinario. Il titolare riceve mfa_required da SQL e Edge. Sono prove nel collaudo, non un certificato di invulnerabilità o una pubblicazione sul principale.
+La base comprende 17 azioni mirate su cloud-test.2 e il controllo a quattro larghezze su cloud-test.4. Le prove successive chiudono i flussi pubblici fra due Google reali, gli inviti privati e le richieste dirette al backend: 11/11 verifiche con Sportivo e 11/11 con Host ordinario. Il titolare riceve mfa_required da SQL e Edge. Su cloud-test.10 sono superati anche 33 controlli del pin privato con coordinate presenti nei cinque stati di accesso. Sono prove nel collaudo, non un certificato di invulnerabilità o una pubblicazione sul principale.
 
 **V1: 15/25 criteri verificati nel collaudo = 60% dei criteri.**
 `███████████████░░░░░░░░░░`
@@ -35,7 +35,7 @@ VERIFICATO indica l'ambito effettivamente provato nel collaudo o nella ripresa. 
 | # | Criterio | Stato attuale | Evidenza e parte residua |
 | --- | --- | --- | --- |
 | 1 | Servizio raggiungibile | VERIFICATO | URL HTTPS di collaudo raggiunto e usato realmente; principale ancora preview |
-| 2 | Release identificabile | VERIFICATO | Versioni Cloudflare e release pubbliche distinte; nuovo candidato da sincronizzare nel rilascio successivo |
+| 2 | Release identificabile | VERIFICATO | Versioni Cloudflare e release pubbliche distinte; candidato rc.7 e collaudo cloud-test.10 identificati; ricevute di sorgenti/CI nel checkpoint privato |
 | 3 | Autenticazione reale | PARZIALE | Google funziona; percorso email/password, SMTP, conferma e recupero ancora aperti nel Master |
 | 4 | Google OAuth | VERIFICATO | Login reale anche dopo revoca della vecchia chiave; nuova credenziale custodita in Supabase |
 | 5 | Profili persistenti | VERIFICATO | Due profili Google separati, ritrovati dopo nuovo accesso; entrambi Free |
@@ -45,7 +45,7 @@ VERIFICATO indica l'ambito effettivamente provato nel collaudo o nella ripresa. 
 | 9 | Partite nel cloud | VERIFICATO | Tre eventi persistenti, inclusi annullato e concluso; storico ritrovato anche dal partecipante |
 | 10 | Partecipazioni | VERIFICATO | Richiesta/pending, ammissione, conteggio, rimozione e nuova richiesta provati nel cloud |
 | 11 | Inviti e privacy | VERIFICATO | Copia reale, ingresso anonimo e OAuth, sede mascherata prima/dopo rimozione; token non pubblicato nei metadata PNG |
-| 12 | Comunicazioni necessarie | PARZIALE | Avvisi e preferenze SQL presenti; normale assistenza, push e promemoria pianificati non completati |
+| 12 | Comunicazioni necessarie | PARZIALE | Avvisi e preferenze SQL presenti; assistenza protetta testata localmente ma non attivata; push e promemoria pianificati non completati |
 | 13 | Persistenza fra dispositivi | DA VERIFICARE | Nuovo accesso nello stesso browser riuscito; non vale come altro account/dispositivo |
 | 14 | Tutti iniziano Free | VERIFICATO | Profilo reale Free, default server controllato; acquisti ancora spenti |
 | 15 | Retention sette giorni | PARZIALE | Moduli e regressioni presenti; job spenti e nessuna cancellazione automatica attiva |
@@ -71,7 +71,7 @@ VERIFICATO indica l'ambito effettivamente provato nel collaudo o nella ripresa. 
 | E - Persistenza | Evento e storico visti da due account, anche dopo nuovo Google login | Altro dispositivo fisico ancora da provare |
 | F - Retention | Regressioni SQL a sette giorni e vincoli | Job reale in ambiente approvato e risultato operativo |
 | G - Errori | Campi vuoti rifiutati; suite su sessioni, rete e risposte tardive | Collaudo reale completo dei servizi; race osservata corretta e coperta da regressioni |
-| H - Privacy | Anonimo, estraneo, pending, ammesso e rimosso provati su sede e inviti; roster/contatto negati | Pin riservati con coordinate non nulle e ulteriori casi da completare |
+| H - Privacy | VERIFICATO: inviti e precedenti controlli backend, più 33/33 letture reali con pin non nullo: creatore, pending, ammesso, rimosso e anonimo | Completato nel collaudo nell’ambito documentato; nessuna certificazione generale |
 | I - Concorrenza | Serializzazione progettata e fixture | Richieste HTTP realmente simultanee, capienza e transizioni |
 | L - Ripristino | Versione precedente e sorgenti conservati | Backup dati e ripristino integrale provati |
 | M - Produzione | HTTPS, asset e percorsi riservati della preview controllati | Rilascio coordinato V1 e smoke sul medesimo URL principale |
@@ -82,7 +82,7 @@ Google usa il client esistente e il callback del solo progetto corretto. Redirec
 
 L'account Admin è del titolare già indicato. Il secondo fattore non è stato creato o simulato; il titolare ha scelto di farlo più tardi. Una password storica in chat non è una credenziale da riutilizzare.
 
-`onlineReady`, `exportReady` ed `erasureRequestsReady` sono veri solo nel collaudo. Email/password, Billing, push e ciclo account restano spenti. La configurazione di default dei sorgenti resta preview. Il modulo di cancellazione registra una pratica, non chiude accesso o dati: [ERASURE-REQUESTS.md](ERASURE-REQUESTS.md).
+`onlineReady`, `exportReady` ed `erasureRequestsReady` sono veri solo nel collaudo. Email/password, assistenza nell’app, Billing, push e ciclo account restano spenti. La UI usa il contatto email per il supporto; il nuovo SQL resta in pending-operations dopo due conferme del connettore scadute. La configurazione di default dei sorgenti resta preview. Il modulo di cancellazione registra una pratica, non chiude accesso o dati: [ERASURE-REQUESTS.md](ERASURE-REQUESTS.md).
 
 Non eseguire più i vecchi test remoti che esigono zero utenti: ora ci sono due account reali. Per prove sintetiche usare isolamento e rollback; le fixture locali non dimostrano backup o autenticazione reale.
 
