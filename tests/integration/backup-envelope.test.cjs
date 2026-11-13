@@ -1,0 +1,17 @@
+'use strict';
+const assert=require('node:assert/strict'),crypto=require('node:crypto'),fs=require('node:fs/promises'),os=require('node:os'),path=require('node:path');
+const {seal,open,fileOperation,keygen,readKey}=require('../../scripts/backup-envelope.cjs');
+let passed=0;async function check(name,fn){await fn();console.log('PASS '+(++passed)+': '+name)}
+(async()=>{const key=crypto.randomBytes(32),dir=await fs.mkdtemp(path.join(os.tmpdir(),'trovat1o-backup-test-'));
+ try{
+ await check('binary and empty backups authenticate and round-trip',async()=>{for(const data of [Buffer.alloc(0),crypto.randomBytes(1024*1024+37)])assert.deepEqual(open(seal(data,key),key),data)});
+ await check('encryption randomizes identical input',async()=>{const data=Buffer.from('synthetic backup');assert.notDeepEqual(seal(data,key),seal(data,key))});
+ await check('wrong keys and changed headers ciphertext or tags are refused',async()=>{const encrypted=seal(Buffer.from('synthetic private content'),key);assert.throws(()=>open(encrypted,crypto.randomBytes(32)));for(const i of [0,8,21,encrypted.length-1]){const changed=Buffer.from(encrypted);changed[i]^=1;assert.throws(()=>open(changed,key))}assert.throws(()=>open(encrypted.subarray(0,-1),key));assert.throws(()=>open(Buffer.alloc(10),key))});
+ await check('streaming files round-trip with private output permissions',async()=>{for(const length of [0,3*1024*1024+13]){const input=path.join(dir,'input-'+length),encrypted=input+'.enc',decrypted=input+'.restored';const data=crypto.randomBytes(length);await fs.writeFile(input,data,{mode:0o600});await fileOperation('encrypt',input,encrypted,key);await fileOperation('decrypt',encrypted,decrypted,key);assert.deepEqual(await fs.readFile(decrypted),data);assert.equal((await fs.stat(decrypted)).mode&0o077,0)}});
+ await check('authentication failure publishes no partial plaintext and removes its temp file',async()=>{const input=path.join(dir,'input-0.enc'),output=path.join(dir,'wrong-key-plaintext');await assert.rejects(fileOperation('decrypt',input,output,crypto.randomBytes(32)));await assert.rejects(fs.stat(output),{code:'ENOENT'});assert.equal((await fs.readdir(dir)).some(n=>n.endsWith('.tmp')),false)});
+ await check('existing outputs and same-file operations never overwrite user data',async()=>{const input=path.join(dir,'input-0'),output=path.join(dir,'existing');await fs.writeFile(output,'preserve me',{mode:0o600});await assert.rejects(fileOperation('encrypt',input,output,key),{code:'EEXIST'});assert.equal(await fs.readFile(output,'utf8'),'preserve me');await assert.rejects(fileOperation('encrypt',input,input,key))});
+ await check('keys require private ownership permissions and are never replaced',async()=>{const file=path.join(dir,'backup.key');await keygen(file);assert.equal((await readKey(file)).length,32);await assert.rejects(keygen(file),{code:'EEXIST'});await fs.chmod(file,0o644);await assert.rejects(readKey(file));await fs.chmod(file,0o600);const link=file+'.link';await fs.symlink(file,link);await assert.rejects(readKey(link))});
+ await check('world-readable destination directories are refused',async()=>{const child=path.join(dir,'public');await fs.mkdir(child,{mode:0o755});await assert.rejects(fileOperation('encrypt',path.join(dir,'input-0'),path.join(child,'backup.enc'),key))});
+ console.log('PASS: '+passed+' backup encryption scenarios; no production data or key used.');
+ }finally{key.fill(0);await fs.rm(dir,{recursive:true,force:true})}
+})().catch(error=>{console.error(error.message);process.exitCode=1});

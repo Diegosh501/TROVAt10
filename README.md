@@ -106,3 +106,7 @@ Repository scelto: [Diegosh501/TROVAt10](https://github.com/Diegosh501/TROVAt10)
 `scripts/package-release.sh` rigenera copie e archivi dai sorgenti e confronta gli ingressi. Il pacchetto locale comprende backend, test, documentazione e guida PDF. Configurazione del collaudo e checkpoint privato restano separati dai file pubblici. Seguire [DEPLOY-READINESS.md](DEPLOY-READINESS.md), [supabase/README.md](supabase/README.md), [ADMIN-SETUP.md](ADMIN-SETUP.md), [PUSH-SETUP.md](PUSH-SETUP.md) e [SECURITY.md](SECURITY.md).
 
 Il dominio acquistato verrà collegato dopo il collaudo; il dominio gratuito è sufficiente per provarlo. Nessun piano a pagamento, SMS o acquisto è stato attivato in questa ripresa. Costi futuri e continuità dipendono dai limiti reali dei piani scelti.
+
+## Prove di concorrenza e recupero
+
+Il percorso PostgreSQL nativo usa un servizio isolato nei controlli GitHub, con dati sintetici e immagine ufficiale bloccata. Le prove forzano connessioni realmente sovrapposte e ripristinano un dump cifrato in un secondo database. Il risultato del run corrente resta la prova autorevole: non equivale a un recupero completo di Supabase gestito o a un test HTTP sul servizio. Istruzioni e cifratura privata: [BACKUP-RESTORE-SETUP.md](BACKUP-RESTORE-SETUP.md).

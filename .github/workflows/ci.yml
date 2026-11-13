@@ -77,3 +77,48 @@ jobs:
           tar -xOzf TROVAT1O-Cloudflare-Deploy/trovato-static-assets.tar.gz public/index.html | cmp index.html -
           tar -xOzf TROVAT1O-Cloudflare-Deploy/trovato-static-assets.tar.gz public/config.js | cmp config.js -
           tar -xOzf TROVAT1O-Cloudflare-Deploy/trovato-static-assets.tar.gz public/sw.js | cmp sw.js -
+
+  postgres-integration:
+    name: Native PostgreSQL concurrency and restore
+    needs: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17.11@sha256:ff87138949ad9a46f32ff23bd6852b52ce024a13dffe9b4087be98292cdd3b4f
+        env:
+          POSTGRES_DB: trovat1o_ci_control
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci_synthetic_only
+        ports:
+          - '127.0.0.1:5432:5432'
+        options: >-
+          --health-cmd "pg_isready -U postgres -d trovat1o_ci_control"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      CI: 'true'
+      TROVAT1O_ISOLATED_PG_TEST: 'true'
+      TROVAT1O_PG_TEST_URL: postgresql://postgres:ci_synthetic_only@127.0.0.1:5432/trovat1o_ci_control
+      TROVAT1O_PG_CONTAINER_ID: ${{ job.services.postgres.id }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install locked native test driver
+        run: |
+          mkdir -p tmp/native-postgres
+          cp tests/fixtures/native-postgres/package.json tmp/native-postgres/package.json
+          cp tests/fixtures/native-postgres/package-lock.json tmp/native-postgres/package-lock.json
+          npm ci --prefix tmp/native-postgres --ignore-scripts --no-audit --no-fund
+      - name: Verify private backup encryption
+        run: node tests/integration/backup-envelope.test.cjs
+      - name: Replay migrations, force concurrent calls, and restore encrypted dump
+        run: node tests/integration/native-postgres.cjs

@@ -1,0 +1,6 @@
+{
+  "name": "trovat1o-native-postgres-tests",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": { "pg": "8.23.1" }
+}
