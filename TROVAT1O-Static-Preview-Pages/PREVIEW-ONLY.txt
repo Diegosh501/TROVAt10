@@ -1,9 +1,3 @@
-TROVAT1O · ANTEPRIMA STATICA MOBILE FIRST
+TROVAT1O 1.0.0-rc.1 — ANTEPRIMA INTERATTIVA
 
-Claim: Non perderti più una partita. La prima versione copre calcio amatoriale a 5, 8 e 11; il brand può estendersi ad altri eventi.
-
-Questa cartella è una preview offline/demo (`onlineReady: false`). Profili, eventi, richieste e notifiche restano nel browser secondo la scelta tra sessione e salvataggio locale. Le push in background e la sincronizzazione tra dispositivi non sono attive. Non inserire dati personali reali.
-
-Il progetto Supabase ha lo schema V2 applicato, ma non ha utenti o eventi, SMTP o Edge Functions configurate. Le pagine informative descrivono la preview e vanno aggiornate prima di raccogliere dati online.
-
-`noindex` scoraggia l’indicizzazione, ma non limita l’accesso a chi conosce il link. Usa il codice della root di progetto per aggiornare questa copia.
+Il sito è pubblicato su workers.dev. Account e partite della demo restano nel browser. Non inserire dati reali. Google e cloud multiutente non ancora attivati. Backend Supabase:15 migrazioni; Admin Edge v2 presente; nessun account reale. Informative pre-lancio, pagamenti e cancellazioni automatiche spenti. Stato autorevole: V1-STATUS.md.

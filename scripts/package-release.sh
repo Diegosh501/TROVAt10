@@ -6,7 +6,7 @@ STATIC_DIR="$PROJECT_ROOT/TROVAT1O-Static-Preview-Pages"
 FINAL_DIR="$PROJECT_ROOT/TROVAT1O-Local-Final-Preview"
 DEPLOY_DIR="$PROJECT_ROOT/TROVAT1O-Cloudflare-Deploy"
 
-WEB_FILES=(index.html index-v2.html config.js sw.js site.webmanifest robots.txt _headers privacy.html cookie.html termini.html politiche.html)
+WEB_FILES=(index.html index-v2.html config.js release.json sw.js site.webmanifest robots.txt _headers privacy.html cookie.html termini.html politiche.html)
 DOC_FILES=(README.md DEPLOY-READINESS.md SECURITY.md BRAND-GUIDE.md UX-ITERATION-V2.md ADMIN-SETUP.md BILLING-SETUP.md RETENTION-SETUP.md ACCOUNT-LIFECYCLE.md PUSH-SETUP.md WRITE-QUOTAS.md UX-CHECKPOINT.md V1-STATUS.md CHANGELOG.md AUDIT-PREDEPLOY.md RELEASES.md)
 DEPLOY_FILES=(README.md package.json package-lock.json wrangler.jsonc)
 

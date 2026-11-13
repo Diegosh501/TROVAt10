@@ -25,7 +25,11 @@ insert into public.subscriptions(user_id,plan,status,current_period_end)
 select uid,case when uid=f.premium_id then 'premium' else 'free' end,'active',
   case when uid=f.premium_id then now()+interval '1 year' else null end
 from retention_fixture f cross join lateral(values(f.host_id),(f.free_id),(f.premium_id)) users(uid);
-update retention_fixture set claims=jsonb_build_object('sub',host_id,'role','authenticated');
+-- Live sessions are explicit and survive service-only maintenance tests.
+insert into auth.sessions(id,user_id,aal,not_after)
+select uid,uid,'aal1',now()+interval '1 hour' from retention_fixture f
+  cross join lateral(values(f.host_id),(f.free_id),(f.premium_id)) users(uid);
+update retention_fixture set claims=jsonb_build_object('sub',host_id,'session_id',host_id,'role','authenticated');
 select set_config('request.jwt.claims',(select claims::text from retention_fixture),true);
 -- 1. Every maintenance/control function is denied to ordinary public roles.
 do $$ begin
@@ -89,7 +93,7 @@ do $$ begin if exists(select 1 from public.event_feed() where id=(select kept fr
     raise exception 'new_closure_hidden_based_on_old_creation'; end if;
 end $$;
 reset role;
-select set_config('request.jwt.claims',(select jsonb_build_object('sub',free_id,'role','authenticated')::text from retention_fixture),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',free_id,'session_id',free_id,'role','authenticated')::text from retention_fixture),true);
 set local role authenticated;
 do $$ begin
   if exists(select 1 from public.event_members where event_id=(select kept from retention_fixture)) then raise exception 'expired_roster_side_channel'; end if;
@@ -97,7 +101,7 @@ do $$ begin
 end $$;
 reset role;
 -- 5. An admitted Premium player retains history even with a Free organizer.
-select set_config('request.jwt.claims',(select jsonb_build_object('sub',premium_id,'role','authenticated')::text from retention_fixture),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',premium_id,'session_id',premium_id,'role','authenticated')::text from retention_fixture),true);
 set local role authenticated;
 do $$ begin
   if not exists(select 1 from public.event_feed() where id=(select kept from retention_fixture) and venue='Campo storico') then
@@ -161,7 +165,7 @@ do $$ begin
 end $$;
 -- 13. A banned account cannot keep private history through an old valid JWT.
 update auth.users set banned_until=now()+interval '1 hour' where id=(select host_id from retention_fixture);
-select set_config('request.jwt.claims',(select jsonb_build_object('sub',host_id,'role','authenticated')::text from retention_fixture),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',host_id,'session_id',host_id,'role','authenticated')::text from retention_fixture),true);
 set local role authenticated;
 do $$ begin if exists(select 1 from public.event_feed()) then raise exception 'banned_jwt_feed_access'; end if; end $$;
 reset role;

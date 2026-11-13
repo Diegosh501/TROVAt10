@@ -14,6 +14,10 @@ select u,'contact-'||u||'@example.invalid',now(),'{"provider":"email"}'::jsonb,
 from contact_fixture f cross join lateral (values(f.owner_id),(f.member_id),(f.stranger_id)) users(u);
 insert into auth.sessions(id,user_id,created_at,updated_at,aal,not_after)
 select session_id,owner_id,now(),now(),'aal1',now()+interval '1 hour' from contact_fixture;
+-- Participant and stranger sessions remain independent of the owner session.
+insert into auth.sessions(id,user_id,aal,not_after)
+select uid,uid,'aal1',now()+interval '1 hour' from contact_fixture f
+  cross join lateral(values(f.member_id),(f.stranger_id)) users(uid);
 update public.profiles set phone_verified_at=now() where id=(select owner_id from contact_fixture);
 insert into public.verified_phones(user_id,phone_hash) select owner_id,repeat('a',64) from contact_fixture;
 insert into public.events(id,creator_id,title,format,kind,starts_at,venue,city,max_players,visibility,admission)
@@ -39,18 +43,18 @@ end $$;
 -- 4. A valid server-bound hash permits sharing.
 select public.set_verified_host_contact(owner_id,session_id,event_id,'+393331234567',repeat('a',64),true) from contact_fixture;
 -- 5. Approved participants can read only the explicitly shared number.
-select set_config('request.jwt.claims',(select jsonb_build_object('sub',member_id,'role','authenticated')::text from contact_fixture),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',member_id,'session_id',member_id,'role','authenticated')::text from contact_fixture),true);
 set local role authenticated;
 do $$ begin if (select count(whatsapp_phone) from public.event_host_contacts)<>1 then raise exception 'approved_contact_missing'; end if; end $$;
 reset role;
 -- 6. Another authenticated account cannot see it.
-select set_config('request.jwt.claims',(select jsonb_build_object('sub',stranger_id,'role','authenticated')::text from contact_fixture),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',stranger_id,'session_id',stranger_id,'role','authenticated')::text from contact_fixture),true);
 set local role authenticated;
 do $$ begin if (select count(whatsapp_phone) from public.event_host_contacts)<>0 then raise exception 'stranger_contact_leak'; end if; end $$;
 reset role;
 -- 7. Pending requests do not reveal the contact.
 update public.event_members set state='pending';
-select set_config('request.jwt.claims',(select jsonb_build_object('sub',member_id,'role','authenticated')::text from contact_fixture),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',member_id,'session_id',member_id,'role','authenticated')::text from contact_fixture),true);
 set local role authenticated;
 do $$ begin if (select count(whatsapp_phone) from public.event_host_contacts)<>0 then raise exception 'pending_contact_leak'; end if; end $$;
 reset role;

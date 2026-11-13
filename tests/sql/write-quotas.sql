@@ -20,6 +20,10 @@ select uid,'qa_quota_'||left(replace(uid::text,'-',''),8),case when uid=f.player
   now(),now(),now(),'regression','regression' from quota_fixture f cross join lateral(values(f.host_id),(f.player_id),(f.admin_id)) users(uid);
 insert into public.subscriptions(user_id,plan,status)
 select uid,'free','active' from quota_fixture f cross join lateral(values(f.host_id),(f.player_id),(f.admin_id)) users(uid);
+-- Explicit ordinary sessions; the Admin MFA session stays separate.
+insert into auth.sessions(id,user_id,aal,not_after)
+select uid,uid,'aal1',now()+interval '1 hour' from quota_fixture f
+  cross join lateral(values(f.host_id),(f.player_id)) users(uid);
 insert into auth.mfa_factors(id,user_id,factor_type,status) select factor_id,admin_id,'totp','verified' from quota_fixture;
 insert into auth.sessions(id,user_id,factor_id,aal,not_after) select session_id,admin_id,factor_id,'aal2',now()+interval '1 hour' from quota_fixture;
 update quota_fixture set admin_claims=jsonb_build_object('sub',admin_id,'role','authenticated','session_id',session_id,'aal','aal2',
@@ -53,7 +57,7 @@ begin
   exception when sqlstate 'PT429' then if sqlerrm<>'write_rate_limited' then raise; end if; return; end;
   raise exception 'write_quota_bypass';
 end $$;
-select set_config('request.jwt.claims',(select jsonb_build_object('sub',host_id,'role','authenticated')::text from quota_fixture),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',host_id,'session_id',host_id,'role','authenticated')::text from quota_fixture),true);
 -- 3. Ten creates/cancels through the actual SECURITY DEFINER RPC succeed;
 -- the eleventh is limited even though no created event remains active.
 set local role authenticated;
@@ -94,7 +98,7 @@ do $$ begin if not exists(select 1 from private.write_action_quotas where user_i
   and action='event_create' and minute_count=1 and hour_count=1) then raise exception 'failed_event_consumed_quota'; end if; end $$;
 -- 8. Sixty new requests reach the ceiling, attributed to the actual caller.
 -- Withdrawal always remains available and does not consume a new-request slot.
-select set_config('request.jwt.claims',(select jsonb_build_object('sub',player_id,'role','authenticated')::text from quota_fixture),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',player_id,'session_id',player_id,'role','authenticated')::text from quota_fixture),true);
 set local role authenticated;
 do $$ declare event uuid:=(select event_id from quota_fixture); begin
   for n in 1..60 loop perform public.leave_event(event); perform public.request_event_join(event,null); end loop;
@@ -118,7 +122,7 @@ reset role;
 do $$ begin if not exists(select 1 from private.write_action_quotas where user_id=(select player_id from quota_fixture)
   and action='join' and minute_count=1 and hour_count=600) then raise exception 'join_hour_limit_wrong'; end if; end $$;
 -- 10. Organizer management has its own 60/minute ceiling and no-op retry.
-select set_config('request.jwt.claims',(select jsonb_build_object('sub',host_id,'role','authenticated')::text from quota_fixture),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',host_id,'session_id',host_id,'role','authenticated')::text from quota_fixture),true);
 set local role authenticated;
 do $$ declare event uuid:=(select event_id from quota_fixture); player uuid:=(select player_id from quota_fixture); begin
   for n in 1..60 loop perform public.manage_event_member(event,player,case when n%2=1 then 'approved' else 'removed' end); end loop;

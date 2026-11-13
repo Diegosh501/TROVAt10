@@ -1,0 +1,10 @@
+{
+  "product": "TROVAT1O",
+  "version": "1.0.0-rc.1",
+  "mode": "interactive-preview",
+  "releaseDate": "2026-11-11",
+  "onlineAccountsEnabled": false,
+  "cloudPersistenceEnabled": false,
+  "paidSubscriptionsEnabled": false,
+  "publicUrl": "https://trovato.diegolucentedesign.workers.dev/"
+}

@@ -46,6 +46,10 @@ select peer_id,'peer-'||peer_id::text||'@example.invalid',now(),
     'terms_version','regression','privacy_notice_version','regression')
 from membership_regression;
 
+-- Explicit session fixtures for the three ordinary callers.
+insert into auth.sessions(id,user_id,aal,not_after)
+select uid,uid,'aal1',now()+interval '1 hour' from membership_regression f
+  cross join lateral(values(f.host_id),(f.player_id),(f.peer_id)) users(uid);
 -- Verification is fixture state, never a client-granted privilege.
 update public.profiles set phone_verified_at=now()
 where id in (select host_id from membership_regression union select player_id from membership_regression
@@ -59,6 +63,7 @@ select event_id,peer_id,'approved' from membership_regression;
 
 -- 1. A new verified player can still enter an open-admission event.
 select set_config('request.jwt.claim.sub',(select player_id::text from membership_regression),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',player_id,'role','authenticated','session_id',player_id)::text from membership_regression),true);
 set local role authenticated;
 select public.request_event_join(event_id,null) from membership_regression;
 reset role;
@@ -71,11 +76,13 @@ end $$;
 
 -- 2. An organizer removes them; another request must remain pending.
 select set_config('request.jwt.claim.sub',(select host_id::text from membership_regression),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',host_id,'role','authenticated','session_id',host_id)::text from membership_regression),true);
 set local role authenticated;
 select public.manage_event_member(event_id,player_id,'removed') from membership_regression;
 reset role;
 -- Admitted peers must not see a removed membership through the base Data API.
 select set_config('request.jwt.claim.sub',(select peer_id::text from membership_regression),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',peer_id,'role','authenticated','session_id',peer_id)::text from membership_regression),true);
 set local role authenticated;
 do $$ begin
   if exists(select 1 from public.event_members where user_id=(select player_id from membership_regression)) then
@@ -85,6 +92,7 @@ end $$;
 reset role;
 -- The removed user may still see their own result.
 select set_config('request.jwt.claim.sub',(select player_id::text from membership_regression),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',player_id,'role','authenticated','session_id',player_id)::text from membership_regression),true);
 set local role authenticated;
 do $$ begin
   if (select state from public.event_members where user_id=(select player_id from membership_regression)) is distinct from 'removed' then
@@ -102,6 +110,7 @@ end $$;
 
 -- Pending applicants remain private to themselves and the organizer.
 select set_config('request.jwt.claim.sub',(select peer_id::text from membership_regression),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',peer_id,'role','authenticated','session_id',peer_id)::text from membership_regression),true);
 set local role authenticated;
 do $$ begin
   if exists(select 1 from public.event_members where user_id=(select player_id from membership_regression)) then
@@ -112,6 +121,7 @@ reset role;
 
 -- 3. A refusal also cannot be bypassed by the open-admission setting.
 select set_config('request.jwt.claim.sub',(select host_id::text from membership_regression),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',host_id,'role','authenticated','session_id',host_id)::text from membership_regression),true);
 set local role authenticated;
 do $$ begin
   if (select state from public.event_members where user_id=(select player_id from membership_regression)) is distinct from 'pending' then
@@ -121,6 +131,7 @@ end $$;
 select public.manage_event_member(event_id,player_id,'declined') from membership_regression;
 reset role;
 select set_config('request.jwt.claim.sub',(select peer_id::text from membership_regression),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',peer_id,'role','authenticated','session_id',peer_id)::text from membership_regression),true);
 set local role authenticated;
 do $$ begin
   if exists(select 1 from public.event_members where user_id=(select player_id from membership_regression)) then
@@ -129,6 +140,7 @@ do $$ begin
 end $$;
 reset role;
 select set_config('request.jwt.claim.sub',(select player_id::text from membership_regression),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',player_id,'role','authenticated','session_id',player_id)::text from membership_regression),true);
 set local role authenticated;
 select public.request_event_join(event_id,null) from membership_regression;
 reset role;
@@ -141,6 +153,7 @@ end $$;
 
 -- 4. Only an explicit organizer approval restores the place.
 select set_config('request.jwt.claim.sub',(select host_id::text from membership_regression),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',host_id,'role','authenticated','session_id',host_id)::text from membership_regression),true);
 set local role authenticated;
 select public.manage_event_member(event_id,player_id,'approved') from membership_regression;
 reset role;
@@ -153,6 +166,7 @@ end $$;
 
 -- Approved members are visible to their admitted peers after the host decides.
 select set_config('request.jwt.claim.sub',(select peer_id::text from membership_regression),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',peer_id,'role','authenticated','session_id',peer_id)::text from membership_regression),true);
 set local role authenticated;
 do $$ begin
   if (select state from public.event_members where user_id=(select player_id from membership_regression)) is distinct from 'approved' then

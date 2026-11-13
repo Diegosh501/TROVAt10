@@ -27,6 +27,11 @@ select legacy_id,'legacy-'||legacy_id||'@example.invalid',now(),'{"provider":"em
   jsonb_build_object('username','qa_legacy_'||left(replace(legacy_id::text,'-',''),8),'role','sportivo',
     'age_confirmed','true','terms_accepted','true','terms_version','regression','privacy_notice_version','regression') from oauth_fixture;
 do $$ begin if (select count(*) from public.profiles)<>1 then raise exception 'Legacy email signup regressed'; end if; end $$;
+-- Each synthetic user has an explicit live Auth session; JWT fixtures below
+-- supply its ID directly. auth.jwt() never manufactures missing claims.
+insert into auth.sessions(id,user_id,aal,not_after)
+select uid,uid,'aal1',now()+interval '1 hour' from oauth_fixture f
+  cross join lateral(values(f.first_id),(f.second_id),(f.legacy_id)) users(uid);
 -- 3. Anonymous callers cannot execute profile completion.
 do $$ begin if has_function_privilege('anon','public.complete_my_profile(text,text,boolean,boolean,boolean)','execute') then
   raise exception 'Anonymous completion privilege'; end if; end $$;
@@ -37,7 +42,7 @@ returns void language plpgsql as $$ begin
   raise exception 'Profile completion bypass: %',p_reason;
 end $$;
 -- 4. A Google claim alone, without a server-created identity, is insufficient.
-select set_config('request.jwt.claims',(select jsonb_build_object('sub',first_id,'role','authenticated','app_metadata',jsonb_build_object('provider','google'))::text from oauth_fixture),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',first_id,'session_id',first_id,'role','authenticated','app_metadata',jsonb_build_object('provider','google'))::text from oauth_fixture),true);
 set local role authenticated;
 select pg_temp.expect_profile_error('google_identity_required');
 reset role;
@@ -69,7 +74,7 @@ do $$ begin
 end $$;
 reset role;
 -- 12. Unconfirmed Google email remains insufficient.
-select set_config('request.jwt.claims',(select jsonb_build_object('sub',second_id,'role','authenticated')::text from oauth_fixture),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',second_id,'session_id',second_id,'role','authenticated')::text from oauth_fixture),true);
 set local role authenticated;
 select pg_temp.expect_profile_error('google_identity_required');
 reset role;
@@ -107,7 +112,7 @@ update auth.users set banned_until=null where id=(select second_id from oauth_fi
 update public.profiles set role='host' where id=(select legacy_id from oauth_fixture);
 alter table oauth_fixture add column public_event uuid,add column private_event uuid;
 grant update on oauth_fixture to authenticated;
-select set_config('request.jwt.claims',(select jsonb_build_object('sub',first_id,'role','authenticated')::text from oauth_fixture),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',first_id,'session_id',first_id,'role','authenticated')::text from oauth_fixture),true);
 set local role authenticated;
 -- 1. A completed Google identity enables public play without phone verification.
 do $$ begin if not public.is_play_verified() or public.is_phone_verified() then raise exception 'Google/phone distinction failed';end if;end $$;
@@ -124,7 +129,7 @@ do $$ begin
  exception when check_violation then if sqlerrm<>'active_event_limit' then raise;end if;end;
 end $$;
 reset role;
-select set_config('request.jwt.claims',(select jsonb_build_object('sub',second_id,'role','authenticated')::text from oauth_fixture),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',second_id,'session_id',second_id,'role','authenticated')::text from oauth_fixture),true);
 set local role authenticated;
 -- 4. A Google Sportivo joins a public open event without an SMS.
 do $$ begin if (select public.request_event_join(public_event,null) from oauth_fixture)<>'approved' then raise exception 'Google public join failed';end if;end $$;
@@ -142,7 +147,7 @@ end $$;
 -- 7. A verified Google member can submit a private report about a real peer.
 select public.submit_player_report(public_event,first_id,'Comportamento scorretto','Synthetic conduct report with no real user data.') from oauth_fixture;
 reset role;
-select set_config('request.jwt.claims',(select jsonb_build_object('sub',legacy_id,'role','authenticated','user_metadata',jsonb_build_object('googleVerified',true))::text from oauth_fixture),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',legacy_id,'session_id',legacy_id,'role','authenticated','user_metadata',jsonb_build_object('googleVerified',true))::text from oauth_fixture),true);
 set local role authenticated;
 -- 8. Editable metadata cannot impersonate a verified provider identity.
 do $$ begin
@@ -159,7 +164,7 @@ end $$;
 reset role;
 -- Replace only the synthetic token hash with the digest of a known fixture.
 update public.event_invites set token_hash=extensions.digest(convert_to(repeat('f',64),'UTF8'),'sha256') where event_id=(select private_event from oauth_fixture);
-select set_config('request.jwt.claims',(select jsonb_build_object('sub',second_id,'role','authenticated')::text from oauth_fixture),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',second_id,'session_id',second_id,'role','authenticated')::text from oauth_fixture),true);
 set local role authenticated;
 -- 10. Google still needs a valid private invitation.
 do $$ begin

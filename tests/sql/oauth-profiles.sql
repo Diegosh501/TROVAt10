@@ -26,6 +26,11 @@ select legacy_id,'legacy-'||legacy_id||'@example.invalid',now(),'{"provider":"em
   jsonb_build_object('username','qa_legacy_'||left(replace(legacy_id::text,'-',''),8),'role','sportivo',
     'age_confirmed','true','terms_accepted','true','terms_version','regression','privacy_notice_version','regression') from oauth_fixture;
 do $$ begin if (select count(*) from public.profiles)<>1 then raise exception 'Legacy email signup regressed'; end if; end $$;
+-- Each synthetic user has an explicit live Auth session; JWT fixtures below
+-- supply its ID directly. auth.jwt() never manufactures missing claims.
+insert into auth.sessions(id,user_id,aal,not_after)
+select uid,uid,'aal1',now()+interval '1 hour' from oauth_fixture f
+  cross join lateral(values(f.first_id),(f.second_id),(f.legacy_id)) users(uid);
 -- 3. Anonymous callers cannot execute profile completion.
 do $$ begin if has_function_privilege('anon','public.complete_my_profile(text,text,boolean,boolean,boolean)','execute') then
   raise exception 'Anonymous completion privilege'; end if; end $$;
@@ -36,7 +41,7 @@ returns void language plpgsql as $$ begin
   raise exception 'Profile completion bypass: %',p_reason;
 end $$;
 -- 4. A Google claim alone, without a server-created identity, is insufficient.
-select set_config('request.jwt.claims',(select jsonb_build_object('sub',first_id,'role','authenticated','app_metadata',jsonb_build_object('provider','google'))::text from oauth_fixture),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',first_id,'session_id',first_id,'role','authenticated','app_metadata',jsonb_build_object('provider','google'))::text from oauth_fixture),true);
 set local role authenticated;
 select pg_temp.expect_profile_error('google_identity_required');
 reset role;
@@ -70,7 +75,7 @@ do $$ begin
 end $$;
 reset role;
 -- 12. Unconfirmed Google email remains insufficient.
-select set_config('request.jwt.claims',(select jsonb_build_object('sub',second_id,'role','authenticated')::text from oauth_fixture),true);
+select set_config('request.jwt.claims',(select jsonb_build_object('sub',second_id,'session_id',second_id,'role','authenticated')::text from oauth_fixture),true);
 set local role authenticated;
 select pg_temp.expect_profile_error('google_identity_required');
 reset role;
