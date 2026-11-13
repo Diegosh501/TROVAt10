@@ -4,6 +4,9 @@
 
 Il progetto Supabase reale non ha ancora un backup completo ripristinato e verificato in un secondo ambiente gestito. Il nuovo percorso descritto qui aggiunge una prova ripetibile del database applicativo in un ambiente PostgreSQL isolato: non sostituisce il recupero di Auth gestita, oggetti Storage, configurazioni e segreti dei provider.
 
+**Prove PostgreSQL native aggiuntive:** [run verificato](https://github.com/Diegosh501/TROVAt10/actions/runs/43481338497), PostgreSQL 17.11 isolato: 17 migrazioni registrate riprodotte, 16 regressioni, nove scenari realmente concorrenti e dump cifrato ripristinato in un secondo database. Confrontati dati e sicurezza di 42 tabelle, 42 policy, 96 funzioni, 177 vincoli, 11 trigger, 84 indici e quattro sequenze. Quattro modifiche negative ai permessi/RLS vengono rilevate; sei guardie locali e quattro sonde native proteggono l’isolamento. Le otto prove di cifratura passano. Auth resta un fixture e non è stato eseguito un recupero completo del progetto Supabase reale. 
+
+
 Supabase raccomanda per il piano Free esportazioni regolari mediante CLI e copie esterne. I backup del database non includono i file Storage; le credenziali dei ruoli personalizzati richiedono gestione distinta. Riferimenti ufficiali: [backup Supabase](https://supabase.com/docs/guides/platform/backups), [trasferimento e ripristino](https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore), [dump PostgreSQL](https://www.postgresql.org/docs/17/backup-dump.html). Non è stato acquistato un piano backup o PITR.
 
 ## Controllo nativo nel repository
@@ -47,6 +50,7 @@ Otto prove ripetibili: `node tests/integration/backup-envelope.test.cjs`. La pro
 - Con CLI Supabase verificata, esportare ruoli, schema e dati secondo le istruzioni ufficiali correnti. Verificare esplicitamente inclusione di Auth e metadati Storage: i filtri predefiniti non equivalgono automaticamente a un backup completo.
 - Conservare configurazione senza segreti e inventario delle Edge Functions; custodire separatamente segreti e oggetti Storage eventualmente presenti. Non pubblicare nessuna di queste copie tramite public/.
 - Cifrare le copie e conservarne una separata dal Mac; definire frequenza, durata, responsabilità e scadenza. Non caricare dati di utenti su un nuovo fornitore senza la configurazione e le autorizzazioni pertinenti.
+- Per le chiavi di cifratura gestite del servizio seguire i passaggi ufficiali di copia/ripristino applicabili, senza esporle in chat o nei log.
 - Ripristinare in un secondo progetto/ambiente approvato, con SMTP, pagamenti, callback e job spenti per evitare invii o addebiti. Verificare policy, identità/riaccesso, dati, oggetti, quote, notifiche e configurazione.
 - Riesaminare i diritti di cancellazione: non usare un backup per riattivare un account eliminato. Solo dopo esito documentato attivare eventuali pulizie automatiche.
 

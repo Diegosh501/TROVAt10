@@ -110,3 +110,6 @@ Il dominio acquistato verrà collegato dopo il collaudo; il dominio gratuito è 
 ## Prove di concorrenza e recupero
 
 Il percorso PostgreSQL nativo usa un servizio isolato nei controlli GitHub, con dati sintetici e immagine ufficiale bloccata. Le prove forzano connessioni realmente sovrapposte e ripristinano un dump cifrato in un secondo database. Il risultato del run corrente resta la prova autorevole: non equivale a un recupero completo di Supabase gestito o a un test HTTP sul servizio. Istruzioni e cifratura privata: [BACKUP-RESTORE-SETUP.md](BACKUP-RESTORE-SETUP.md).
+
+**Prove PostgreSQL native aggiuntive:** [run verificato](https://github.com/Diegosh501/TROVAt10/actions/runs/43481338497), PostgreSQL 17.11 isolato: 17 migrazioni registrate riprodotte, 16 regressioni, nove scenari realmente concorrenti e dump cifrato ripristinato in un secondo database. Confrontati dati e sicurezza di 42 tabelle, 42 policy, 96 funzioni, 177 vincoli, 11 trigger, 84 indici e quattro sequenze. Quattro modifiche negative ai permessi/RLS vengono rilevate; sei guardie locali e quattro sonde native proteggono l’isolamento. Le otto prove di cifratura passano. Auth resta un fixture e non è stato eseguito un recupero completo del progetto Supabase reale. [Procedura backup](BACKUP-RESTORE-SETUP.md).
+

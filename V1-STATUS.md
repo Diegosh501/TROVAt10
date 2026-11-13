@@ -28,6 +28,9 @@ La base comprende 17 azioni mirate su cloud-test.2 e il controllo a quattro larg
 `███████████████░░░░░░░░░░`
 La barra non misura codice scritto o tempo residuo. I gate degli altri criteri restano determinanti per il lancio.
 
+**Prove PostgreSQL native aggiuntive:** [run verificato](https://github.com/Diegosh501/TROVAt10/actions/runs/43481338497), PostgreSQL 17.11 isolato: 17 migrazioni registrate riprodotte, 16 regressioni, nove scenari realmente concorrenti e dump cifrato ripristinato in un secondo database. Confrontati dati e sicurezza di 42 tabelle, 42 policy, 96 funzioni, 177 vincoli, 11 trigger, 84 indici e quattro sequenze. Quattro modifiche negative ai permessi/RLS vengono rilevate; sei guardie locali e quattro sonde native proteggono l’isolamento. Le otto prove di cifratura passano. Auth resta un fixture e non è stato eseguito un recupero completo del progetto Supabase reale. [Procedura backup](BACKUP-RESTORE-SETUP.md).
+
+
 ## I 25 criteri della V1
 
 VERIFICATO indica l'ambito effettivamente provato nel collaudo o nella ripresa. Non anticipa il rilascio sul sito principale.
@@ -54,7 +57,7 @@ VERIFICATO indica l'ambito effettivamente provato nel collaudo o nella ripresa. 
 | 18 | Test multiutente | VERIFICATO | Due account Google distinti, flussi pubblici e privati; altro dispositivo e concorrenza rimangono nei criteri/scenari specifici |
 | 19 | Nessun blocco conosciuto | NON DIMOSTRATO | Corrette race UI, copia link e ingresso anonimo da invito; servizi e gate di rilascio ancora aperti |
 | 20 | Limiti economici | VERIFICATO | Nessun piano comprato, SMS inviato o pagamento reale; dominio acquistato rinviato |
-| 21 | Backup/ripristino/rollback | PARZIALE | Sorgenti/migrazioni e versione hosting precedente conservati; recupero completo dei dati non provato |
+| 21 | Backup/ripristino/rollback | PARZIALE | Recupero SQL isolato di 42 tabelle e permessi provato; recupero completo del progetto gestito ancora aperto |
 | 22 | Informative adeguate | PARZIALE | Pagine versionate e consenso profilo acquisito; verifiche su servizi attivi, accordi e cancellazione effettiva aperte |
 | 23 | Controlli post-deploy | DA ESEGUIRE | Collaudo cloud separato provato; nessun post-deploy della V1 completa sul principale |
 | 24 | Documentazione | VERIFICATO | README e stato correnti aggiornati, limiti espliciti; ricevute del commit/CI e guida nel pacchetto di ripresa |
@@ -72,8 +75,8 @@ VERIFICATO indica l'ambito effettivamente provato nel collaudo o nella ripresa. 
 | F - Retention | Regressioni SQL a sette giorni e vincoli | Job reale in ambiente approvato e risultato operativo |
 | G - Errori | Campi vuoti rifiutati; suite su sessioni, rete e risposte tardive | Collaudo reale completo dei servizi; race osservata corretta e coperta da regressioni |
 | H - Privacy | VERIFICATO: inviti e precedenti controlli backend, più 33/33 letture reali con pin non nullo: creatore, pending, ammesso, rimosso e anonimo | Completato nel collaudo nell’ambito documentato; nessuna certificazione generale |
-| I - Concorrenza | Serializzazione progettata e fixture | Richieste HTTP realmente simultanee, capienza e transizioni |
-| L - Ripristino | Versione precedente e sorgenti conservati | Backup dati e ripristino integrale provati |
+| I - Concorrenza | Nove casi su PostgreSQL 17.11 con connessioni distinte e sovrapposizione osservata: doppie richieste, ultimo posto, ammissioni, avvio, Free e supporto | Prova HTTP concorrente nel servizio ancora da completare |
+| L - Ripristino | Dump cifrato sintetico ripristinato in un secondo database: 42 tabelle e catalogo di sicurezza coerenti; sorgenti/versione frontend conservati | Backup e ripristino dell’intero progetto Supabase reale, oggetti e configurazione ancora da provare |
 | M - Produzione | HTTPS, asset e percorsi riservati della preview controllati | Rilascio coordinato V1 e smoke sul medesimo URL principale |
 
 ## Configurazioni e sicurezza

@@ -1,5 +1,7 @@
 # Candidato rc.7 / collaudo cloud-test.10 — 13 novembre 2026
 
+- Nuovo controllo PostgreSQL 17.11 isolato in CI: replay delle 17 migrazioni, regressioni, nove scenari concorrenti e ripristino cifrato in un database nuovo, con confronto di dati e permessi effettivi. Backup operatori cifrato in streaming; otto prove e protezioni dell’ambiente di test. Nessun backup di dati reali o servizio a pagamento attivato.
+
 - Assistenza disattivata: contatto email diretto, senza pulsante di invio non operativo. CAPTCHA caricato solo aprendo i percorsi pertinenti; la sua indisponibilità non impedisce il caricamento Google.
 - Percorso supporto pronto per il server: origini esatte, sessione verificata due volte, corpo limitato, conferme esplicite, quota e ricevuta atomiche, protezione anti-riuso CAPTCHA e retry con la stessa ricevuta per 24 ore. Schema remoto non applicato: conferme tecniche scadute. Nessun falso invio riuscito.
 - 27 suite Node, 16 moduli e 16 regressioni SQL locali. 33 controlli reali dei pin privati su coordinate presenti, prima/dopo ammissione e rimozione, più creatore e anonimo. Scenario H chiuso nell’ambito provato.

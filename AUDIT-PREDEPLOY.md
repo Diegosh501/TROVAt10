@@ -1,3 +1,6 @@
+
+**Prove PostgreSQL native aggiuntive:** [run verificato](https://github.com/Diegosh501/TROVAt10/actions/runs/43481338497), PostgreSQL 17.11 isolato: 17 migrazioni registrate riprodotte, 16 regressioni, nove scenari realmente concorrenti e dump cifrato ripristinato in un secondo database. Confrontati dati e sicurezza di 42 tabelle, 42 policy, 96 funzioni, 177 vincoli, 11 trigger, 84 indici e quattro sequenze. Quattro modifiche negative ai permessi/RLS vengono rilevate; sei guardie locali e quattro sonde native proteggono l’isolamento. Le otto prove di cifratura passano. Auth resta un fixture e non è stato eseguito un recupero completo del progetto Supabase reale. [Procedura backup](BACKUP-RESTORE-SETUP.md).
+
 # Audit corrente — candidato rc.7 / cloud-test.10, 13 novembre 2026
 
 Questa sezione prevale sulle verifiche storiche. 27/27 suite Node e 16/16 regressioni SQL locali. Handler supporto reale con trasporti controllati: 17 scenari; UI: 14; bootstrap: 7. Due mutazioni locali negative rilevate. Nuovo supporto non attivo: due conferme migration scadute e schema remoto invariato, 17 migrazioni. Nessun aggiramento della conferma tecnica.
