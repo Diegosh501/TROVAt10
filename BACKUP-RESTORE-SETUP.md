@@ -12,7 +12,7 @@ Il job `Native PostgreSQL concurrency and restore` in GitHub Actions usa l’imm
 
 Il driver `tests/integration/native-postgres.cjs`:
 
-1. Rifiuta endpoint remoti, database di controllo diversi da `trovat1o_ci_control`, cluster con altri database e controllo non vuoto. Richiede un’opzione esplicita di test isolato.
+1. Rifiuta endpoint remoti, database di controllo diversi da `trovat1o_ci_control`, cluster con altri database, ruoli applicativi preesistenti, controllo o database postgres non vuoti. Richiede un’opzione esplicita di test isolato.
 2. Crea due database casuali nuovi e controlla PostgreSQL 17. Il fixture Auth è separato da quello PGlite; il vecchio blocco PGlite-only non viene rimosso.
 3. Riproduce le 17 migrazioni realmente registrate nell’ordine. Il solo helper gestito `rls_auto_enable` ha una firma inerte di test per la revoca storica: tutte le tabelle applicative devono attivare esplicitamente la propria RLS.
 4. Esegue le regressioni SQL con verifica del rollback. Applica la migrazione supporto pendente esclusivamente al database sintetico e ne verifica la regressione: questo non ne prova l’applicazione remota.
@@ -29,13 +29,15 @@ L’esito effettivo va letto nel run corrispondente al commit corrente, non dedo
 Esempio, dalla cartella dei sorgenti, su un’esportazione già ottenuta con strumenti ufficiali:
 
 ```sh
-mkdir -m 700 -p output/private-backup
-node scripts/backup-envelope.cjs keygen output/private-backup/backup.key
-node scripts/backup-envelope.cjs encrypt output/private-backup/database.dump output/private-backup/database.dump.enc output/private-backup/backup.key
-node scripts/backup-envelope.cjs decrypt output/private-backup/database.dump.enc output/private-backup/database.restored.dump output/private-backup/backup.key
+mkdir -m 700 -p output/private-backup output/private-key
+node scripts/backup-envelope.cjs keygen output/private-key/backup.key
+node scripts/backup-envelope.cjs encrypt output/private-backup/database.dump output/private-backup/database.dump.enc output/private-key/backup.key
+node scripts/backup-envelope.cjs decrypt output/private-backup/database.dump.enc output/private-backup/database.restored.dump output/private-key/backup.key
 ```
 
-La generazione della chiave va eseguita una volta sola. Custodire la chiave separatamente dal backup, fuori da repository, sito, cartelle condivise e allegati di consegna. La perdita della chiave rende irrecuperabile la copia cifrata. La chiave non va inviata in chat o inserita nella riga di comando. L’esempio non produce da solo un dump Supabase e non autorizza cancellazioni: non eliminare gli originali senza una verifica di recupero.
+La generazione della chiave va eseguita una volta sola. Custodire la chiave separatamente dal backup, fuori dal versionamento, dal sito e dalle cartelle condivise e allegati di consegna. La perdita della chiave rende irrecuperabile la copia cifrata. La chiave non va inviata in chat o inserita nella riga di comando. L’esempio non produce da solo un dump Supabase e non autorizza cancellazioni: non eliminare gli originali senza una verifica di recupero.
+
+Conservare la copia cifrata e la chiave su supporti separati dopo la verifica di recupero. La cartella output è esclusa da Git; non copiare la sua sottocartella privata nel sito.
 
 Otto prove ripetibili: `node tests/integration/backup-envelope.test.cjs`. La prova non crea una chiave reale del proprietario.
 
