@@ -1,6 +1,6 @@
 # V1.0 ONLINE - stato verificabile
 
-Aggiornato il 13 novembre 2026. Questo documento sostituisce le vecchie percentuali dei checkpoint. Il Master corrente comprende **25 criteri e 11 scenari finali** A-I, L, M.
+Aggiornato il 14 novembre 2026. Questo documento sostituisce le vecchie percentuali dei checkpoint. Il Master corrente comprende **25 criteri e 11 scenari finali** A-I, L, M.
 
 ## Versioni
 
@@ -15,9 +15,9 @@ Il collaudo usa dati reali persistenti. Non è una demo locale, ma non costituis
 
 | Verifica | Risultato | Cosa dimostra |
 | --- | --- | --- |
-| Suite Node | `██████████` 28/28 | Controlli del codice e funzioni con trasporti controllati |
-| Moduli SQL locali | `██████████` 16/16 | Applicazione dei moduli nel PostgreSQL locale |
-| Regressioni SQL | `██████████` 16/16 | Policy e transizioni su fixture con rollback |
+| Suite Node | `██████████` 29/29 | Controlli del codice e funzioni con trasporti controllati |
+| Moduli SQL locali | `██████████` 17/17 | Applicazione dei moduli nel PostgreSQL locale |
+| Regressioni SQL | `██████████` 17/17 | Policy e transizioni su fixture con rollback |
 | Login Google e profilo | `██████████` 2 identità reali verificate | Accesso, consenso, Free e profili separati |
 | Azioni reali cloud mirate | `██████████` 17/17 osservate | Creazione, modifica, limiti, storico, ruolo, export e PNG sullo stesso account |
 | Scenari finali del Master | `████░░░░░░` 4/11 interamente chiusi | Chiusi A, B, D e H; MFA, altro dispositivo, job e ripristino aperti |
@@ -33,6 +33,8 @@ La barra non misura codice scritto o tempo residuo. I gate degli altri criteri r
 
 **Aggiornamento cloud-test.11:** sei prove HTTP realmente sovrapposte, 18 operazioni tra i due account Google autorizzati: creazione al limite Free, otto richieste duplicate, doppia uscita, nuova candidatura, ammissione contro avvio e doppia conclusione. Una sola partita sintetica aggiunta e conclusa, nessuna cancellazione. Le otto regressioni nuove e il browser verificano caricamento lento, rete assente, recupero e uscita. La prova iniziale cercava erroneamente `closed_at` nel DTO compatibile del feed; il controllo SQL separato conferma il timestamp reale. La ricevuta iniziale è conservata. Per la contesa remota dell’ultimo posto servono ancora due Sportivi distinti: il caso resta verificato soltanto nel PostgreSQL nativo.
 
+**Candidato rc.9, non pubblicato:** percorso guidato di cancellazione revisionata dietro tre gate spenti (SQL, Edge e client). Conferma recente, revisioni a scadenza, vincoli e ripristino atomico degli errori; 44 casi Edge e 16 client, più regressione SQL e quattro contese native sul primo candidato. Mobile 320 px e desktop 1440 px provati con dati sintetici; nessun accesso MFA reale simulato. Le ricevute CI identificano il commit testato. Il database remoto conserva le stesse 17 migrazioni: la nuova esecuzione non è stata applicata. Questo progresso non chiude il requisito di cancellazione reale o i gate della V1.
+
 ## I 25 criteri della V1
 
 VERIFICATO indica l'ambito effettivamente provato nel collaudo o nella ripresa. Non anticipa il rilascio sul sito principale.
@@ -40,7 +42,7 @@ VERIFICATO indica l'ambito effettivamente provato nel collaudo o nella ripresa. 
 | # | Criterio | Stato attuale | Evidenza e parte residua |
 | --- | --- | --- | --- |
 | 1 | Servizio raggiungibile | VERIFICATO | URL HTTPS di collaudo raggiunto e usato realmente; principale ancora preview |
-| 2 | Release identificabile | VERIFICATO | Versioni Cloudflare e release pubbliche distinte; candidato rc.8 e collaudo cloud-test.11 identificati; ricevute di sorgenti/CI nel checkpoint privato |
+| 2 | Release identificabile | VERIFICATO | Versioni Cloudflare e release pubbliche distinte; candidato rc.9 e collaudo cloud-test.11 identificati; ricevute di sorgenti/CI nel checkpoint privato |
 | 3 | Autenticazione reale | PARZIALE | Google funziona; percorso email/password, SMTP, conferma e recupero ancora aperti nel Master |
 | 4 | Google OAuth | VERIFICATO | Login reale anche dopo revoca della vecchia chiave; nuova credenziale custodita in Supabase |
 | 5 | Profili persistenti | VERIFICATO | Due profili Google separati, ritrovati dopo nuovo accesso; entrambi Free |

@@ -1,3 +1,9 @@
+# Candidato corrente — 14 novembre 2026, rc.9 non pubblicato
+
+Il collaudo online resta **cloud-test.11**, derivato da rc.8/cache v22; il principale resta rc.1. Il candidato rc.9/cache v23 integra il percorso di cancellazione revisionata con tre gate disabilitati. Nessuna nuova migrazione remota, funzione Edge pubblicata, attivazione di job, spesa o cancellazione reale. Test e limiti: [ERASURE-REQUESTS.md](ERASURE-REQUESTS.md), [V1-STATUS.md](V1-STATUS.md). Le ricevute nel checkpoint privato identificano il commit e l’esito CI effettivamente provati; non attribuire il vecchio verde a modifiche successive.
+
+La guida v4 descrive il servizio di collaudo operativo. La preparazione rc.9 è un aggiornamento dei sorgenti, non un rilascio online della nuova cancellazione. Il passaggio all’indirizzo gratuito indicizzabile avverrà insieme al rilascio pubblico dopo i gate; il collaudo resta noindex.
+
 # Stato corrente — 13 novembre 2026, collaudo multiutente
 
 Questa sezione prevale sullo storico conservato sotto. Stato dettagliato: **V1-STATUS.md**.

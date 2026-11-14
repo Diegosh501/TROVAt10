@@ -1,3 +1,12 @@
+# Candidato rc.9, esecuzione cancellazione disabilitata — 14 novembre 2026
+
+- Nuovo percorso incrementale, non applicato al cloud: conferma recente del richiedente, verifica Admin con allowlist e TOTP, codice di revisione temporaneo e frase esplicita. Un account con partite condivise, acquisti, file o altre dipendenze da verificare rimane protetto.
+- Sessioni, identità, profilo e ricevuta gestiti nella stessa transazione; errore di vincolo ripristina lo stato. Ricevuta minima e ripetizione idempotente. Nessun account reale cancellato, nessun pagamento modificato.
+- UI guidata con un’unica azione per una pratica già aperta, consenso non preselezionato, riaccesso Google solo se necessario e scarto delle risposte tardive. Codice Admin solo in memoria. Revisione disponibile solo per pratiche classificate dal server.
+- 29 suite Node, 17 moduli/regressioni SQL, 44 casi Edge Admin e 16 client dedicati. Replay nativo del primo candidato: 13 contese totali, di cui quattro nuove; il checkpoint identifica l’ultima CI effettiva.
+- Pulsanti azionati nel browser su copia locale con dati sintetici, a 320 e 1440 px. Campi a 16 px e azioni mobile da 53 px; nessuna prova di cancellazione reale o MFA gestita. Due tentativi di predisposizione CDP interrotti sono documentati; prova completata con fixture statica locale.
+- Cache del prossimo candidato v23; collaudo cloud-test.11 e principale rc.1 invariati. I tre gate di esecuzione restano spenti. Guida v4 ancora riferita alla versione effettivamente online.
+
 # Candidato rc.8 / collaudo cloud-test.11 — 13 novembre 2026
 
 - Stato di caricamento esplicito per lista e I miei match: nessun risultato vuoto prematuro; gli errori di trasporto terminano l’attesa e consentono il recupero.

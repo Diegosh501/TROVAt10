@@ -206,4 +206,12 @@ set local role authenticated;
 update erase_exec_fixture set request_id=(public.request_account_erasure(true)->>'id')::uuid where n=1;
 select pg_temp.expect_erase_error('select public.confirm_my_account_erasure((select request_id from erase_exec_fixture where n=1),true)','PT403');
 reset role;
+-- Successful confirmations are independently rate limited; no budget is taken
+-- from export, withdrawal or another account.
+select pg_temp.erase_claim(4);
+set local role authenticated;
+update erase_exec_fixture set request_id=(public.request_account_erasure(true)->>'id')::uuid where n=4;
+do $$ declare i integer;begin for i in 1..10 loop perform public.confirm_my_account_erasure((select request_id from erase_exec_fixture where n=4),true);end loop;end $$;
+select pg_temp.expect_erase_error('select public.confirm_my_account_erasure((select request_id from erase_exec_fixture where n=4),true)','PT429');
+reset role;
 rollback;

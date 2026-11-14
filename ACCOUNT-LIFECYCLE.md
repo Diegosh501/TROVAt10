@@ -1,22 +1,6 @@
-# Stato corrente — 13 novembre 2026, collaudo multiutente
+# Durata degli account Free — stato del 14 novembre 2026
 
-Questa sezione prevale sullo storico conservato sotto. Stato dettagliato: **V1-STATUS.md**.
-
-- **Collaudo cloud:** https://v1-check-trovato.diegolucentedesign.workers.dev/, `1.0.0-cloud-test.10`, Cloudflare `8ac772c9-508b-47db-8487-14b9d0946a2d`. Candidato sorgente `1.0.0-rc.7`, cache pubblica v21. Il principale resta `1.0.0-rc.1`, preview locale: nessun nuovo traffico di produzione è stato attivato.
-- **Due account Google e due profili Free reali.** Tre eventi di prova: un privato programmato, un privato annullato e un pubblico concluso. Nessuna prenotazione o pagamento. Pubblicazione, richiesta, ammissione, avvio, conclusione e storico sono stati provati fra account distinti.
-- **Inviti:** copia effettiva del link, ingresso anonimo e ritorno da Google verificati. Sede privata mascherata per ospite, pending e rimosso; visibile solo dopo ammissione. Una nuova richiesta dopo rimozione resta pending. Il token resta in memoria, non nell’archivio locale dei match; generare un nuovo invito dopo una nuova sessione sostituisce quello precedente, con avviso.
-- **Sicurezza reale:** 11/11 controlli HTTP con Sportivo e 11/11 con Host ordinario. Admin SQL/Edge negati, profili altrui invisibili, sede/roster/contatto privati protetti e azioni altrui respinte. Due sonde del titolare confermano `mfa_required`. Nessun enrollment MFA simulato: il titolare lo ha rinviato.
-- **Backend:** progetto `nrixslotansgrtrosaof`, 17 migrazioni. Nuova migrazione `20261113121927_trovat1o_event_status_notification_copy`: testo corretto per avvio e conclusione; tipo, permessi e coda invariati. Admin Edge v4 e contatto Host v1 attivi. Nessun job di purge/retention/push attivo.
-- **Controlli:** 27 suite Node; 16 moduli SQL e 16 regressioni locali, compresi avvisi di stato. Le fixture non provano Auth gestita, concorrenza HTTP, Cron o ripristino. Quattro larghezze già controllate: 320, 390, 768 e 1440 px.
-- **Master R3:** 15/25 criteri verificati nel collaudo = 60% dei criteri, non del tempo o del codice. Scenari A, B, D e H chiusi nell’ambito documentato: 3/11. Pin riservati verificati con coordinate presenti: 33/33 controlli reali nei cinque stati creatore, pending, ammesso, rimosso e anonimo. Persistenza su altro dispositivo, concorrenza, automatismi e recupero restano aperti.
-- **Assistenza nuova:** handler, UI, quote e registri anti-riuso/idempotenza verificati localmente. Migrazione pendente: due conferme del connettore scadute, nessun DDL applicato. Il modulo resta spento e la UI presenta il contatto email. Leggere [SUPPORT-SETUP.md](SUPPORT-SETUP.md). CAPTCHA caricato solo su richiesta, indipendente dall’accesso Google.
-- **Residui:** TOTP e uso completo Admin, email/password con SMTP/conferma/reset/anti-abuso, assistenza, push/promemoria, retention/account lifecycle, cancellazione effettiva, backup/ripristino, informative e rilascio sul principale. Acquisti Premium €4,99/anno spenti. Nessun servizio a pagamento acquistato.
-- **Advisors:** 18 tabelle private con RLS senza policy (diniego intenzionale), due RPC anonime e 43 autenticate SECURITY DEFINER da mantenere con gate/grant stretti. Protezione password compromesse segnalata: percorso email e configurazione anti-abuso remota restano un gate; il flag UI spento non prova la disattivazione del provider.
-- Sorgenti, CI e integrità degli archivi hanno ricevute separate nel checkpoint privato. Un vecchio verde non verifica nuove modifiche. Non eseguire i test che richiedono un DB remoto vuoto: contiene account reali.
-
----
-
-## Documento e checkpoint precedenti
+Stato operativo completo: [V1-STATUS.md](V1-STATUS.md). Il modulo di durata account è applicato nel progetto corretto come `20261111124013_trovat1o_free_account_lifecycle_disabled`; `enabled=false` e `purge_enabled=false`, senza job attivo. Il collaudo resta cloud-test.11, il candidato rc.9 aggiunge una distinta procedura di cancellazione su richiesta ancora disabilitata e non applicata. Nessun account reale è stato cancellato. Non riapplicare la vecchia copia pendente del modulo durata account.
 
 # Durata degli account Free
 
@@ -24,9 +8,7 @@ Decisione del titolare dell’11 novembre 2026: il periodo Free parte dalla **cr
 
 ## Stato effettivo
 
-Il codice è in `supabase/account-lifecycle.sql`, con interfaccia dietro `accountLifecycleReady: false`. Le impostazioni server iniziano con `enabled=false` e `purge_enabled=false`. **Non è attivo online.** Il tentativo di applicare la migrazione con il connettore l’11 novembre ha richiesto una conferma operativa poi scaduta: una lettura successiva ha verificato che la tabella non esiste e le migrazioni remote restano tredici. Non riprovare automaticamente per ottenere approvazioni ripetute.
-
-La funzione Admin aggiornata a versione 2 è stata invece distribuita, senza attivare questo modulo, Google o pagamenti. Nessun account reale è stato cancellato e nessun nuovo costo è stato autorizzato.
+Il codice è in `supabase/account-lifecycle.sql`, con interfaccia dietro `accountLifecycleReady: false`. La migrazione è registrata nel cloud ma entrambe le impostazioni server restano false e il job non è attivo. Il primo tentativo scaduto appartiene allo storico: non rappresenta più lo stato attuale. Admin Edge v4 e Google sono operativi nel collaudo con i propri limiti; pagamenti e cancellazioni restano spenti. Leggere il checkpoint prima di ogni attivazione.
 
 ## Regole implementate
 

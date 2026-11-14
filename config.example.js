@@ -7,6 +7,7 @@ window.TROVAT1O_CONFIG = {
   billingReady: false,
   exportReady: false,
   erasureRequestsReady: false,
+  erasureExecutionReady: false,
   accountLifecycleReady: false,
   billingMode: 'test',
   publicBaseUrl: '',

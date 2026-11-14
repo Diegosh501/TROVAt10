@@ -67,6 +67,39 @@ begin
 end $$;
 revoke all on function private.lock_erasure_admin(text,uuid) from public,anon,authenticated;
 
+-- Confirmation has its own bounded write budget; withdrawing from a match
+-- and exporting personal data do not consume this budget.
+alter table private.write_action_quotas drop constraint write_action_quotas_action_check;
+alter table private.write_action_quotas add constraint write_action_quotas_action_check
+  check(action in ('event_create','join','manage','erasure_confirm'));
+create or replace function private.consume_write_quota(p_action text)
+returns void language plpgsql security definer set search_path='' as $$
+declare
+  v_user uuid:=auth.uid();
+  v_at timestamptz:=pg_catalog.now();
+  v_min integer; v_hour integer; v_allowed integer;
+begin
+  if v_user is null then return; end if;
+  if p_action='event_create' then v_min:=10; v_hour:=60;
+  elsif p_action in ('join','manage') then v_min:=60; v_hour:=600;
+  elsif p_action='erasure_confirm' then v_min:=10;v_hour:=60;
+  else raise exception 'invalid_write_quota_action' using errcode='22023'; end if;
+  -- Both windows share the same locked (user,action) row. ON CONFLICT's WHERE
+  -- is rechecked on the latest tuple after a concurrent writer releases it.
+  insert into private.write_action_quotas as q(user_id,action,minute_bucket,minute_count,hour_bucket,hour_count)
+    values(v_user,p_action,pg_catalog.date_trunc('minute',v_at),1,pg_catalog.date_trunc('hour',v_at),1)
+  on conflict(user_id,action) do update set
+    minute_bucket=excluded.minute_bucket,
+    minute_count=case when q.minute_bucket=excluded.minute_bucket then q.minute_count+1 else 1 end,
+    hour_bucket=excluded.hour_bucket,
+    hour_count=case when q.hour_bucket=excluded.hour_bucket then q.hour_count+1 else 1 end
+  where (q.minute_bucket<>excluded.minute_bucket or q.minute_count<v_min)
+    and (q.hour_bucket<>excluded.hour_bucket or q.hour_count<v_hour)
+  returning 1 into v_allowed;
+  if v_allowed is null then raise exception 'write_rate_limited' using errcode='PT429'; end if;
+end $$;
+revoke all on function private.consume_write_quota(text) from public,anon,authenticated;
+
 create function public.confirm_my_account_erasure(p_request_id uuid,p_confirm boolean)
 returns jsonb language plpgsql security definer set search_path='' as $$
 declare u uuid; sid uuid; r public.support_requests%rowtype; at_time timestamptz:=clock_timestamp();
@@ -90,6 +123,7 @@ begin
       or r.status in ('resolved','closed') then raise exception 'erasure_request_not_found' using errcode='PT404';end if;
   if exists(select 1 from private.platform_admins where user_id=u) then
     raise exception 'administration_succession_required' using errcode='PT403';end if;
+  perform private.consume_write_quota('erasure_confirm');
   insert into private.account_erasure_execution_receipts(request_id,user_id,confirmed_session_id,confirmed_at)
     values(p_request_id,u,sid,at_time)
   on conflict(request_id) do update set user_id=excluded.user_id,confirmed_session_id=excluded.confirmed_session_id,
@@ -290,3 +324,30 @@ begin
 end $$;
 revoke all on function public.admin_execute_account_erasure(uuid,text,text) from public,anon;
 grant execute on function public.admin_execute_account_erasure(uuid,text,text) to authenticated;
+
+-- Expose only the trusted request kind, never a target email or Auth identifier.
+create or replace function public.admin_support_tickets(p_query text default '',p_status text default '',p_category text default '',p_sort text default 'date')
+returns jsonb language plpgsql security definer set search_path = '' as $$
+declare v_rows jsonb; v_total bigint;
+begin
+  perform private.require_platform_admin('tickets_read');
+  if p_query is null or char_length(p_query)>100 or p_status is null
+    or p_status not in ('','new','in_progress','waiting_user','resolved','closed') or p_category is null
+    or p_category not in ('','bug','account','event','safety','other') or p_sort is null
+    or p_sort not in ('date','name') then raise exception 'invalid_request' using errcode='22023'; end if;
+  with matches as (
+    select id,request_kind,category,subject,details,contact_name,contact_email,contact_allowed,status,admin_reply,created_at,updated_at
+    from public.support_requests
+    where (p_status='' or status=p_status) and (p_category='' or category=p_category)
+      and (pg_catalog.btrim(p_query)='' or search_document @@ pg_catalog.websearch_to_tsquery('simple',p_query))
+  ), page as (
+    select *,count(*) over() as full_count from matches
+    order by case when p_sort='name' then contact_name end asc nulls last,created_at desc,id
+    limit 50
+  ) select coalesce(pg_catalog.jsonb_agg(pg_catalog.to_jsonb(page)-'full_count'),'[]'::jsonb),coalesce(max(full_count),0)
+    into v_rows,v_total from page;
+  return pg_catalog.jsonb_build_object('tickets',v_rows,'total',v_total);
+end $$;
+revoke all on function public.admin_support_tickets(text,text,text,text) from public,anon;
+grant execute on function public.admin_support_tickets(text,text,text,text) to authenticated;
+
