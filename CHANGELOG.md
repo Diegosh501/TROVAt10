@@ -1,3 +1,11 @@
+# Candidato rc.10 — 14 novembre 2026, correzioni runtime notifiche
+
+- Corretto un errore di importazione ESM: web-push@4.0.0 non espone un default, mentre il precedente controllo tipi lo accettava. Una prova esegue ora l’importazione del vero entrypoint Edge senza avviare un server.
+- Verifica WebCrypto della corrispondenza delle chiavi VAPID prima del claim; coppie errate e punti pubblici invalidi non consumano messaggi. Controllo dopo autenticazione, riutilizzato soltanto per la stessa coppia.
+- Otto prove con libreria reale e ricevitore indipendente: cifratura, firma/audience/scadenza, dati generici, materiale fresco, alterazioni e revoca del consenso. 19 casi del gestore; nessun provider contattato o segreto persistente creato.
+- Esecuzione test in ambiente ripulito, senza rete o scrittura; CI aggiornata. Aggiunti 11 hash runtime di dipendenze già fissate, nessun cambio di versione o pacchetto npm.
+- Pubblicazione push-dispatch rifiutata dalla revisione automatica: nuovo endpoint persistente richiede consenso specifico. Non pubblicato, nessun job o invio attivato. Cache del candidato v24; collaudo cloud-test.11 e principale rc.1 invariati.
+
 # Candidato rc.9, esecuzione cancellazione disabilitata — 14 novembre 2026
 
 - Nuovo percorso incrementale, non applicato al cloud: conferma recente del richiedente, verifica Admin con allowlist e TOTP, codice di revisione temporaneo e frase esplicita. Un account con partite condivise, acquisti, file o altre dipendenze da verificare rimane protetto.

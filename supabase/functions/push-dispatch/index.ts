@@ -1,4 +1,4 @@
-import webpush from 'npm:web-push@4.0.0';
+import * as webpush from 'npm:web-push@4.0.0';
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.119.0';
 import {createPushDispatcher} from '../_shared/push-core.ts';
 const env=(name:string)=>Deno.env.get(name)||'';

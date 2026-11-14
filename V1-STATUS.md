@@ -35,6 +35,8 @@ La barra non misura codice scritto o tempo residuo. I gate degli altri criteri r
 
 **Candidato rc.9, non pubblicato:** percorso guidato di cancellazione revisionata dietro tre gate spenti (SQL, Edge e client). Conferma recente, revisioni a scadenza, vincoli e ripristino atomico degli errori; 44 casi Edge e 16 client, più regressione SQL e quattro contese native sul primo candidato. Mobile 320 px e desktop 1440 px provati con dati sintetici; nessun accesso MFA reale simulato. Le ricevute CI identificano il commit testato. Il database remoto conserva le stesse 17 migrazioni: la nuova esecuzione non è stata applicata. Questo progresso non chiude il requisito di cancellazione reale o i gate della V1.
 
+**Candidato rc.10, non pubblicato:** corretti due problemi del dispatcher push: import ESM incompatibile con web-push@4.0.0 e chiavi VAPID non corrispondenti ammesse fino al claim. 19 casi del gestore e otto prove di runtime/cifratura effettivi con materiale temporaneo. La revisione automatica ha rifiutato la creazione del nuovo endpoint persistente: serve autorizzazione specifica, senza aggirare il rifiuto. Nessuna consegna o programmazione reale; il requisito operativo rimane aperto. [Procedura](PUSH-SETUP.md).
+
 ## I 25 criteri della V1
 
 VERIFICATO indica l'ambito effettivamente provato nel collaudo o nella ripresa. Non anticipa il rilascio sul sito principale.
@@ -42,7 +44,7 @@ VERIFICATO indica l'ambito effettivamente provato nel collaudo o nella ripresa. 
 | # | Criterio | Stato attuale | Evidenza e parte residua |
 | --- | --- | --- | --- |
 | 1 | Servizio raggiungibile | VERIFICATO | URL HTTPS di collaudo raggiunto e usato realmente; principale ancora preview |
-| 2 | Release identificabile | VERIFICATO | Versioni Cloudflare e release pubbliche distinte; candidato rc.9 e collaudo cloud-test.11 identificati; ricevute di sorgenti/CI nel checkpoint privato |
+| 2 | Release identificabile | VERIFICATO | Versioni Cloudflare e release pubbliche distinte; candidato rc.10 e collaudo cloud-test.11 identificati; ricevute di sorgenti/CI nel checkpoint privato |
 | 3 | Autenticazione reale | PARZIALE | Google funziona; percorso email/password, SMTP, conferma e recupero ancora aperti nel Master |
 | 4 | Google OAuth | VERIFICATO | Login reale anche dopo revoca della vecchia chiave; nuova credenziale custodita in Supabase |
 | 5 | Profili persistenti | VERIFICATO | Due profili Google separati, ritrovati dopo nuovo accesso; entrambi Free |
