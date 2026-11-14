@@ -40,7 +40,7 @@ L’operazione aggiorna l’elenco dei soli due nuovi vincoli Auth conosciuti: r
 - `node tests/support-edge-runtime.cjs`: 17 scenari sull’handler reale con Auth, CAPTCHA e RPC controllati.
 - `node tests/support-client-runtime.cjs`: 14 scenari UI, consensi, retry e cambio account.
 - `node tests/bootstrap-runtime.cjs`: 7 scenari, compresa indisponibilità CAPTCHA con Google indipendente.
-- `node tests/local-postgres.cjs --require-engine`: 16 moduli e 16 regressioni SQL, comprese `tests/sql/support-submit.sql`; solo database locale isolato e rollback.
+- `node tests/local-postgres.cjs --require-engine`: 17 moduli e 17 regressioni SQL, comprese `tests/sql/support-submit.sql`; solo database locale isolato e rollback.
 - Deno controlla il codice reale con il lockfile; CI include il nuovo handler.
 
 Due mutazioni negative del solo ambiente locale hanno dimostrato che togliere il controllo sessione o il vincolo anti-riuso fa fallire la regressione. Nessuna protezione remota è stata rimossa per provarlo.

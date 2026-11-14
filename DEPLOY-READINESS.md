@@ -1,60 +1,48 @@
-# Stato corrente — 13 novembre 2026, collaudo multiutente
-
-Questa sezione prevale sullo storico conservato sotto. Stato dettagliato: **V1-STATUS.md**.
-
-- **Collaudo cloud:** https://v1-check-trovato.diegolucentedesign.workers.dev/, `1.0.0-cloud-test.11`, Cloudflare `efaa577e-d2aa-47ba-bbae-92c2c06ef11f`. Candidato sorgente `1.0.0-rc.8`, cache pubblica v22. Il principale resta `1.0.0-rc.1`, preview locale: nessun nuovo traffico di produzione è stato attivato.
-- **Due account Google e due profili Free reali.** Quattro eventi di prova: un privato programmato, un privato annullato e due pubblici conclusi. Nessuna prenotazione o pagamento. Pubblicazione, richiesta, ammissione, avvio, conclusione e storico sono stati provati fra account distinti.
-- **Inviti:** copia effettiva del link, ingresso anonimo e ritorno da Google verificati. Sede privata mascherata per ospite, pending e rimosso; visibile solo dopo ammissione. Una nuova richiesta dopo rimozione resta pending. Il token resta in memoria, non nell’archivio locale dei match; generare un nuovo invito dopo una nuova sessione sostituisce quello precedente, con avviso.
-- **Sicurezza reale:** 11/11 controlli HTTP con Sportivo e 11/11 con Host ordinario. Admin SQL/Edge negati, profili altrui invisibili, sede/roster/contatto privati protetti e azioni altrui respinte. Due sonde del titolare confermano `mfa_required`. Nessun enrollment MFA simulato: il titolare lo ha rinviato.
-- **Backend:** progetto `nrixslotansgrtrosaof`, 17 migrazioni. Nuova migrazione `20261113121927_trovat1o_event_status_notification_copy`: testo corretto per avvio e conclusione; tipo, permessi e coda invariati. Admin Edge v4 e contatto Host v1 attivi. Nessun job di purge/retention/push attivo.
-- **Controlli:** 28 suite Node; 16 moduli SQL e 16 regressioni locali, compresi avvisi di stato. Le fixture non provano Auth gestita, concorrenza HTTP, Cron o ripristino. Quattro larghezze già controllate: 320, 390, 768 e 1440 px.
-- **Master R3:** 15/25 criteri verificati nel collaudo = 60% dei criteri, non del tempo o del codice. Scenari A, B, D e H chiusi nell’ambito documentato: 3/11. Pin riservati verificati con coordinate presenti: 33/33 controlli reali nei cinque stati creatore, pending, ammesso, rimosso e anonimo. Persistenza su altro dispositivo, concorrenza, automatismi e recupero restano aperti.
-- **Assistenza nuova:** handler, UI, quote e registri anti-riuso/idempotenza verificati localmente. Migrazione pendente: due conferme del connettore scadute, nessun DDL applicato. Il modulo resta spento e la UI presenta il contatto email. Leggere [SUPPORT-SETUP.md](SUPPORT-SETUP.md). CAPTCHA caricato solo su richiesta, indipendente dall’accesso Google.
-- **Residui:** TOTP e uso completo Admin, email/password con SMTP/conferma/reset/anti-abuso, assistenza, push/promemoria, retention/account lifecycle, cancellazione effettiva, backup/ripristino, informative e rilascio sul principale. Acquisti Premium €4,99/anno spenti. Nessun servizio a pagamento acquistato.
-- **Advisors:** 18 tabelle private con RLS senza policy (diniego intenzionale), due RPC anonime e 43 autenticate SECURITY DEFINER da mantenere con gate/grant stretti. Protezione password compromesse segnalata: percorso email e configurazione anti-abuso remota restano un gate; il flag UI spento non prova la disattivazione del provider.
-- Sorgenti, CI e integrità degli archivi hanno ricevute separate nel checkpoint privato. Un vecchio verde non verifica nuove modifiche. Non eseguire i test che richiedono un DB remoto vuoto: contiene account reali.
-
-**Prove PostgreSQL native aggiuntive:** [run verificato](https://github.com/Diegosh501/TROVAt10/actions/runs/43481338497), PostgreSQL 17.11 isolato: 17 migrazioni registrate riprodotte, 16 regressioni, nove scenari realmente concorrenti e dump cifrato ripristinato in un secondo database. Confrontati dati e sicurezza di 42 tabelle, 42 policy, 96 funzioni, 177 vincoli, 11 trigger, 84 indici e quattro sequenze. Quattro modifiche negative ai permessi/RLS vengono rilevate; sei guardie locali e quattro sonde native proteggono l’isolamento. Le otto prove di cifratura passano. Auth resta un fixture e non è stato eseguito un recupero completo del progetto Supabase reale. [Procedura backup](BACKUP-RESTORE-SETUP.md).
-
-
-**Nuove verifiche effettive:** sei race HTTP e 18 operazioni nel collaudo. Caricamento lento, offline, recupero e uscita verificati nel browser; otto nuove regressioni proteggono i confini della sessione. Contesa remota dell’ultimo posto, MFA personale, servizi e gate di produzione ancora aperti.
-
-
----
-
-## Documento e checkpoint precedenti
-
 # Preparare il rilascio V1.0
 
-Stato dell’11 novembre 2026. Il sito pubblico è ancora l’anteprima 2.0.2. La cartella pubblica locale e i pacchetti sono candidati successivi e non attestano un nuovo deploy.
+Versioni, criteri e scenari autorevoli: [V1-STATUS.md](V1-STATUS.md). Storico: [RELEASES.md](RELEASES.md). Distinguere frontend distribuito, sorgenti e funzioni server: un merge non aggiorna il sito automaticamente.
+
+## Punto di partenza del 14 novembre 2026
+
+Collaudo cloud-test.11 da rc.8; principale rc.1, anteprima con dati locali. PR #1 e sorgenti rc.10 sono integrati nel ramo principale, senza deploy frontend. Supabase `nrixslotansgrtrosaof` conserva 17 migrazioni, due account Google e quattro eventi. Funzioni: admin-console v4, host-contact v1, push-dispatch v1 con blocco false nel codice. Invio, pianificazione e purge sono spenti.
+
+La lettura pubblica di Auth rileva Google ed email abilitati sul server, mentre l’app offre solo Google. La console richiede un nuovo accesso: il provider email non è ancora stato modificato. Questo è un gate di rilascio.
 
 ## Gate ancora aperti
 
-1. Google OAuth sul progetto Supabase corretto e login/logout reali. Il client non richiede SMTP/SMS/Turnstile per il percorso Google; configurare solo i percorsi opzionali realmente offerti.
-2. Allowlist dell’Admin verificato, enrollment TOTP e controllo della sessione e della scadenza di 15 minuti. L’Edge Admin v2 è distribuita ma non sostituisce questo test.
-3. Distribuzione delle funzioni necessarie, segreti nelle impostazioni dei provider, limiti e origini corrette. Non impostare valori segreti nel frontend o nel repository.
-4. Prove con account Host/Sportivo separati: persistenza, invito privato, capienza concorrente, richieste, ammissioni, espulsione/riammissione, modifiche e conclusione.
-5. Cron e vere esecuzioni di storico, promemoria e push. Esportazione e cancellazione su richiesta devono funzionare; la durata automatica degli account ha una migrazione separata da approvare ed è disattivata.
-6. Prima degli acquisti: ambiente Stripe test autorizzato, prezzo annuale previsto e stato pagato verificato, webhook, portale, rinnovo/annullamento, dati fiscali/contrattuali pertinenti. Non usare un acquisto live per provare l’integrazione.
-7. Verifica finale delle informative aggiornate, accordi con i responsabili, trasferimenti e conservazione delle pratiche. I testi non sono una certificazione legale. Backup dati e ripristino completo ancora da provare.
-8. Solo dopo i controlli necessari abilitare i flag appropriati, distribuire una versione coordinata e provare online i flussi A-G. Le funzioni opzionali non disponibili restano spente e non devono mostrare falsi successi.
+1. Completare email/password, SMTP personalizzato, conferma, recupero e antiabuso previsti dal Master R3. Nel frattempo chiudere sul server i percorsi non offerti nel collaudo. La disattivazione temporanea non completa il requisito email V1.
+2. Completare personalmente TOTP dell’Admin già assegnato e collaudare metriche e operazioni reali. Il titolare ha rinviato il passaggio; non creare o simulare un suo fattore.
+3. Applicare le sole migrazioni pendenti con conferma tecnica valida. Assistenza richiede anche Turnstile reale e prova pratica. Non ripetere il ciclo di conferme scadute o aggirarlo.
+4. Chiudere gli scenari su altro dispositivo, contesa dell’ultimo posto fra due Sportivi Google distinti, errori dei servizi, automatismi e recupero gestito.
+5. Verificare job reali di storico e comunicazioni, consenso, revoca e pulizia. Il dispatcher spento non prova consegna. Account lifecycle, purge e cancellazione revisionata rimangono disattivati.
+6. Verificare backup/ripristino del progetto gestito: Auth, Storage e configurazione hanno prove distinte dal recupero PostgreSQL sintetico.
+7. Adeguare informative, conservazione e accordi ai servizi effettivi. Premium e pagamenti reali restano spenti.
+8. Superare i criteri V1, rilasciare sul principale e collaudarlo sullo stesso URL. Porting gratuito e indicizzabilità pubblica vanno coordinati con questa fase; il collaudo mantiene noindex.
 
-## Pacchetto e controlli
+## Configurazione e preflight
 
-Da una copia completa dei sorgenti:
+Creare una preview solo se manca la configurazione locale:
 
 ```sh
-cp config.example.js config.js
-bash scripts/package-release.sh
+if [ ! -f config.js ]; then
+  cp config.example.js config.js
+fi
 ```
 
-La configurazione reale va predisposta prima del rilascio e non va sostituita alla cieca se esiste già. Il workflow CI crea solo una configurazione di preview e non pubblica. I test Node, il driver PostgreSQL locale obbligatorio e i controlli Deno sono descritti nel README e nel workflow.
+Per la release cloud predisporre e revisionare la configurazione pubblica pertinente; il default dei sorgenti è preview.
 
-Gli archivi escludono `.env`, `.dev.vars`, `.npmrc`, `node_modules`, `.wrangler` e Git. Prima di usarli confrontare sorgenti, copie ed entrypoint, non soltanto l’integrità dello ZIP. Il pacchetto locale include la documentazione, le prove e la guida PDF; quello statico contiene i file del sito.
+```sh
+bash scripts/package-release.sh
+node scripts/verify-auth-settings.mjs TROVAT1O-Cloudflare-Deploy/public/config.js output/audit/auth-provider-preflight.json
+```
 
-## Pubblicazione e verifica
+Il preflight esegue solo GET alle impostazioni pubbliche del progetto corretto con chiave publishable/anon. Rifiuta chiavi server, altri progetti, redirect e provider non offerti; non crea utenti, non accede e non invia email. Discrepanza: exit 1. Preview: exit 2, esito non verificato. Non dimostra SMTP, CAPTCHA, consegna email, login Google o MFA.
 
-Il progetto Cloudflare già autorizzato usa asset statici da `TROVAT1O-Cloudflare-Deploy/public/` e il dominio gratuito esistente. Dopo aver superato i gate:
+La CI esegue test sorgenti, PostgreSQL locale/nativo, Deno con lock e packaging. Wrangler in CI è solo dry-run. Consultare il run del commit effettivo; un verde precedente non verifica nuovi cambi.
+
+## Pubblicazione e controllo HTTPS
+
+Solo dopo i gate:
 
 ```sh
 cd TROVAT1O-Cloudflare-Deploy
@@ -62,10 +50,16 @@ npm ci --ignore-scripts --no-audit --no-fund
 npx wrangler deploy
 ```
 
-Non confondere `deploy --dry-run` con pubblicazione e un deploy riuscito con accesso Google o sincronizzazione funzionanti. Registrare versione Cloudflare, commit, configurazione senza segreti, data ed esito. Controllare asset, console, sessioni, autorizzazioni e prove reali sullo stesso URL pubblico.
+Esporre esclusivamente `public/`. Root, checkpoint, dump, test e pacchetti restano privati. Tornati alla root:
+
+```sh
+node scripts/verify-live.mjs https://trovato.diegolucentedesign.workers.dev/ output/audit/live-verification.json TROVAT1O-Cloudflare-Deploy/public
+```
+
+Per un’anteprima usare la sua URL e directory effettivamente caricata. Il verificatore asset confronta hash, intestazioni e percorsi riservati; Auth e flussi reali restano prove separate. Registrare Version ID, release, commit, origini, migrazioni e risultati post-deploy.
 
 ## Recupero e costi
 
-Conservare la versione hosting precedente e un backup dati verificato. Disattivare i job di eliminazione prima di interventi di rollback; una cancellazione fisica non si annulla cambiando configurazione o ritirando una migrazione. Le tredici migrazioni registrate non sono un backup dei dati e non sono state riprodotte da zero.
+Conservare versione hosting precedente e backup verificato. Fermare i job che modificano dati prima del recupero. Un rollback frontend non ripristina righe cancellate. [Procedura backup](BACKUP-RESTORE-SETUP.md).
 
-Non acquistare servizi o aumentare piani automaticamente. Verificare le quote e la continuità dei servizi Free correnti; in caso di crescita il titolare decide un eventuale incremento. Il dominio comprato non è necessario per il primo collaudo pubblico; collegarlo successivamente richiede aggiornare origine, redirect, link, metadata, CORS e informative.
+Nessun acquisto o aumento di piano automatico. Il vincolo è costo zero entro le quote effettive. Un dominio comprato è facoltativo: richiederà aggiornare origine, redirect, link, metadata, CORS e informative.

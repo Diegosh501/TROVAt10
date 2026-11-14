@@ -15,7 +15,7 @@ Il collaudo usa dati reali persistenti. Non è una demo locale, ma non costituis
 
 | Verifica | Risultato | Cosa dimostra |
 | --- | --- | --- |
-| Suite Node | `██████████` 29/29 | Controlli del codice e funzioni con trasporti controllati |
+| Suite Node sorgenti correnti | `██████████` 30/30 | Controlli del codice e funzioni con trasporti controllati, incluse 15 prove del preflight Auth |
 | Moduli SQL locali | `██████████` 17/17 | Applicazione dei moduli nel PostgreSQL locale |
 | Regressioni SQL | `██████████` 17/17 | Policy e transizioni su fixture con rollback |
 | Login Google e profilo | `██████████` 2 identità reali verificate | Accesso, consenso, Free e profili separati |
@@ -35,7 +35,7 @@ La barra non misura codice scritto o tempo residuo. I gate degli altri criteri r
 
 **Candidato rc.9, non pubblicato:** percorso guidato di cancellazione revisionata dietro tre gate spenti (SQL, Edge e client). Conferma recente, revisioni a scadenza, vincoli e ripristino atomico degli errori; 44 casi Edge e 16 client, più regressione SQL e quattro contese native sul primo candidato. Mobile 320 px e desktop 1440 px provati con dati sintetici; nessun accesso MFA reale simulato. Le ricevute CI identificano il commit testato. Il database remoto conserva le stesse 17 migrazioni: la nuova esecuzione non è stata applicata. Questo progresso non chiude il requisito di cancellazione reale o i gate della V1.
 
-**Candidato rc.10, non pubblicato:** corretti due problemi del dispatcher push: import ESM incompatibile con web-push@4.0.0 e chiavi VAPID non corrispondenti ammesse fino al claim. 19 casi del gestore e otto prove di runtime/cifratura effettivi con materiale temporaneo. Il titolare ha poi autorizzato la pubblicazione inizialmente spenta: `push-dispatch` v1 si avvia nel Supabase gestito e i tre probe restituiscono 503/push_unavailable. Il blocco esplicito nel codice prevale sui segreti del progetto. Nessuna consegna o programmazione reale; il requisito operativo rimane aperto. [Procedura](PUSH-SETUP.md).
+**Sorgenti rc.10, frontend invariato:** corretti due problemi del dispatcher push: import ESM incompatibile con web-push@4.0.0 e chiavi VAPID non corrispondenti ammesse fino al claim. 19 casi del gestore e otto prove di runtime/cifratura effettivi con materiale temporaneo. Il titolare ha poi autorizzato la pubblicazione inizialmente spenta: `push-dispatch` v1 si avvia nel Supabase gestito e i tre probe restituiscono 503/push_unavailable. Il blocco esplicito nel codice prevale sui segreti del progetto. Nessuna consegna o programmazione reale; il requisito operativo rimane aperto. [Procedura](PUSH-SETUP.md).
 
 ## I 25 criteri della V1
 
@@ -45,7 +45,7 @@ VERIFICATO indica l'ambito effettivamente provato nel collaudo o nella ripresa. 
 | --- | --- | --- | --- |
 | 1 | Servizio raggiungibile | VERIFICATO | URL HTTPS di collaudo raggiunto e usato realmente; principale ancora preview |
 | 2 | Release identificabile | VERIFICATO | Versioni Cloudflare e release pubbliche distinte; candidato rc.10 e collaudo cloud-test.11 identificati; ricevute di sorgenti/CI nel checkpoint privato |
-| 3 | Autenticazione reale | PARZIALE | Google funziona; percorso email/password, SMTP, conferma e recupero ancora aperti nel Master |
+| 3 | Autenticazione reale | PARZIALE | Google funziona; email server ancora abilitata con UI spenta: correggere la configurazione e completare SMTP/conferma/recupero/antiabuso del Master |
 | 4 | Google OAuth | VERIFICATO | Login reale anche dopo revoca della vecchia chiave; nuova credenziale custodita in Supabase |
 | 5 | Profili persistenti | VERIFICATO | Due profili Google separati, ritrovati dopo nuovo accesso; entrambi Free |
 | 6 | Assegnazione ruoli | VERIFICATO | Host/Sportivo cambiati sul server e persistenti; Admin assegnato separatamente e non selezionabile |
@@ -61,9 +61,9 @@ VERIFICATO indica l'ambito effettivamente provato nel collaudo o nella ripresa. 
 | 16 | Funzioni server necessarie | PARZIALE | Admin e contatto Host pubblicate; dispatcher push pubblicato con blocco esplicito false e boot verificato; perimetro operativo restante da configurare |
 | 17 | Permessi backend | VERIFICATO | 11/11 richieste reali per Sportivo e 11/11 per Host ordinario; gate MFA titolare confermato; fixture per revoche/metadata |
 | 18 | Test multiutente | VERIFICATO | Due account Google distinti, flussi pubblici e privati; altro dispositivo e concorrenza rimangono nei criteri/scenari specifici |
-| 19 | Nessun blocco conosciuto | NON DIMOSTRATO | Corrette race UI, copia link e ingresso anonimo da invito; servizi e gate di rilascio ancora aperti |
+| 19 | Nessun blocco conosciuto | NON DIMOSTRATO | Corrette race UI e inviti; il nuovo preflight rileva email server abilitata con UI spenta. Configurazione Auth e servizi restano gate reali |
 | 20 | Limiti economici | VERIFICATO | Nessun piano comprato, SMS inviato o pagamento reale; dominio acquistato rinviato |
-| 21 | Backup/ripristino/rollback | PARZIALE | Recupero SQL isolato di 42 tabelle e permessi provato; recupero completo del progetto gestito ancora aperto |
+| 21 | Backup/ripristino/rollback | PARZIALE | Recupero SQL isolato di 44 tabelle e permessi provato; recupero completo del progetto gestito ancora aperto |
 | 22 | Informative adeguate | PARZIALE | Pagine versionate e consenso profilo acquisito; verifiche su servizi attivi, accordi e cancellazione effettiva aperte |
 | 23 | Controlli post-deploy | DA ESEGUIRE | Collaudo cloud separato provato; nessun post-deploy della V1 completa sul principale |
 | 24 | Documentazione | VERIFICATO | README e stato correnti aggiornati, limiti espliciti; ricevute del commit/CI e guida nel pacchetto di ripresa |
@@ -81,8 +81,8 @@ VERIFICATO indica l'ambito effettivamente provato nel collaudo o nella ripresa. 
 | F - Retention | Regressioni SQL a sette giorni e vincoli | Job reale in ambiente approvato e risultato operativo |
 | G - Errori | Campi vuoti rifiutati; suite su sessioni, rete e risposte tardive | Rete lenta/offline, recupero e uscita osservati e corretti; completare errori dei servizi ancora spenti |
 | H - Privacy | VERIFICATO: inviti e precedenti controlli backend, più 33/33 letture reali con pin non nullo: creatore, pending, ammesso, rimosso e anonimo | Completato nel collaudo nell’ambito documentato; nessuna certificazione generale |
-| I - Concorrenza | Nove casi su PostgreSQL 17.11 con connessioni distinte e sovrapposizione osservata: doppie richieste, ultimo posto, ammissioni, avvio, Free e supporto | Sei race HTTP nel servizio verificate; la contesa dell’ultimo posto tra due Sportivi remoti distinti resta da provare |
-| L - Ripristino | Dump cifrato sintetico ripristinato in un secondo database: 42 tabelle e catalogo di sicurezza coerenti; sorgenti/versione frontend conservati | Backup e ripristino dell’intero progetto Supabase reale, oggetti e configurazione ancora da provare |
+| I - Concorrenza | Tredici casi su PostgreSQL 17.11 con connessioni distinte e sovrapposizione osservata: doppie richieste, ultimo posto, ammissioni, avvio, Free e supporto | Sei race HTTP nel servizio verificate; la contesa dell’ultimo posto tra due Sportivi remoti distinti resta da provare |
+| L - Ripristino | Dump cifrato sintetico ripristinato in un secondo database: 44 tabelle e catalogo di sicurezza coerenti; sorgenti/versione frontend conservati | Backup e ripristino dell’intero progetto Supabase reale, oggetti e configurazione ancora da provare |
 | M - Produzione | HTTPS, asset e percorsi riservati della preview controllati | Rilascio coordinato V1 e smoke sul medesimo URL principale |
 
 ## Configurazioni e sicurezza
@@ -91,7 +91,7 @@ Google usa il client esistente e il callback del solo progetto corretto. Redirec
 
 L'account Admin è del titolare già indicato. Il secondo fattore non è stato creato o simulato; il titolare ha scelto di farlo più tardi. Una password storica in chat non è una credenziale da riutilizzare.
 
-`onlineReady`, `exportReady` ed `erasureRequestsReady` sono veri solo nel collaudo. Email/password, assistenza nell’app, Billing, push e ciclo account restano spenti. La UI usa il contatto email per il supporto; il nuovo SQL resta in pending-operations dopo due conferme del connettore scadute. La configurazione di default dei sorgenti resta preview. Il modulo di cancellazione registra una pratica, non chiude accesso o dati: [ERASURE-REQUESTS.md](ERASURE-REQUESTS.md).
+`onlineReady`, `exportReady` ed `erasureRequestsReady` sono veri solo nel collaudo. La UI email/password, assistenza nell’app, Billing, push e ciclo account restano spenti. La lettura pubblica Auth del 14 novembre rileva però external.email=true: la modifica server richiede un nuovo accesso alla console. Il preflight scripts/verify-auth-settings.mjs segnala questa discrepanza, senza creare account o inviare email. La UI usa il contatto email per il supporto; il nuovo SQL resta in pending-operations dopo due conferme del connettore scadute. La configurazione di default dei sorgenti resta preview. Il modulo di cancellazione registra una pratica, non chiude accesso o dati: [ERASURE-REQUESTS.md](ERASURE-REQUESTS.md).
 
 Non eseguire più i vecchi test remoti che esigono zero utenti: ora ci sono due account reali. Per prove sintetiche usare isolamento e rollback; le fixture locali non dimostrano backup o autenticazione reale.
 
