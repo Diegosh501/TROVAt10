@@ -45,7 +45,7 @@ VERIFICATO indica l'ambito effettivamente provato nel collaudo o nella ripresa. 
 | --- | --- | --- | --- |
 | 1 | Servizio raggiungibile | VERIFICATO | URL HTTPS di collaudo raggiunto e usato realmente; principale ancora preview |
 | 2 | Release identificabile | VERIFICATO | Versioni Cloudflare e release pubbliche distinte; candidato rc.10 e collaudo cloud-test.11 identificati; ricevute di sorgenti/CI nel checkpoint privato |
-| 3 | Autenticazione reale | PARZIALE | Google funziona; email server ancora abilitata con UI spenta: correggere la configurazione e completare SMTP/conferma/recupero/antiabuso del Master |
+| 3 | Autenticazione reale | PARZIALE | Google funziona anche dopo la disattivazione Email; preflight provider allineati. Restano email/password, SMTP, conferma, recupero e antiabuso previsti dal Master |
 | 4 | Google OAuth | VERIFICATO | Login reale anche dopo revoca della vecchia chiave; nuova credenziale custodita in Supabase |
 | 5 | Profili persistenti | VERIFICATO | Due profili Google separati, ritrovati dopo nuovo accesso; entrambi Free |
 | 6 | Assegnazione ruoli | VERIFICATO | Host/Sportivo cambiati sul server e persistenti; Admin assegnato separatamente e non selezionabile |
@@ -61,7 +61,7 @@ VERIFICATO indica l'ambito effettivamente provato nel collaudo o nella ripresa. 
 | 16 | Funzioni server necessarie | PARZIALE | Admin e contatto Host pubblicate; dispatcher push pubblicato con blocco esplicito false e boot verificato; perimetro operativo restante da configurare |
 | 17 | Permessi backend | VERIFICATO | 11/11 richieste reali per Sportivo e 11/11 per Host ordinario; gate MFA titolare confermato; fixture per revoche/metadata |
 | 18 | Test multiutente | VERIFICATO | Due account Google distinti, flussi pubblici e privati; altro dispositivo e concorrenza rimangono nei criteri/scenari specifici |
-| 19 | Nessun blocco conosciuto | NON DIMOSTRATO | Corrette race UI e inviti; il nuovo preflight rileva email server abilitata con UI spenta. Configurazione Auth e servizi restano gate reali |
+| 19 | Nessun blocco conosciuto | NON DIMOSTRATO | Discrepanza provider corretta e Google ritestato; servizi e altri gate di rilascio restano aperti |
 | 20 | Limiti economici | VERIFICATO | Nessun piano comprato, SMS inviato o pagamento reale; dominio acquistato rinviato |
 | 21 | Backup/ripristino/rollback | PARZIALE | Recupero SQL isolato di 44 tabelle e permessi provato; recupero completo del progetto gestito ancora aperto |
 | 22 | Informative adeguate | PARZIALE | Pagine versionate e consenso profilo acquisito; verifiche su servizi attivi, accordi e cancellazione effettiva aperte |
@@ -91,7 +91,7 @@ Google usa il client esistente e il callback del solo progetto corretto. Redirec
 
 L'account Admin è del titolare già indicato. Il secondo fattore non è stato creato o simulato; il titolare ha scelto di farlo più tardi. Una password storica in chat non è una credenziale da riutilizzare.
 
-`onlineReady`, `exportReady` ed `erasureRequestsReady` sono veri solo nel collaudo. La UI email/password, assistenza nell’app, Billing, push e ciclo account restano spenti. La lettura pubblica Auth del 14 novembre rileva però external.email=true: il salvataggio della modifica server richiede consenso specifico. Il preflight scripts/verify-auth-settings.mjs segnala questa discrepanza, senza creare account o inviare email. La UI usa il contatto email per il supporto; il nuovo SQL resta in pending-operations dopo due conferme del connettore scadute. La configurazione di default dei sorgenti resta preview. Il modulo di cancellazione registra una pratica, non chiude accesso o dati: [ERASURE-REQUESTS.md](ERASURE-REQUESTS.md).
+`onlineReady`, `exportReady` ed `erasureRequestsReady` sono veri solo nel collaudo. La UI email/password, assistenza nell’app, Billing, push e ciclo account restano spenti. Il provider Email server è ora disabilitato dopo la scelta del titolare: preflight reale riuscito, Google e nuove registrazioni Google preservati. Login Google con profilo Free e storico ritrovati, poi uscita verificata. Nessun nuovo account o evento creato dal collaudo. La UI usa il contatto email per il supporto; il nuovo SQL resta in pending-operations dopo due conferme del connettore scadute. La configurazione di default dei sorgenti resta preview. Il modulo di cancellazione registra una pratica, non chiude accesso o dati: [ERASURE-REQUESTS.md](ERASURE-REQUESTS.md).
 
 Non eseguire più i vecchi test remoti che esigono zero utenti: ora ci sono due account reali. Per prove sintetiche usare isolamento e rollback; le fixture locali non dimostrano backup o autenticazione reale.
 

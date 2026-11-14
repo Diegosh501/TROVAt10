@@ -6,11 +6,11 @@ Versioni, criteri e scenari autorevoli: [V1-STATUS.md](V1-STATUS.md). Storico: [
 
 Collaudo cloud-test.11 da rc.8; principale rc.1, anteprima con dati locali. PR #1 e sorgenti rc.10 sono integrati nel ramo principale, senza deploy frontend. Supabase `nrixslotansgrtrosaof` conserva 17 migrazioni, due account Google e quattro eventi. Funzioni: admin-console v4, host-contact v1, push-dispatch v1 con blocco false nel codice. Invio, pianificazione e purge sono spenti.
 
-La lettura pubblica di Auth rileva Google ed email abilitati sul server, mentre l’app offre solo Google. La sessione console è disponibile; il salvataggio richiede consenso specifico e il provider email non è ancora stato modificato. Questo è un gate di rilascio.
+Auth del collaudo è ora allineato: solo Google abilitato, Email e altri provider non offerti disabilitati; nuove registrazioni Google consentite. Scelta salvata dopo la delega del titolare, preflight reale riuscito e nuovo accesso Google con profilo/storico persistenti verificato. Il percorso email del Master rimane da completare.
 
 ## Gate ancora aperti
 
-1. Completare email/password, SMTP personalizzato, conferma, recupero e antiabuso previsti dal Master R3. Nel frattempo chiudere sul server i percorsi non offerti nel collaudo. La disattivazione temporanea non completa il requisito email V1.
+1. Completare email/password, SMTP personalizzato, conferma, recupero e antiabuso previsti dal Master R3. Nel frattempo mantenere chiusi sul server i percorsi non offerti nel collaudo. La disattivazione temporanea non completa il requisito email V1.
 2. Completare personalmente TOTP dell’Admin già assegnato e collaudare metriche e operazioni reali. Il titolare ha rinviato il passaggio; non creare o simulare un suo fattore.
 3. Applicare le sole migrazioni pendenti con conferma tecnica valida. Assistenza richiede anche Turnstile reale e prova pratica. Non ripetere il ciclo di conferme scadute o aggirarlo.
 4. Chiudere gli scenari su altro dispositivo, contesa dell’ultimo posto fra due Sportivi Google distinti, errori dei servizi, automatismi e recupero gestito.

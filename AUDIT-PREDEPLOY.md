@@ -1,3 +1,11 @@
+# Aggiornamento Auth applicato — 14 novembre 2026
+
+Il titolare ha delegato la scelta nella domanda specifica. Salvata la sola disattivazione del provider Email, preservando Google e nuove registrazioni Google. Il preflight reale passa: Email=false,Google=true,anonimi/telefono=false. Nuovo login Google con Sportivo QA già autorizzato: profilo Free verificato e partita conclusa ritrovata nello storico; successiva uscita e rimozione della UI personale riuscite. Nessun nuovo account,evento o segreto. Il requisito email/SMTP/antiabuso del Master resta aperto.
+
+Il rifiuto iniziale del salvataggio è superato dalla decisione del titolare; le ricevute precedenti sono conservate come storico. La prova usa lo stesso browser/dispositivo e non sostituisce MFA personale o altro dispositivo.
+
+## Rilevazioni precedenti alla scelta applicata
+
 # Audit di ripresa — 14 novembre 2026
 
 Auth pubblico: Google ed email abilitati, anonimi/telefono spenti, conferma email richiesta e signup consentito. L’app offre Google e mantiene emailAuthEnabled=false. Nuovo preflight reale: exit 1 con email_provider_exposed_while_ui_disabled; un blocco atteso e ancora da correggere sul server. Sessione console poi recuperata senza nuovo login; Save bloccato dalla revisione automatica in attesa di consenso specifico. Nessuna modifica Auth eseguita. Quindici prove locali del nuovo controllo passate; nessuna registrazione o email.

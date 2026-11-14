@@ -6,7 +6,7 @@ Aggiornato il 14 novembre 2026. Stato operativo e criteri finali: [V1-STATUS.md]
 
 Google OAuth PKCE e due identità reali sono collaudati con completamento esplicito del profilo. Il dominio Gmail non sostituisce controlli contro abusi o autorizzazioni.
 
-Auth pubblico rileva Google ed email abilitati, anonimi/telefono disabilitati, signup consentito e conferma email richiesta. L’app offre solo Google (`emailAuthEnabled=false`). Chiudere temporaneamente il provider email server fino alla configurazione e verifica SMTP/antiabuso. La sessione console è disponibile; la revisione automatica richiede consenso specifico prima del salvataggio e la modifica non è stata eseguita.
+Auth pubblico conferma Google attivo, Email/telefono/anonimi e altri provider non offerti disabilitati, nuove registrazioni Google consentite. Il titolare ha delegato la scelta dopo la domanda specifica: salvata la sola disattivazione Email. Il preflight reale ora passa; un nuovo login Google ha ritrovato profilo Free e storico esistente. La successiva uscita ha rimosso i dati personali dalla UI. Il percorso email/SMTP/antiabuso del Master resta da configurare e verificare prima della sua riattivazione.
 
 ```sh
 node scripts/verify-auth-settings.mjs TROVAT1O-Cloudflare-Deploy/public/config.js output/audit/auth-provider-preflight.json

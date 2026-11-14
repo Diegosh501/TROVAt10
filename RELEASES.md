@@ -1,3 +1,11 @@
+# Configurazione Auth aggiornata — 14 novembre 2026
+
+Email disabilitato sul progetto corretto dopo la scelta delegata dal titolare; Google e nuove registrazioni Google rimangono attivi. Preflight reale riuscito e login Google nuovamente collaudato con profilo/storico persistenti,poi disconnessione. Nessun nuovo account o evento.
+
+Questo è un aggiornamento della configurazione Auth: frontend cloud-test.11 e principale rc.1 invariati,push/job/pagamenti spenti. Email/password e SMTP del Master restano aperti. Le ricevute correnti identificano sorgenti e CI effettivi; i blocchi di salvataggio descritti sotto sono storico risolto dalla decisione del titolare.
+
+## Storico precedente all’aggiornamento Auth
+
 # Aggiornamento strumenti operativi — 14 novembre 2026
 
 Preflight Auth e documentazione: sorgenti del controllo dei provider e istruzioni aggiornate, frontend e backend distribuiti invariati. La lettura reale segnala email server abilitata con UI spenta; configurazione ancora da correggere in console dopo il consenso specifico richiesto dalla revisione automatica al salvataggio. I risultati e il commit effettivo sono nel checkpoint. La PR #1 è integrata e push-dispatch v1 è pubblicato spento. Nessuna nuova pubblicazione è implicata dall’aggiornamento degli strumenti.

@@ -1,3 +1,9 @@
+# Provider Auth allineati — 14 novembre 2026
+
+- Applicata la scelta delegata dal titolare: solo provider Email disabilitato,Google e nuove registrazioni Google mantenuti attivi. Nessun account cancellato o nuova chiave. Preflight reale ora riuscito.
+- Verificati nuovamente login Google,profilo Sportivo Free e storico già esistente; uscita completata e dati personali rimossi dalla UI. Nessun nuovo profilo o evento di prova.
+- Percorso email/password,SMTP,conferma,recupero e antiabuso del Master ancora da completare. Nessun nuovo deploy frontend,job,pagamento o invio push. Le rilevazioni iniziali restano storico.
+
 # Preflight Auth e istruzioni operative — 14 novembre 2026
 
 - Nuovo controllo in sola lettura dei provider server rispetto alla configurazione UI: progetto corretto, chiave pubblica, conferma email, provider non offerti, redirect e risposte malformate. Nessuna registrazione, login o email. Quindici scenari di regressione con server HTTP locale.

@@ -8,7 +8,7 @@ Progetto corretto `nrixslotansgrtrosaof`, organizzazione `thnqvzujtphdvpzemxuz`,
 
 Al 14 novembre 2026: 17 migrazioni registrate, due identità Google/profili Free e quattro eventi di collaudo. Funzioni pubblicate: admin-console v4, host-contact v1 e push-dispatch v1. Quest’ultima impone `PUSH_RELEASE_READY=false`: boot gestito verificato, invio e pianificazione spenti. Cron/pg_net assenti; sottoscrizioni e coda push vuote.
 
-Google funziona nel collaudo. Auth pubblico rileva `external.email=true`, benché `emailAuthEnabled=false` nell’app. Chiudere il percorso non configurato sul server fino alla preparazione di SMTP e antiabuso; la sola UI non lo disabilita. Il preflight nella procedura di rilascio segnala questa discrepanza.
+Google funziona nel collaudo anche dopo la modifica Auth. Il provider Email è disabilitato sul server,coerentemente con emailAuthEnabled=false; Google e nuove registrazioni Google sono preservati. Preflight reale riuscito,profilo Free e storico ritrovati dopo nuovo login,poi uscita verificata. Il percorso email/password,SMTP,conferma,recupero e antiabuso del Master resta da completare prima della sua riattivazione.
 
 ## Moduli, migrazioni e candidati
 
