@@ -6,7 +6,7 @@ Versioni, criteri e scenari autorevoli: [V1-STATUS.md](V1-STATUS.md). Storico: [
 
 Collaudo cloud-test.11 da rc.8; principale rc.1, anteprima con dati locali. PR #1 e sorgenti rc.10 sono integrati nel ramo principale, senza deploy frontend. Supabase `nrixslotansgrtrosaof` conserva 17 migrazioni, due account Google e quattro eventi. Funzioni: admin-console v4, host-contact v1, push-dispatch v1 con blocco false nel codice. Invio, pianificazione e purge sono spenti.
 
-La lettura pubblica di Auth rileva Google ed email abilitati sul server, mentre l’app offre solo Google. La console richiede un nuovo accesso: il provider email non è ancora stato modificato. Questo è un gate di rilascio.
+La lettura pubblica di Auth rileva Google ed email abilitati sul server, mentre l’app offre solo Google. La sessione console è disponibile; il salvataggio richiede consenso specifico e il provider email non è ancora stato modificato. Questo è un gate di rilascio.
 
 ## Gate ancora aperti
 

@@ -56,7 +56,7 @@ Apri http://127.0.0.1:4173 e ferma il server con `Ctrl+C`. Per la stessa Wi-Fi p
 
 Il percorso Google già collaudato usa un'email verificata e il completamento esplicito del profilo. Non richiede SMS per giocare. Il telefono Host condiviso resta facoltativo, con verifica e consenso; il numero non è una rubrica pubblica.
 
-**Email/password, conferma email, recupero password, SMTP personalizzato e Turnstile restano requisiti aperti del Master R3.** L’app mantiene `emailAuthEnabled:false`, ma la lettura pubblica di Auth rileva il provider email server ancora abilitato. Chiuderlo temporaneamente finché il percorso non sarà configurato e verificato. La console richiede un nuovo accesso e la modifica non è stata eseguita. La sola assenza del modulo nell’app non protegge l’API di registrazione.
+**Email/password, conferma email, recupero password, SMTP personalizzato e Turnstile restano requisiti aperti del Master R3.** L’app mantiene `emailAuthEnabled:false`, ma la lettura pubblica di Auth rileva il provider email server ancora abilitato. Chiuderlo temporaneamente finché il percorso non sarà configurato e verificato. La sessione console è disponibile; il salvataggio della modifica richiede consenso specifico e non è stato eseguito. La sola assenza del modulo nell’app non protegge l’API di registrazione.
 
 Prima del rilascio cloud, dalla root:
 

@@ -1,6 +1,6 @@
 # Audit di ripresa — 14 novembre 2026
 
-Auth pubblico: Google ed email abilitati, anonimi/telefono spenti, conferma email richiesta e signup consentito. L’app offre Google e mantiene emailAuthEnabled=false. Nuovo preflight reale: exit 1 con email_provider_exposed_while_ui_disabled; un blocco atteso e ancora da correggere sul server. Console su login; nessuna modifica Auth eseguita. Quindici prove locali del nuovo controllo passate; nessuna registrazione o email.
+Auth pubblico: Google ed email abilitati, anonimi/telefono spenti, conferma email richiesta e signup consentito. L’app offre Google e mantiene emailAuthEnabled=false. Nuovo preflight reale: exit 1 con email_provider_exposed_while_ui_disabled; un blocco atteso e ancora da correggere sul server. Sessione console poi recuperata senza nuovo login; Save bloccato dalla revisione automatica in attesa di consenso specifico. Nessuna modifica Auth eseguita. Quindici prove locali del nuovo controllo passate; nessuna registrazione o email.
 
 Catalogo letto senza valori riservati: zero tabelle pubbliche senza RLS, zero privilegi client sulle tabelle private, coda push non leggibile dai client; due RPC anonime (feed/invito),43 definers autenticate. Advisor salute senza rilievi, indici non usati informativi e avvisi di sicurezza documentati in SECURITY.md. Prima query con configurazioni raw rifiutata dalla revisione automatica; sostituita con soli nomi/conteggi/indicatori. Nessuna configurazione sensibile estratta.
 

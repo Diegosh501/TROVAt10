@@ -6,7 +6,7 @@ Aggiornato il 14 novembre 2026. Stato operativo e criteri finali: [V1-STATUS.md]
 
 Google OAuth PKCE e due identità reali sono collaudati con completamento esplicito del profilo. Il dominio Gmail non sostituisce controlli contro abusi o autorizzazioni.
 
-Auth pubblico rileva Google ed email abilitati, anonimi/telefono disabilitati, signup consentito e conferma email richiesta. L’app offre solo Google (`emailAuthEnabled=false`). Chiudere temporaneamente il provider email server fino alla configurazione e verifica SMTP/antiabuso. La console richiede un nuovo accesso; la modifica non è stata eseguita.
+Auth pubblico rileva Google ed email abilitati, anonimi/telefono disabilitati, signup consentito e conferma email richiesta. L’app offre solo Google (`emailAuthEnabled=false`). Chiudere temporaneamente il provider email server fino alla configurazione e verifica SMTP/antiabuso. La sessione console è disponibile; la revisione automatica richiede consenso specifico prima del salvataggio e la modifica non è stata eseguita.
 
 ```sh
 node scripts/verify-auth-settings.mjs TROVAT1O-Cloudflare-Deploy/public/config.js output/audit/auth-provider-preflight.json

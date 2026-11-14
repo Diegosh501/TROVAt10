@@ -1,6 +1,6 @@
 # Aggiornamento strumenti operativi — 14 novembre 2026
 
-Preflight Auth e documentazione: sorgenti del controllo dei provider e istruzioni aggiornate, frontend e backend distribuiti invariati. La lettura reale segnala email server abilitata con UI spenta; configurazione ancora da correggere in console dopo nuovo accesso. I risultati e il commit effettivo sono nel checkpoint. La PR #1 è integrata e push-dispatch v1 è pubblicato spento. Nessuna nuova pubblicazione è implicata dall’aggiornamento degli strumenti.
+Preflight Auth e documentazione: sorgenti del controllo dei provider e istruzioni aggiornate, frontend e backend distribuiti invariati. La lettura reale segnala email server abilitata con UI spenta; configurazione ancora da correggere in console dopo il consenso specifico richiesto dalla revisione automatica al salvataggio. I risultati e il commit effettivo sono nel checkpoint. La PR #1 è integrata e push-dispatch v1 è pubblicato spento. Nessuna nuova pubblicazione è implicata dall’aggiornamento degli strumenti.
 
 ## Storico rilasci e candidati precedenti
 

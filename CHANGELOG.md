@@ -1,7 +1,7 @@
 # Preflight Auth e istruzioni operative — 14 novembre 2026
 
 - Nuovo controllo in sola lettura dei provider server rispetto alla configurazione UI: progetto corretto, chiave pubblica, conferma email, provider non offerti, redirect e risposte malformate. Nessuna registrazione, login o email. Quindici scenari di regressione con server HTTP locale.
-- Prova reale: provider email ancora abilitato sul server mentre la UI lo tiene spento. Gate di rilascio conservato; modifica in console non eseguita perché serve un nuovo accesso.
+- Prova reale: provider email ancora abilitato sul server mentre la UI lo tiene spento. Gate di rilascio conservato; sessione console recuperata, ma salvataggio non eseguito perché la revisione automatica richiede consenso specifico.
 - Istruzioni Admin, backend, sicurezza e deploy aggiornate; eliminati snapshot operativi duplicati e passaggi ormai completati. Configurazione locale esistente preservata nei comandi.
 - Nessuna modifica del frontend, migrazione, chiave, job, pagamento o cancellazione. Master V1→V4 invariato.
 
