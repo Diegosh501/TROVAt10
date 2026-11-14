@@ -1,6 +1,6 @@
 # Candidato corrente — 14 novembre 2026, rc.10 non pubblicato
 
-Correzioni di avvio e configurazione del dispatcher push, verificate con libreria reale: otto prove crittografiche/runtime e 19 scenari del gestore. Dettagli in [PUSH-SETUP.md](PUSH-SETUP.md). Il tentativo di creare il nuovo endpoint su Supabase è stato rifiutato dalla revisione automatica in attesa di consenso specifico; nessuna funzione o segreto nuovo, job o invio reale. Non aggirare il rifiuto. Le ricevute del checkpoint identificano commit e CI effettivamente testati.
+Correzioni di avvio e configurazione del dispatcher push, verificate con libreria reale: otto prove crittografiche/runtime e 19 scenari del gestore. Dettagli in [PUSH-SETUP.md](PUSH-SETUP.md). Dopo il consenso specifico del titolare, push-dispatch v1 è stata pubblicata inizialmente disattivata. Boot gestito e corrispondenza delle due sorgenti applicative verificati; tre richieste ricevono 503/push_unavailable. Nessun segreto persistente, job o invio reale attivato. Le ricevute del checkpoint identificano commit e CI effettivamente testati.
 
 Il collaudo resta cloud-test.11 dal candidato rc.8/cache v22, principale rc.1 preview. Il candidato rc.10/cache v24 include il precedente percorso di cancellazione, ancora disabilitato. La guida v4 descrive il servizio già online. Nessun nuovo dominio o acquisto.
 

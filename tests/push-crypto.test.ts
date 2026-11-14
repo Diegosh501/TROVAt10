@@ -114,7 +114,7 @@ Deno.test('mismatched VAPID configuration fails before claiming any queued messa
   const f = await fixture({ mismatch: true }), response = await f.request();
   ensure(response.status === 503 && f.calls.length === 0 && f.sent.length === 0, 'Mismatched VAPID key pair reached the queue');
 });
-Deno.test('actual Edge entrypoint imports and registers a protected handler without starting a server', async () => {
+Deno.test('actual Edge entrypoint remains disabled even with fully configured project secrets', async () => {
   const signing = webpush.generateVAPIDKeys(), secret = encode(crypto.getRandomValues(new Uint8Array(32)));
   const env: Record<string, string> = { SUPABASE_URL: 'https://fixture.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'synthetic-notcredential',
     PUSH_ENABLED: 'true', PUSH_CRON_SECRET: secret, VAPID_PUBLIC_KEY: signing.publicKey, VAPID_PRIVATE_KEY: signing.privateKey,
@@ -127,5 +127,8 @@ Deno.test('actual Edge entrypoint imports and registers a protected handler with
   } finally { Deno.serve = originalServe; Deno.env.get = originalGet; }
   const handler = captured as unknown as ((request: Request) => Promise<Response>); ensure(typeof handler === 'function', 'Entrypoint did not register');
   const response = await handler(new Request(env.APP_ORIGIN, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }));
-  ensure(response.status === 401 && response.headers.get('Cache-Control') === 'no-store', 'Unauthenticated job request was accepted');
+  ensure(response.status === 503 && response.headers.get('Cache-Control') === 'no-store', 'Initial publication was not disabled');
+  ensure((await response.json()).error === 'push_unavailable', 'Disabled handler reached a transport');
+  const authenticated = await handler(new Request(env.APP_ORIGIN, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + secret }, body: '{}' }));
+  ensure(authenticated.status === 503 && (await authenticated.json()).error === 'push_unavailable', 'Existing job credentials bypassed the release gate');
 });

@@ -4,7 +4,7 @@
 - Verifica WebCrypto della corrispondenza delle chiavi VAPID prima del claim; coppie errate e punti pubblici invalidi non consumano messaggi. Controllo dopo autenticazione, riutilizzato soltanto per la stessa coppia.
 - Otto prove con libreria reale e ricevitore indipendente: cifratura, firma/audience/scadenza, dati generici, materiale fresco, alterazioni e revoca del consenso. 19 casi del gestore; nessun provider contattato o segreto persistente creato.
 - Esecuzione test in ambiente ripulito, senza rete o scrittura; CI aggiornata. Dispatcher collegato al client ufficiale Supabase npm 2.119.0 con integrità fissata: il primo CI ha correttamente rifiutato un file CDN variabile. Aggiunte nove voci npm, precedenti voci e wrapper degli altri componenti invariati; controllo frozen mantenuto.
-- Pubblicazione push-dispatch rifiutata dalla revisione automatica: nuovo endpoint persistente richiede consenso specifico. Non pubblicato, nessun job o invio attivato. Cache del candidato v24; collaudo cloud-test.11 e principale rc.1 invariati.
+- Il titolare ha autorizzato la pubblicazione inizialmente spenta dopo il rifiuto automatico: push-dispatch v1 pubblicata e boot gestito verificato. Gate di rilascio false nel codice, efficace anche con chiavi e PUSH_ENABLED già presenti. Tre probe 503/push_unavailable, due sorgenti corrispondenti; nessun job, segreto persistente o invio attivato. Cache del candidato v24; collaudo cloud-test.11 e principale rc.1 invariati.
 
 # Candidato rc.9, esecuzione cancellazione disabilitata — 14 novembre 2026
 
