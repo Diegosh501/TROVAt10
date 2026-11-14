@@ -1,5 +1,5 @@
 import * as webpush from 'npm:web-push@4.0.0';
-import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.119.0';
+import {createClient} from 'npm:@supabase/supabase-js@2.119.0';
 import {createPushDispatcher} from '../_shared/push-core.ts';
 const env=(name:string)=>Deno.env.get(name)||'';
 const db=createClient(env('SUPABASE_URL')||'https://unconfigured.invalid',env('SUPABASE_SERVICE_ROLE_KEY')||'unconfigured',
