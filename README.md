@@ -18,7 +18,7 @@ Il collaudo è separato dal traffico del sito principale. Un caricamento con `wr
 - Quattro partite di collaudo persistenti. Flusso pubblico provato: creazione → ricerca → richiesta → ammissione → avvio → conclusione → storico ritrovato dallo Sportivo dopo un nuovo accesso. Nessuna prenotazione reale.
 - Invito privato copiato e riaperto prima del login; ritorno da Google allo stesso evento. Sede mascherata prima dell’ammissione e dopo rimozione. Una nuova richiesta non riammette automaticamente.
 - Esportazione personale JSON con nove sezioni e PNG scaricati. Logo e sito nei metadata; sede privata, nomi e token esclusi dal PNG privato.
-- **29 suite Node; 17 moduli SQL e 17 regressioni locali.** **11/11 controlli backend reali come Sportivo e 11/11 come Host ordinario**. La sonda del titolare riceve `mfa_required` sia da SQL sia da Edge. La console completa richiede il TOTP personale, rinviato dal titolare.
+- **30 suite Node, incluse 15 prove del nuovo preflight Auth; 17 moduli SQL e 17 regressioni locali.** **11/11 controlli backend reali come Sportivo e 11/11 come Host ordinario**. La sonda del titolare riceve `mfa_required` sia da SQL sia da Edge. La console completa richiede il TOTP personale, rinviato dal titolare.
 - Larghezze controllate: 320, 390, 768 e 1440 px; campi a 16 px e azioni profilo dentro i bordi. Non è una garanzia su ogni dispositivo.
 - `admin-console` v4 e `host-contact` v1 pubblicate; `push-dispatch` v1 pubblicata con invio esplicitamente spento; 17 migrazioni sul progetto corretto. La correzione degli avvisi distingue avvio, conclusione, annullamento e cambio dei dettagli.
 - **15/25 criteri V1 verificati nel collaudo; 4/11 scenari finali chiusi (A, B, D, H)**. Le cifre misurano criteri verificati, non tempo residuo o percentuale di codice. La V1 completa non è ancora rilasciata sul principale.
@@ -38,7 +38,9 @@ Il collaudo ha controlli HTTPS, asset e percorsi riservati propri. Non attribuir
 Se manca la configurazione locale, creala dal modello:
 
 ```sh
-cp config.example.js config.js
+if [ ! -f config.js ]; then
+  cp config.example.js config.js
+fi
 ```
 
 Non sovrascrivere una configurazione già predisposta. Dalla cartella principale:
@@ -54,7 +56,15 @@ Apri http://127.0.0.1:4173 e ferma il server con `Ctrl+C`. Per la stessa Wi-Fi p
 
 Il percorso Google già collaudato usa un'email verificata e il completamento esplicito del profilo. Non richiede SMS per giocare. Il telefono Host condiviso resta facoltativo, con verifica e consenso; il numero non è una rubrica pubblica.
 
-**Email/password, conferma email, recupero password, SMTP personalizzato e Turnstile restano requisiti aperti del Master R3.** Non sono stati provati o attivati nel collaudo; `emailAuthEnabled` resta `false`. Non presentarli come disponibili.
+**Email/password, conferma email, recupero password, SMTP personalizzato e Turnstile restano requisiti aperti del Master R3.** L’app mantiene `emailAuthEnabled:false`, ma la lettura pubblica di Auth rileva il provider email server ancora abilitato. Chiuderlo temporaneamente finché il percorso non sarà configurato e verificato. La console richiede un nuovo accesso e la modifica non è stata eseguita. La sola assenza del modulo nell’app non protegge l’API di registrazione.
+
+Prima del rilascio cloud, dalla root:
+
+```sh
+node scripts/verify-auth-settings.mjs TROVAT1O-Cloudflare-Deploy/public/config.js output/audit/auth-provider-preflight.json
+```
+
+Il preflight è in sola lettura: verifica i provider effettivi senza creare account o inviare email. Discrepanza o errore: exit 1; configurazione preview: exit 2, non verificata. Un esito positivo copre soltanto l’allineamento dei provider, non SMTP, CAPTCHA o consegna email. [Procedura rilascio](DEPLOY-READINESS.md).
 
 Lo stesso account può passare da Sportivo a Host. Soltanto il creatore gestisce il proprio evento. L'Admin di piattaforma è autorizzato in una allowlist privata: sessione Auth viva, TOTP recente e controlli SQL sono indispensabili. L'email scritta nel browser, `user_metadata`, Free o Premium non concedono Admin. Il suggerimento server in `app_metadata` abilita solo la sonda dell'ingresso dedicato; non autorizza dati o azioni. Gli utenti ordinari non hanno una Console demo.
 

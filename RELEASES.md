@@ -1,3 +1,9 @@
+# Aggiornamento strumenti operativi — 14 novembre 2026
+
+Preflight Auth e documentazione: sorgenti del controllo dei provider e istruzioni aggiornate, frontend e backend distribuiti invariati. La lettura reale segnala email server abilitata con UI spenta; configurazione ancora da correggere in console dopo nuovo accesso. I risultati e il commit effettivo sono nel checkpoint. La PR #1 è integrata e push-dispatch v1 è pubblicato spento. Nessuna nuova pubblicazione è implicata dall’aggiornamento degli strumenti.
+
+## Storico rilasci e candidati precedenti
+
 # Candidato corrente — 14 novembre 2026, rc.10 non pubblicato
 
 Correzioni di avvio e configurazione del dispatcher push, verificate con libreria reale: otto prove crittografiche/runtime e 19 scenari del gestore. Dettagli in [PUSH-SETUP.md](PUSH-SETUP.md). Dopo il consenso specifico del titolare, push-dispatch v1 è stata pubblicata inizialmente disattivata. Boot gestito e corrispondenza delle due sorgenti applicative verificati; tre richieste ricevono 503/push_unavailable. Nessun segreto persistente, job o invio reale attivato. Le ricevute del checkpoint identificano commit e CI effettivamente testati.

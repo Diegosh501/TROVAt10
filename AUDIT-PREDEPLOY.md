@@ -1,3 +1,13 @@
+# Audit di ripresa — 14 novembre 2026
+
+Auth pubblico: Google ed email abilitati, anonimi/telefono spenti, conferma email richiesta e signup consentito. L’app offre Google e mantiene emailAuthEnabled=false. Nuovo preflight reale: exit 1 con email_provider_exposed_while_ui_disabled; un blocco atteso e ancora da correggere sul server. Console su login; nessuna modifica Auth eseguita. Quindici prove locali del nuovo controllo passate; nessuna registrazione o email.
+
+Catalogo letto senza valori riservati: zero tabelle pubbliche senza RLS, zero privilegi client sulle tabelle private, coda push non leggibile dai client; due RPC anonime (feed/invito),43 definers autenticate. Advisor salute senza rilievi, indici non usati informativi e avvisi di sicurezza documentati in SECURITY.md. Prima query con configurazioni raw rifiutata dalla revisione automatica; sostituita con soli nomi/conteggi/indicatori. Nessuna configurazione sensibile estratta.
+
+Main integrato con PR1 e dispatcher v1 spento già verificati. Nessun nuovo deploy o DDL da questo audit. Il Master conserva 15/25 criteri verificati e4/11 scenari. Le sezioni seguenti sono storico e non sostituiscono V1-STATUS.md.
+
+## Storico audit precedenti
+
 # Aggiornamento verificato — rc.8 / cloud-test.11, 13 novembre 2026
 
 28/28 suite Node, incluse otto nuove regressioni su caricamento, errori rete, isolamento e uscita. Sei prove HTTP con 18 operazioni sovrapposte nel collaudo: limite Free, candidature duplicate, doppia uscita, nuova richiesta, ammissione/avvio e conclusione. Timestamp di chiusura verificato direttamente nel database: il DTO del feed non espone quella colonna. Il primo controllo del campo e la prima enumerazione che includeva `_headers` sono stati corretti come verificatori; ricevute iniziali conservate, senza cancellare risultati sfavorevoli.
