@@ -1,7 +1,10 @@
 const assert=require('node:assert/strict');
+const {createECDH}=require('node:crypto');
 const {createPushDispatcher,permittedPushEndpoint}=require('../supabase/functions/_shared/push-core.ts');
 const id='11111111-1111-4111-8111-111111111111',lease='22222222-2222-4222-8222-222222222222',notice='33333333-3333-4333-8333-333333333333';
-const config={enabled:true,cronSecret:'c'.repeat(43),publicKey:'B'+'p'.repeat(86),privateKey:'v'.repeat(43),subject:'mailto:support@example.test',origin:'https://app.example.test'};
+// Ephemeral synthetic signing material: never a deploy credential or an output.
+const signing=createECDH('prime256v1');signing.generateKeys();
+const config={enabled:true,cronSecret:'c'.repeat(43),publicKey:signing.getPublicKey().toString('base64url'),privateKey:signing.getPrivateKey().toString('base64url'),subject:'mailto:support@example.test',origin:'https://app.example.test'};
 function boot(options={}){
  const calls=[],sent=[],prepared=[];let checks=0;
  const row={delivery_id:id,lease_token:lease,subscription_id:id,notice_id:notice,endpoint:'https://fcm.googleapis.com/fcm/send/synthetic-token',p256dh:'a'.repeat(87),auth:'b'.repeat(22),...options.row};
@@ -19,6 +22,8 @@ const finishes=b=>b.calls.filter(c=>c.name==='finish_push_delivery');
 (async()=>{
  await check('default-off/unconfigured dispatcher never touches database',async()=>{const b=boot({config:{enabled:false}});assert.equal((await b.request()).status,503);assert.equal(b.calls.length,0)});
  await check('malformed VAPID, contact or origin fails closed',async()=>{for(const config of [{publicKey:''},{privateKey:'short'},{cronSecret:'short'},{subject:'invalid'},{origin:'http://app.example.test'}]){const b=boot({config});assert.equal((await b.request()).status,503)}});
+  await check('shape-valid but mismatched signing keys cannot claim queued notices',async()=>{const other=createECDH('prime256v1');other.generateKeys();const b=boot({config:{privateKey:other.getPrivateKey().toString('base64url')}});assert.equal((await b.request()).status,503);assert.equal(b.calls.length,0);assert.equal(b.sent.length,0)});
+  await check('invalid public curve point cannot consume a delivery',async()=>{const b=boot({config:{publicKey:'B'+'p'.repeat(86)}});assert.equal((await b.request()).status,503);assert.equal(b.calls.length,0)});
  await check('browser-origin requests and absent/incorrect cron secrets are rejected',async()=>{const b=boot();assert.equal((await b.request('{}',{Origin:config.origin})).status,403);for(const Authorization of ['', 'Bearer wrong'])assert.equal((await b.request('{}',{Authorization})).status,401);assert.equal(b.calls.length,0)});
  await check('request accepts only a bounded empty JSON object',async()=>{for(const body of ['[]','null','broken','{"endpoint":"https://evil.invalid"}',' '.repeat(1030)])assert.equal((await boot().request(body)).status,400)});
  await check('endpoint allowlist rejects SSRF, user-info, ports, redirects and lookalike domains',async()=>{for(const url of ['http://fcm.googleapis.com/x','https://127.0.0.1/x','https://localhost/x','https://169.254.169.254/latest','https://fcm.googleapis.com.evil.invalid/x','https://fcm.googleapis.com@evil.invalid/x','https://evil.invalid@fcm.googleapis.com/x','https://fcm.googleapis.com:8443/x','https://fcm.googleapis.com/x?redirect=https://evil.invalid','https://[::1]/x'])assert.equal(permittedPushEndpoint(url),false);for(const url of ['https://fcm.googleapis.com/fcm/send/a','https://updates.push.services.mozilla.com/wpush/v2/a','https://web.push.apple.com/a'])assert.equal(permittedPushEndpoint(url),true)});

@@ -1,3 +1,9 @@
+# Candidato corrente — 14 novembre 2026, rc.10 non pubblicato
+
+Correzioni di avvio e configurazione del dispatcher push, verificate con libreria reale: otto prove crittografiche/runtime e 19 scenari del gestore. Dettagli in [PUSH-SETUP.md](PUSH-SETUP.md). Dopo il consenso specifico del titolare, push-dispatch v1 è stata pubblicata inizialmente disattivata. Boot gestito e corrispondenza delle due sorgenti applicative verificati; tre richieste ricevono 503/push_unavailable. Nessun segreto persistente, job o invio reale attivato. Le ricevute del checkpoint identificano commit e CI effettivamente testati.
+
+Il collaudo resta cloud-test.11 dal candidato rc.8/cache v22, principale rc.1 preview. Il candidato rc.10/cache v24 include il precedente percorso di cancellazione, ancora disabilitato. La guida v4 descrive il servizio già online. Nessun nuovo dominio o acquisto.
+
 # Candidato corrente — 14 novembre 2026, rc.9 non pubblicato
 
 Il collaudo online resta **cloud-test.11**, derivato da rc.8/cache v22; il principale resta rc.1. Il candidato rc.9/cache v23 integra il percorso di cancellazione revisionata con tre gate disabilitati. Nessuna nuova migrazione remota, funzione Edge pubblicata, attivazione di job, spesa o cancellazione reale. Test e limiti: [ERASURE-REQUESTS.md](ERASURE-REQUESTS.md), [V1-STATUS.md](V1-STATUS.md). Le ricevute nel checkpoint privato identificano il commit e l’esito CI effettivamente provati; non attribuire il vecchio verde a modifiche successive.

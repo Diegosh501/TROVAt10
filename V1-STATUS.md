@@ -7,7 +7,7 @@ Aggiornato il 14 novembre 2026. Questo documento sostituisce le vecchie percentu
 - **Collaudo cloud reale:** https://v1-check-trovato.diegolucentedesign.workers.dev/ - `1.0.0-cloud-test.11`, Cloudflare `efaa577e-d2aa-47ba-bbae-92c2c06ef11f`.
 - **Sito principale:** https://trovato.diegolucentedesign.workers.dev/ - `1.0.0-rc.1`, Cloudflare `959a4c70-a070-4ee8-aa21-b306260b3165`. Resta l'anteprima con dati locali.
 - **Supabase:** `nrixslotansgrtrosaof`, 17 migrazioni. Due account Google reali, due profili Free e quattro eventi di collaudo: un privato programmato, un privato annullato e due pubblici conclusi.
-- **Server pubblicati:** `admin-console` v4, `host-contact` v1. Le altre funzioni necessarie devono essere configurate e provate prima dell'apertura definitiva.
+- **Server pubblicati:** `admin-console` v4, `host-contact` v1 e `push-dispatch` v1 (invio e pianificazione spenti). Le altre funzioni necessarie devono essere configurate e provate prima dell'apertura definitiva.
 
 Il collaudo usa dati reali persistenti. Non è una demo locale, ma non costituisce ancora la V1 finale aperta al pubblico.
 
@@ -35,6 +35,8 @@ La barra non misura codice scritto o tempo residuo. I gate degli altri criteri r
 
 **Candidato rc.9, non pubblicato:** percorso guidato di cancellazione revisionata dietro tre gate spenti (SQL, Edge e client). Conferma recente, revisioni a scadenza, vincoli e ripristino atomico degli errori; 44 casi Edge e 16 client, più regressione SQL e quattro contese native sul primo candidato. Mobile 320 px e desktop 1440 px provati con dati sintetici; nessun accesso MFA reale simulato. Le ricevute CI identificano il commit testato. Il database remoto conserva le stesse 17 migrazioni: la nuova esecuzione non è stata applicata. Questo progresso non chiude il requisito di cancellazione reale o i gate della V1.
 
+**Candidato rc.10, non pubblicato:** corretti due problemi del dispatcher push: import ESM incompatibile con web-push@4.0.0 e chiavi VAPID non corrispondenti ammesse fino al claim. 19 casi del gestore e otto prove di runtime/cifratura effettivi con materiale temporaneo. Il titolare ha poi autorizzato la pubblicazione inizialmente spenta: `push-dispatch` v1 si avvia nel Supabase gestito e i tre probe restituiscono 503/push_unavailable. Il blocco esplicito nel codice prevale sui segreti del progetto. Nessuna consegna o programmazione reale; il requisito operativo rimane aperto. [Procedura](PUSH-SETUP.md).
+
 ## I 25 criteri della V1
 
 VERIFICATO indica l'ambito effettivamente provato nel collaudo o nella ripresa. Non anticipa il rilascio sul sito principale.
@@ -42,7 +44,7 @@ VERIFICATO indica l'ambito effettivamente provato nel collaudo o nella ripresa. 
 | # | Criterio | Stato attuale | Evidenza e parte residua |
 | --- | --- | --- | --- |
 | 1 | Servizio raggiungibile | VERIFICATO | URL HTTPS di collaudo raggiunto e usato realmente; principale ancora preview |
-| 2 | Release identificabile | VERIFICATO | Versioni Cloudflare e release pubbliche distinte; candidato rc.9 e collaudo cloud-test.11 identificati; ricevute di sorgenti/CI nel checkpoint privato |
+| 2 | Release identificabile | VERIFICATO | Versioni Cloudflare e release pubbliche distinte; candidato rc.10 e collaudo cloud-test.11 identificati; ricevute di sorgenti/CI nel checkpoint privato |
 | 3 | Autenticazione reale | PARZIALE | Google funziona; percorso email/password, SMTP, conferma e recupero ancora aperti nel Master |
 | 4 | Google OAuth | VERIFICATO | Login reale anche dopo revoca della vecchia chiave; nuova credenziale custodita in Supabase |
 | 5 | Profili persistenti | VERIFICATO | Due profili Google separati, ritrovati dopo nuovo accesso; entrambi Free |
@@ -56,7 +58,7 @@ VERIFICATO indica l'ambito effettivamente provato nel collaudo o nella ripresa. 
 | 13 | Persistenza fra dispositivi | DA VERIFICARE | Nuovo accesso nello stesso browser riuscito; non vale come altro account/dispositivo |
 | 14 | Tutti iniziano Free | VERIFICATO | Profilo reale Free, default server controllato; acquisti ancora spenti |
 | 15 | Retention sette giorni | PARZIALE | Moduli e regressioni presenti; job spenti e nessuna cancellazione automatica attiva |
-| 16 | Funzioni server necessarie | PARZIALE | Admin e contatto Host pubblicate; perimetro restante ancora da configurare |
+| 16 | Funzioni server necessarie | PARZIALE | Admin e contatto Host pubblicate; dispatcher push pubblicato con blocco esplicito false e boot verificato; perimetro operativo restante da configurare |
 | 17 | Permessi backend | VERIFICATO | 11/11 richieste reali per Sportivo e 11/11 per Host ordinario; gate MFA titolare confermato; fixture per revoche/metadata |
 | 18 | Test multiutente | VERIFICATO | Due account Google distinti, flussi pubblici e privati; altro dispositivo e concorrenza rimangono nei criteri/scenari specifici |
 | 19 | Nessun blocco conosciuto | NON DIMOSTRATO | Corrette race UI, copia link e ingresso anonimo da invito; servizi e gate di rilascio ancora aperti |

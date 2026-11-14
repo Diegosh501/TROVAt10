@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | Collaudo cloud | https://v1-check-trovato.diegolucentedesign.workers.dev/ | `1.0.0-cloud-test.11`: Google, profilo e partite reali su Supabase; non è ancora un lancio pubblico definitivo |
 | Sito principale | https://trovato.diegolucentedesign.workers.dev/ | `1.0.0-rc.1`: anteprima interattiva con dati locali |
-| Sorgenti e pacchetto locale | Questo repository | Candidato `1.0.0-rc.9`; i flag di attivazione sono disabilitati per impostazione predefinita |
+| Sorgenti e pacchetto locale | Questo repository | Candidato `1.0.0-rc.10`; i flag di attivazione sono disabilitati per impostazione predefinita |
 
 Il collaudo è separato dal traffico del sito principale. Un caricamento con `wrangler versions upload` non è un rilascio in produzione. [V1-STATUS.md](V1-STATUS.md) registra i **25 criteri** del Master R3 e gli **11 scenari finali**. Non dichiarare la V1 completata prima di soddisfarli.
 
@@ -20,7 +20,7 @@ Il collaudo è separato dal traffico del sito principale. Un caricamento con `wr
 - Esportazione personale JSON con nove sezioni e PNG scaricati. Logo e sito nei metadata; sede privata, nomi e token esclusi dal PNG privato.
 - **29 suite Node; 17 moduli SQL e 17 regressioni locali.** **11/11 controlli backend reali come Sportivo e 11/11 come Host ordinario**. La sonda del titolare riceve `mfa_required` sia da SQL sia da Edge. La console completa richiede il TOTP personale, rinviato dal titolare.
 - Larghezze controllate: 320, 390, 768 e 1440 px; campi a 16 px e azioni profilo dentro i bordi. Non è una garanzia su ogni dispositivo.
-- `admin-console` v4 e `host-contact` v1 pubblicate; 17 migrazioni sul progetto corretto. La correzione degli avvisi distingue avvio, conclusione, annullamento e cambio dei dettagli.
+- `admin-console` v4 e `host-contact` v1 pubblicate; `push-dispatch` v1 pubblicata con invio esplicitamente spento; 17 migrazioni sul progetto corretto. La correzione degli avvisi distingue avvio, conclusione, annullamento e cambio dei dettagli.
 - **15/25 criteri V1 verificati nel collaudo; 4/11 scenari finali chiusi (A, B, D, H)**. Le cifre misurano criteri verificati, non tempo residuo o percentuale di codice. La V1 completa non è ancora rilasciata sul principale.
 
 La riservatezza dei pin è stata provata con coordinate presenti: **33/33 controlli reali** nei cinque stati creatore, pending, ammesso, rimosso e anonimo. Il backend nasconde sede, coordinate e roster quando non consentiti.
@@ -30,6 +30,8 @@ La riservatezza dei pin è stata provata con coordinate presenti: **33/33 contro
 Il collaudo ha controlli HTTPS, asset e percorsi riservati propri. Non attribuirgli la pubblicazione coordinata della V1 sul principale.
 
 **Caricamento e uscita:** il collaudo mostra uno stato di attesa fino alla prima risposta cloud, gestisce errore e ripristino della rete e impedisce accessi concorrenti mentre la disconnessione è in corso. Otto regressioni mirate e prova browser con rete lenta/offline riuscite. Sei prove HTTP simultanee con 18 operazioni hanno rispettato limite Free, unicità delle richieste, rientro, avvio e conclusione. La contesa dell’ultimo posto fra due giocatori distinti è provata nel PostgreSQL nativo isolato, non con due Sportivi Google nel servizio.
+
+**Notifiche, candidato rc.10:** corretta l’importazione ESM che impediva l’avvio del dispatcher e aggiunta verifica della coppia VAPID prima di prendere messaggi. 19 casi del gestore e otto prove con libreria/cifratura reali, senza consegna o chiavi persistenti. Pubblicazione autorizzata dal titolare ed eseguita: `push-dispatch` v1 si avvia nel servizio gestito e risponde 503/push_unavailable. Un blocco nel codice mantiene spento l’invio anche con segreti già configurati; push e job restano spenti. [Dettagli e comandi](PUSH-SETUP.md).
 
 ## Avvio locale su Mac
 

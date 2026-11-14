@@ -58,6 +58,12 @@ jobs:
           npx --yes deno@2.9.6 check --frozen --lock=supabase/deno.lock supabase/functions/billing/index.ts supabase/functions/stripe-webhook/index.ts supabase/functions/admin-console/index.ts supabase/functions/host-contact/index.ts supabase/functions/push-dispatch/index.ts supabase/functions/support-request/index.ts
           npx --yes deno@2.9.6 test --frozen --lock=supabase/deno.lock tests/billing-signature.test.ts
 
+      - name: Verify actual Web Push runtime and cryptography without delivery
+        run: |
+          push_deno_bin="$(npx --yes --package=deno@2.9.6 --call 'command -v deno')"
+          "$push_deno_bin" cache --frozen-lockfile --lock=supabase/deno.lock tests/push-crypto.test.ts supabase/functions/push-dispatch/index.ts
+          node scripts/run-push-crypto-check.cjs "$push_deno_bin"
+
       - name: Package release from source
         run: bash scripts/package-release.sh
 

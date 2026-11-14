@@ -12,6 +12,19 @@ function validConfig(c:PushConfig){
     /^[A-Za-z0-9_-]{43}$/.test(c.privateKey)&&new URL(c.origin).origin===c.origin&&new URL(c.origin).protocol==='https:'&&
     (/^mailto:[^@\s]+@[^@\s]+\.[^@\s]+$/.test(c.subject)||(new URL(c.subject).protocol==='https:'&&new URL(c.subject).origin===c.origin))}catch{return false}
 }
+async function matchingVapidKeys(publicKey:string,privateKey:string){
+  try{
+    const raw=Uint8Array.from(atob(publicKey.replace(/-/g,'+').replace(/_/g,'/')+'='),c=>c.charCodeAt(0));
+    if(raw.length!==65||raw[0]!==4)return false;
+    const encode=(part:Uint8Array)=>btoa(String.fromCharCode(...part)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+    const publicCryptoKey=await crypto.subtle.importKey('raw',raw,{name:'ECDSA',namedCurve:'P-256'},false,['verify']);
+    const privateCryptoKey=await crypto.subtle.importKey('jwk',{kty:'EC',crv:'P-256',x:encode(raw.slice(1,33)),y:encode(raw.slice(33)),d:privateKey},
+      {name:'ECDSA',namedCurve:'P-256'},false,['sign']);
+    const probe=crypto.getRandomValues(new Uint8Array(32));
+    const signature=await crypto.subtle.sign({name:'ECDSA',hash:'SHA-256'},privateCryptoKey,probe);
+    return await crypto.subtle.verify({name:'ECDSA',hash:'SHA-256'},publicCryptoKey,signature,probe);
+  }catch{return false}
+}
 function equalSecret(a:string,b:string){const x=new TextEncoder().encode(a),y=new TextEncoder().encode(b);let diff=x.length^y.length;
   for(let i=0;i<Math.max(x.length,y.length);i++)diff|=(x[i]||0)^(y[i]||0);return diff===0}
 function reply(body:unknown,status=200){return new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}})}
@@ -21,7 +34,12 @@ async function readSmallBody(req:Request){
   const bytes=new Uint8Array(size);let offset=0;for(const part of parts){bytes.set(part,offset);offset+=part.length}
   return new TextDecoder('utf-8',{fatal:true}).decode(bytes)||'{}';
 }
-export function createPushDispatcher(c:PushConfig,p:PushPorts){return async(req:Request)=>{
+export function createPushDispatcher(c:PushConfig,p:PushPorts){
+ let keyCheck:{publicKey:string;privateKey:string;result:Promise<boolean>}|null=null;
+ function keysReady(){if(!keyCheck||keyCheck.publicKey!==c.publicKey||keyCheck.privateKey!==c.privateKey){
+   keyCheck={publicKey:c.publicKey,privateKey:c.privateKey,result:matchingVapidKeys(c.publicKey,c.privateKey)};
+ }return keyCheck.result}
+ return async(req:Request)=>{
   if(!validConfig(c))return reply({error:'push_unavailable'},503);
   if(req.method!=='POST')return reply({error:'invalid_method'},405);
   if(req.headers.has('Origin'))return reply({error:'forbidden'},403);
@@ -29,6 +47,9 @@ export function createPushDispatcher(c:PushConfig,p:PushPorts){return async(req:
   if(authorization.length>160||!equalSecret(authorization,'Bearer '+c.cronSecret))return reply({error:'unauthorized'},401);
   if(!req.headers.get('Content-Type')?.toLowerCase().startsWith('application/json'))return reply({error:'invalid_request'},400);
   try{const body=JSON.parse(await readSmallBody(req));if(!body||Array.isArray(body)||typeof body!=='object'||Object.keys(body).length)return reply({error:'invalid_request'},400)}catch{return reply({error:'invalid_request'},400)}
+  // Check once per key pair, only after authenticating the bounded job request.
+  // A bad deployment must not consume leases or discard queued notifications.
+  if(!await keysReady())return reply({error:'push_unavailable'},503);
   let rows:any[];
   try{rows=await p.rpc('claim_push_deliveries',{p_limit:10});if(!Array.isArray(rows)||rows.length>10)throw new Error('bad_claim')}
   catch{return reply({error:'unavailable'},503)}
